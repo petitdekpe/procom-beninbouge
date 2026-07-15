@@ -1,0 +1,57 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Pages{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Pages statiques</h1>
+        <a href="{{ path('admin_page_new') }}" class="bo-btn bo-btn-accent">+ Nouvelle page</a>
+    </div>
+
+    <div data-list-root>
+        <div class="bo-toolbar">
+            <div class="bo-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.8-3.8"/></svg>
+                <input type="text" data-list-search placeholder="Rechercher des pages">
+            </div>
+        </div>
+
+        <div class="bo-card">
+            {% if pages|length > 0 %}
+                <table class="bo-table">
+                    <thead>
+                        <tr><th>Titre</th><th>Slug</th><th>Statut</th><th>Ordre</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for page in pages %}
+                            <tr data-search="{{ (page.title ~ ' ' ~ page.slug)|lower }}">
+                                <td style="font-weight:700">{{ page.title }}</td>
+                                <td class="bo-muted">/page/{{ page.slug }}</td>
+                                <td>
+                                    {% if page.published %}
+                                        <span class="bo-status"><span class="dot" style="background:var(--sp-green)"></span>Publiée</span>
+                                    {% else %}
+                                        <span class="bo-status"><span class="dot" style="background:var(--sp-gray-dot)"></span>Brouillon</span>
+                                    {% endif %}
+                                </td>
+                                <td class="bo-muted">{{ page.position }}</td>
+                                <td style="text-align:right;white-space:nowrap">
+                                    {% if page.published %}
+                                        <a href="{{ path('app_page_show', { slug: page.slug }) }}" target="_blank" rel="noopener" class="bo-btn bo-btn-muted">Voir</a>
+                                    {% endif %}
+                                    <a href="{{ path('admin_page_edit', { id: page.id }) }}" class="bo-btn bo-btn-muted">Modifier</a>
+                                    <form method="post" action="{{ path('admin_page_delete', { id: page.id }) }}" style="display:inline" onsubmit="return confirm('Supprimer cette page ?');">
+                                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                        <button type="submit" class="bo-btn bo-btn-danger">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="bo-empty">Aucune page pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

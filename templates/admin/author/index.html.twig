@@ -1,0 +1,68 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Auteurs{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Auteurs</h1>
+        <a href="{{ path('admin_author_new') }}" class="bo-btn bo-btn-accent">+ Nouvel auteur</a>
+    </div>
+
+    <div data-list-root>
+        <div class="bo-toolbar">
+            <div class="bo-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.8-3.8"/></svg>
+                <input type="text" data-list-search placeholder="Rechercher des auteurs">
+            </div>
+        </div>
+
+        <div class="bo-card">
+            {% if authors|length > 0 %}
+                <table class="bo-table">
+                    <thead>
+                        <tr><th>Nom</th><th>E-mail</th><th>Compte</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for author in authors %}
+                            <tr data-search="{{ (author.firstName ~ ' ' ~ author.lastName ~ ' ' ~ author.email)|lower }}">
+                                <td>
+                                    <div class="bo-row-title">
+                                        {% if author.avatar %}
+                                            <img class="bo-thumb" style="border-radius:50%" src="{{ author.avatar }}" alt="">
+                                        {% else %}
+                                            <span class="bo-thumb-fallback" style="border-radius:50%">{{ author.firstName|slice(0, 1)|upper }}</span>
+                                        {% endif %}
+                                        {{ author.firstName }} {{ author.lastName }}
+                                    </div>
+                                </td>
+                                <td class="bo-muted">{{ author.email }}</td>
+                                <td>
+                                    {% if author.user %}
+                                        <span class="bo-format-badge">Compte éditeur</span>
+                                    {% else %}
+                                        <span class="bo-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align:right;white-space:nowrap">
+                                    {% if author.user and author.user != app.user and not is_granted('ROLE_ADMIN') %}
+                                        <span class="bo-muted" style="font-size:12.5px">Géré via Validations</span>
+                                    {% elseif author.user == app.user and not is_granted('ROLE_ADMIN') %}
+                                        <a href="{{ path('admin_profile') }}" class="bo-btn bo-btn-muted">Mon profil</a>
+                                    {% else %}
+                                        <a href="{{ path('admin_author_edit', { id: author.id }) }}" class="bo-btn bo-btn-muted">Modifier</a>
+                                        <form method="post" action="{{ path('admin_author_delete', { id: author.id }) }}" style="display:inline" onsubmit="return confirm('Supprimer cet auteur ?');">
+                                            <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                            <button type="submit" class="bo-btn bo-btn-danger">Supprimer</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="bo-empty">Aucun auteur pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

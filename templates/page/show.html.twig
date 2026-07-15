@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% set pageUrl = url('app_page_show', { slug: page.slug }) %}
+{% set metaDescription = page.metaDescription|excerpt(180) %}
+
+{% block title %}{{ page.metaTitle ?: page.title }} — {{ site_settings().siteName }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {{ include('partials/_seo_meta.html.twig', {
+        ogTitle: page.metaTitle ?: page.title,
+        metaDescription: metaDescription,
+        canonicalUrl: pageUrl,
+        structuredData: {
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            'name': page.metaTitle ?: page.title,
+            'description': metaDescription,
+            'url': pageUrl,
+        },
+    }) }}
+{% endblock %}
+
+{% block body %}
+<div style="background:#F4F2EA;color:#14160F;font-family:'Manrope',sans-serif">
+
+    {{ include('partials/_header.html.twig') }}
+
+    <article style="max-width:760px;margin:0 auto;padding:44px 24px 64px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:#8a8a7c;margin-bottom:20px">
+            <a href="{{ path('app_home') }}" style="text-decoration:none;color:#8a8a7c">Accueil</a>
+            <span>/</span>
+            <span style="color:#3a3f33">{{ page.title }}</span>
+        </div>
+
+        <h1 style="font-family:'Archivo';font-weight:900;font-size:32px;color:#14160F;line-height:1.15;letter-spacing:-.4px;margin-bottom:28px">{{ page.title }}</h1>
+
+        <div class="bb-article-body">
+            {{ page.content|raw }}
+        </div>
+    </article>
+
+    {{ include('partials/_footer.html.twig') }}
+
+</div>
+{% endblock %}

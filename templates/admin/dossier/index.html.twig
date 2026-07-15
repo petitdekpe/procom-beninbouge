@@ -1,0 +1,57 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Dossiers{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Dossiers</h1>
+        <a href="{{ path('admin_dossier_new') }}" class="bo-btn bo-btn-accent">+ Nouveau dossier</a>
+    </div>
+
+    <div data-list-root>
+        <div class="bo-toolbar">
+            <div class="bo-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.8-3.8"/></svg>
+                <input type="text" data-list-search placeholder="Rechercher des dossiers">
+            </div>
+        </div>
+
+        <div class="bo-card">
+            {% if dossiers|length > 0 %}
+                <table class="bo-table">
+                    <thead>
+                        <tr><th>Titre</th><th>Slug</th><th>Articles</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for dossier in dossiers %}
+                            <tr data-search="{{ (dossier.title ~ ' ' ~ dossier.slug)|lower }}">
+                                <td>
+                                    <div class="bo-row-title">
+                                        {% if dossier.coverImage %}
+                                            <img class="bo-thumb" src="{{ dossier.coverImage }}" alt="">
+                                        {% else %}
+                                            <span class="bo-thumb-fallback">{{ dossier.title|slice(0, 1)|upper }}</span>
+                                        {% endif %}
+                                        {{ dossier.title }}
+                                    </div>
+                                </td>
+                                <td class="bo-muted">{{ dossier.slug }}</td>
+                                <td class="bo-muted">{{ dossier.articles|length }}</td>
+                                <td style="text-align:right;white-space:nowrap">
+                                    <a href="{{ path('app_dossier_show', { slug: dossier.slug }) }}" target="_blank" rel="noopener" class="bo-btn bo-btn-muted">Aperçu</a>
+                                    <a href="{{ path('admin_dossier_edit', { id: dossier.id }) }}" class="bo-btn bo-btn-muted">Modifier</a>
+                                    <form method="post" action="{{ path('admin_dossier_delete', { id: dossier.id }) }}" style="display:inline" onsubmit="return confirm('Supprimer ce dossier ? Les articles qu\'il contient ne seront pas supprimés.');">
+                                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                        <button type="submit" class="bo-btn bo-btn-danger">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="bo-empty">Aucun dossier pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

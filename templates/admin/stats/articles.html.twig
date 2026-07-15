@@ -1,0 +1,48 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Statistiques par article{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Statistiques par article</h1>
+        <a href="{{ path('admin_stats_index') }}" class="bo-btn bo-btn-muted">← Vue d'ensemble</a>
+    </div>
+    <p class="bo-muted" style="margin:0 0 22px;font-size:14px">
+        Triés par vues décroissantes, 200 articles publiés les plus récents. Le taux de clic (vues ÷ impressions) est une estimation : ce site n'a pas de système d'attribution publicitaire, une impression correspond simplement à une carte d'article affichée dans une liste.
+    </p>
+
+    <div class="bo-card" style="overflow-x:auto">
+        {% if rows|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr>
+                        <th>Article</th>
+                        <th style="text-align:right">Vues</th>
+                        <th style="text-align:right">Lecteurs uniques</th>
+                        <th style="text-align:right">Temps de lecture</th>
+                        <th style="text-align:right">Partages</th>
+                        <th style="text-align:right">Taux de clic</th>
+                        <th style="text-align:right">Commentaires</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            <td style="font-weight:700;max-width:320px">
+                                <a href="{{ path('app_article_show', { slug: row.article.slug }) }}" target="_blank" style="color:inherit">{{ row.article.title }}</a>
+                            </td>
+                            <td class="bo-muted" style="text-align:right">{{ row.views|format_number }}</td>
+                            <td class="bo-muted" style="text-align:right">{{ row.uniqueReaders|format_number }}</td>
+                            <td class="bo-muted" style="text-align:right">{{ row.avgDuration is not null ? (row.avgDuration / 60)|round(1) ~ ' min' : '—' }}</td>
+                            <td class="bo-muted" style="text-align:right">{{ row.shares|format_number }}</td>
+                            <td class="bo-muted" style="text-align:right">{{ row.ctr is not null ? row.ctr ~ ' %' : '—' }}</td>
+                            <td class="bo-muted" style="text-align:right">{{ row.comments|format_number }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">Aucun article publié pour le moment.</p>
+        {% endif %}
+    </div>
+{% endblock %}

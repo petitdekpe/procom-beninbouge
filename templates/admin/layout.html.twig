@@ -1,0 +1,401 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% block admin_title %}Backoffice{% endblock %} — {{ site_settings().siteName }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+    <style>
+        :root{
+            --sp-bg:#f6f6f7;
+            --sp-border:#e5e5e6;
+            --sp-black:#0a0a0a;
+            --sp-muted:#6a6a6e;
+            --sp-accent:#6c5dd3;
+            --sp-accent-soft:#c7c2f4;
+            --sp-accent-soft-text:#18163a;
+            --sp-green:#1ed760;
+            --sp-amber:#f5a623;
+            --sp-gray-dot:#b3b3b3;
+            --sp-danger-bg:#fdecee;
+            --sp-danger-text:#a3173a;
+        }
+        *{box-sizing:border-box}
+        body{margin:0;font-family:'Manrope',system-ui,sans-serif;background:var(--sp-bg);color:var(--sp-black);-webkit-font-smoothing:antialiased}
+        a{color:inherit}
+
+        .bo-app{display:flex;flex-direction:column;min-height:100vh}
+
+        .bo-topbar{flex:none;height:56px;background:#fff;border-bottom:1px solid var(--sp-border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:30}
+        .bo-topbar-brand{display:flex;align-items:center;gap:9px;font-weight:900;font-size:14.5px;text-decoration:none}
+        .bo-topbar-brand .mark{width:24px;height:24px;border-radius:7px;background:var(--sp-black);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
+        .bo-topbar-right{display:flex;align-items:center;gap:10px}
+        .bo-icon-btn{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--sp-muted);background:none;border:none;cursor:pointer}
+        .bo-icon-btn:hover{background:var(--sp-bg)}
+        .bo-icon-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+        .bo-avatar{width:30px;height:30px;border-radius:50%;background:var(--sp-black);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12.5px}
+        .bo-topbar-site{font-weight:700;font-size:13px;color:var(--sp-muted);text-decoration:none}
+        .bo-topbar-site:hover{color:var(--sp-black)}
+
+        .bo-body-row{display:flex;flex:1;min-height:0}
+
+        .bo-sidebar{flex:none;width:256px;background:#fff;border-right:1px solid var(--sp-border);padding:18px 14px;display:flex;flex-direction:column;transition:width .15s ease}
+        .bo-app.bo-collapsed .bo-sidebar{width:72px;padding:18px 10px}
+        .bo-app.bo-collapsed .bo-sidebar .bo-label{display:none}
+        .bo-app.bo-collapsed .bo-new-btn{padding:11px}
+
+        .bo-new-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--sp-black);color:#fff;font-weight:800;font-size:13.5px;padding:11px 14px;border-radius:999px;text-decoration:none;margin-bottom:18px}
+        .bo-new-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;flex:none}
+
+        .bo-nav{display:flex;flex-direction:column;gap:3px}
+        .bo-nav-link{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:999px;color:#4a4a4d;text-decoration:none;font-weight:700;font-size:13.5px}
+        .bo-nav-link svg{flex:none;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+        .bo-nav-link:hover{background:var(--sp-bg)}
+        .bo-nav-link.active{background:var(--sp-black);color:#fff}
+
+        .bo-sidebar-collapse{margin-top:auto;align-self:flex-start;width:30px;height:30px;border-radius:50%;border:1px solid var(--sp-border);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sp-muted)}
+        .bo-sidebar-collapse svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s ease}
+        .bo-app.bo-collapsed .bo-sidebar-collapse svg{transform:rotate(180deg)}
+
+        .bo-content{flex:1;min-width:0;padding:30px 36px 60px}
+
+        .bo-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:20px;flex-wrap:wrap}
+        .bo-page-title{font-family:'Anton',system-ui,sans-serif;font-size:32px;letter-spacing:.3px;margin:0;font-weight:400}
+
+        .bo-btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:800;font-size:13.5px;padding:10px 18px;border-radius:999px;border:none;cursor:pointer;white-space:nowrap}
+        .bo-btn-accent{background:var(--sp-accent-soft);color:var(--sp-accent-soft-text)}
+        .bo-btn-black{background:var(--sp-black);color:#fff}
+        .bo-btn-danger{background:var(--sp-danger-bg);color:var(--sp-danger-text)}
+        .bo-btn-muted{background:#f0f0f1;color:var(--sp-black)}
+
+        .bo-toggle{position:relative;display:inline-block;width:40px;height:22px;vertical-align:middle}
+        .bo-toggle input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+        .bo-toggle-track{position:absolute;inset:0;background:var(--sp-border);border-radius:999px;transition:background .15s ease}
+        .bo-toggle-track::before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .15s ease;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+        .bo-toggle input:checked + .bo-toggle-track{background:var(--sp-green)}
+        .bo-toggle input:checked + .bo-toggle-track::before{transform:translateX(18px)}
+        .bo-toggle input:focus-visible + .bo-toggle-track{outline:2px solid var(--sp-accent);outline-offset:2px}
+
+        .bo-select{padding:8px 11px;border:1px solid var(--sp-border);border-radius:9px;font-family:inherit;font-size:13.5px;background:#fff;color:var(--sp-black)}
+
+        .bo-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+        .bo-search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--sp-border);border-radius:999px;padding:9px 16px;min-width:260px}
+        .bo-search svg{width:15px;height:15px;flex:none;fill:none;stroke:var(--sp-muted);stroke-width:1.8}
+        .bo-search input{border:none;outline:none;font-family:inherit;font-size:13.5px;flex:1;background:transparent}
+        .bo-filters{display:flex;gap:8px;flex-wrap:wrap}
+        .bo-pill{border:1px solid var(--sp-border);background:#fff;color:var(--sp-muted);font-weight:700;font-size:12.5px;padding:7px 14px;border-radius:999px;cursor:pointer}
+        .bo-pill.active{background:var(--sp-black);color:#fff;border-color:var(--sp-black)}
+
+        .bo-card{background:#fff;border:1px solid var(--sp-border);border-radius:14px;overflow:hidden}
+        .bo-table{width:100%;border-collapse:collapse;font-size:13.5px}
+        .bo-table th{text-align:left;color:var(--sp-muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:800;padding:13px 16px;border-bottom:1px solid var(--sp-border)}
+        .bo-table td{padding:12px 16px;border-bottom:1px solid #f1f1f2;vertical-align:middle}
+        .bo-table tr:last-child td{border-bottom:none}
+        .bo-row-title{display:flex;align-items:center;gap:10px;font-weight:700}
+        .bo-thumb{width:34px;height:34px;border-radius:7px;object-fit:cover;flex:none;background:#eee}
+        .bo-thumb-fallback{width:34px;height:34px;border-radius:7px;flex:none;background:var(--sp-black);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px}
+        .bo-status{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:13px}
+        .bo-status .dot{width:8px;height:8px;border-radius:50%;flex:none}
+        .bo-format-badge{display:inline-block;border:1px solid var(--sp-border);border-radius:6px;padding:3px 9px;font-size:11.5px;font-weight:800;text-transform:capitalize}
+        .bo-empty{color:var(--sp-muted);padding:32px;text-align:center}
+        .bo-muted{color:var(--sp-muted)}
+
+        .bo-flash{padding:12px 16px;border-radius:10px;margin-bottom:16px;font-weight:700;font-size:13.5px}
+        .bo-flash-success{background:#e7f9ee;color:#0b6b32}
+        .bo-flash-error{background:var(--sp-danger-bg);color:var(--sp-danger-text)}
+
+        /* Wizard (multi-step create/edit forms) */
+        .bo-wizard-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--sp-border)}
+        .bo-wizard-title{font-weight:900;font-size:15px;margin:0 0 8px}
+        .bo-stepper{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;color:#b9b9bb;flex-wrap:wrap}
+        .bo-stepper-sep{color:#d3d3d5}
+        .bo-stepper-tab{background:none;border:none;cursor:pointer;font:inherit;color:inherit;padding:0 0 4px;border-bottom:2px solid transparent}
+        .bo-stepper-tab.active{color:var(--sp-black);border-bottom-color:var(--sp-accent)}
+        .bo-stepper-tab.done{color:#4a4a4d}
+        .bo-wizard-close{color:var(--sp-muted);text-decoration:none;font-size:20px;line-height:1}
+        .bo-step{max-width:640px}
+        .bo-form-row{margin-bottom:18px}
+        .bo-form-row label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}
+        .bo-form-row input[type=text],.bo-form-row input[type=email],.bo-form-row input[type=number],
+        .bo-form-row input[type=datetime-local],.bo-form-row textarea,.bo-form-row select{
+            width:100%;padding:10px 13px;border:1px solid var(--sp-border);border-radius:9px;font-family:inherit;font-size:14px;background:#fff
+        }
+        .bo-form-row select[multiple]{height:120px}
+        .bo-form-row input[type=checkbox]{width:auto;margin-right:8px}
+        .bo-form-row .help,.bo-form-row .form-help,.bo-form-row .help-text{color:var(--sp-muted);font-size:12px;margin-top:5px}
+        .bo-form-row ul{color:var(--sp-danger-text);font-size:12.5px;font-weight:700;list-style:none;margin-top:6px;padding:0}
+        .bo-richtext .ql-toolbar.ql-snow{border:1px solid var(--sp-border);border-bottom:none;border-radius:9px 9px 0 0;background:#fafafa}
+        .bo-richtext .ql-container.ql-snow{border:1px solid var(--sp-border);border-radius:0 0 9px 9px;font-family:inherit;font-size:14px;background:#fff}
+        .bo-richtext .ql-editor{min-height:140px}
+        .bo-richtext.bo-richtext-tall .ql-editor{min-height:340px}
+        .bo-wizard-footer{display:flex;justify-content:space-between;margin-top:26px;padding-top:18px;border-top:1px solid var(--sp-border)}
+        .bo-review-row{display:flex;justify-content:space-between;gap:18px;padding:11px 0;border-bottom:1px solid #f1f1f2;font-size:13.5px}
+        .bo-review-row span{color:var(--sp-muted)}
+        .bo-review-row strong{font-weight:700;text-align:right}
+
+        /*
+         * Responsive: the sidebar+content layout doesn't have room to
+         * breathe below ~900px, so the sidebar auto-shrinks to its
+         * icon-only state (same visual as the manual bo-collapsed
+         * toggle, just viewport-driven instead of click-driven). Wide
+         * tables scroll horizontally within their card instead of
+         * overflowing the page.
+         */
+        @media (max-width: 900px) {
+            .bo-sidebar{width:72px;padding:18px 10px}
+            .bo-sidebar .bo-label{display:none}
+            .bo-new-btn{padding:11px}
+            .bo-content{padding:22px 16px 40px}
+        }
+
+        @media (max-width: 640px) {
+            .bo-table{display:block;overflow-x:auto;white-space:nowrap}
+            .bo-page-head{gap:12px}
+            .bo-grid-2{grid-template-columns:1fr !important}
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="bo-app" id="bo-app">
+        <header class="bo-topbar">
+            <a href="{{ path('admin_dashboard') }}" class="bo-topbar-brand">
+                <span class="mark">BB</span> {{ site_settings().siteName }} · Admin
+            </a>
+            <div class="bo-topbar-right">
+                <a href="{{ path('app_home') }}" class="bo-topbar-site">Voir le site →</a>
+                <button type="button" class="bo-icon-btn" title="Notifications" disabled>
+                    <svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5"/><path d="M4 16h16l-1.2 2.2a1 1 0 0 1-.9.5H6.1a1 1 0 0 1-.9-.5L4 16Z"/><path d="M10.5 20a1.5 1.5 0 0 0 3 0"/></svg>
+                </button>
+                <span class="bo-avatar">{{ app.user ? app.user.userIdentifier|first|upper : 'A' }}</span>
+            </div>
+        </header>
+
+        <div class="bo-body-row">
+            <aside class="bo-sidebar">
+                <a href="{{ path('admin_article_new') }}" class="bo-new-btn">
+                    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    <span class="bo-label">Nouvel article</span>
+                </a>
+                <nav class="bo-nav">
+                    <a href="{{ path('admin_dashboard') }}" class="bo-nav-link {{ app.request.attributes.get('_route') == 'admin_dashboard' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+                        <span class="bo-label">Accueil</span>
+                    </a>
+                    <a href="{{ path('admin_stats_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_stats' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>
+                        <span class="bo-label">Statistiques</span>
+                    </a>
+                    <a href="{{ path('admin_article_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_article' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 16.5h6M9 9.5h2"/></svg>
+                        <span class="bo-label">Articles</span>
+                    </a>
+                    <a href="{{ path('admin_category_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_category' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><path d="M3 11.5 11.5 3H19a1 1 0 0 1 1 1v7.5l-8.5 8.5a1 1 0 0 1-1.4 0L3 11.9a1 1 0 0 1 0-1.4Z"/><circle cx="15" cy="8" r="1.5"/></svg>
+                        <span class="bo-label">Catégories</span>
+                    </a>
+                    <a href="{{ path('admin_tag_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_tag' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><path d="M20.6 12.6 12.6 20.6a2 2 0 0 1-2.8 0l-6.4-6.4a2 2 0 0 1 0-2.8L11.4 3.4A2 2 0 0 1 12.8 3H19a1 1 0 0 1 1 1v6.2a2 2 0 0 1-.6 1.4Z"/><circle cx="15" cy="7.5" r="1.3"/></svg>
+                        <span class="bo-label">Mots-clés</span>
+                    </a>
+                    <a href="{{ path('admin_dossier_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_dossier' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><path d="M3 7a1 1 0 0 1 1-1h6l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7Z"/></svg>
+                        <span class="bo-label">Dossiers</span>
+                    </a>
+                    <a href="{{ path('admin_author_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_author' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6.5 7-6.5s7 2.9 7 6.5"/></svg>
+                        <span class="bo-label">Auteurs</span>
+                    </a>
+                    <a href="{{ path('admin_project_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_project' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="11" rx="1.5"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>
+                        <span class="bo-label">Projets</span>
+                    </a>
+                    <a href="{{ path('admin_media_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_media' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5"/><circle cx="9" cy="11" r="2"/><path d="M3 17l4.5-4 3 2.5L17 11l4 4"/></svg>
+                        <span class="bo-label">Médias</span>
+                    </a>
+                    <a href="{{ path('admin_comment_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_comment' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><path d="M4 19.5V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5 4.5Z"/></svg>
+                        <span class="bo-label">Commentaires</span>
+                    </a>
+                    <a href="{{ path('admin_page_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_page' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 12h6M9 16h6"/></svg>
+                        <span class="bo-label">Pages</span>
+                    </a>
+                    <a href="{{ path('admin_home_section_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_home_section' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.5V19a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9.5"/><path d="M10 20v-5h4v5"/></svg>
+                        <span class="bo-label">Page d'accueil</span>
+                    </a>
+                    <a href="{{ path('admin_profile') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_profile' ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6.5 7-6.5s7 2.9 7 6.5"/><circle cx="12" cy="12" r="10"/></svg>
+                        <span class="bo-label">Mon profil</span>
+                    </a>
+                    {% if is_granted('ROLE_EDITOR_IN_CHIEF') %}
+                        <a href="{{ path('admin_workflow_review') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_workflow_review' ? 'active' : '' }}">
+                            <svg viewBox="0 0 24 24"><path d="M4 19.5V6a2 2 0 0 1 2-2h8l6 6v9.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M13 4v5h5"/><path d="m9 15 2 2 4-4"/></svg>
+                            <span class="bo-label">Relecture</span>
+                        </a>
+                    {% endif %}
+                    {% if is_granted('ROLE_PROOFREADER') %}
+                        <a href="{{ path('admin_workflow_correction') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_workflow_correction' ? 'active' : '' }}">
+                            <svg viewBox="0 0 24 24"><path d="M4 17.5 15 6.5l2.5 2.5L6.5 20H4v-2.5Z"/><path d="m14 8 2.5 2.5"/></svg>
+                            <span class="bo-label">Correction</span>
+                        </a>
+                    {% endif %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('admin_validation_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_validation' ? 'active' : '' }}">
+                            <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7-7 9-4-2-7-4.5-7-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>
+                            <span class="bo-label">Validations</span>
+                        </a>
+                        <a href="{{ path('admin_user_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_user' ? 'active' : '' }}">
+                            <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c0-3.2 2.5-5.8 5.5-5.8s5.5 2.6 5.5 5.8"/><path d="M16 4.5c1.5.3 2.6 1.7 2.6 3.3s-1.1 3-2.6 3.3"/><path d="M19 13.5c1.7.4 3 1.9 3 3.7"/></svg>
+                            <span class="bo-label">Utilisateurs</span>
+                        </a>
+                        <a href="{{ path('admin_site_settings_edit') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_site_settings' ? 'active' : '' }}">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+                            <span class="bo-label">Paramètres</span>
+                        </a>
+                    {% endif %}
+                </nav>
+                <button type="button" class="bo-sidebar-collapse" id="bo-sidebar-toggle" title="Réduire la barre latérale">
+                    <svg viewBox="0 0 24 24"><path d="M11 6 5 12l6 6"/><path d="M18 6l-6 6 6 6"/></svg>
+                </button>
+            </aside>
+
+            <main class="bo-content">
+                {% for label, messages in app.flashes(['success', 'error']) %}
+                    {% for message in messages %}
+                        <div class="bo-flash bo-flash-{{ label }}">{{ message }}</div>
+                    {% endfor %}
+                {% endfor %}
+
+                {% block admin_body %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var app = document.getElementById('bo-app');
+            var toggle = document.getElementById('bo-sidebar-toggle');
+            if (toggle && app) {
+                if (localStorage.getItem('bo-sidebar-collapsed') === '1') app.classList.add('bo-collapsed');
+                toggle.addEventListener('click', function () {
+                    app.classList.toggle('bo-collapsed');
+                    localStorage.setItem('bo-sidebar-collapsed', app.classList.contains('bo-collapsed') ? '1' : '0');
+                });
+            }
+
+            // Generic client-side search + pill filtering for admin list tables.
+            // Expects: a <table class="bo-table"> whose rows carry a data-search
+            // attribute (haystack text) and, optionally, data-filter (category
+            // key matched against .bo-pill[data-filter] buttons in the toolbar).
+            document.querySelectorAll('[data-list-root]').forEach(function (root) {
+                var rows = Array.prototype.slice.call(root.querySelectorAll('tbody tr'));
+                var searchInput = root.querySelector('[data-list-search]');
+                var pills = Array.prototype.slice.call(root.querySelectorAll('.bo-pill'));
+                var activeFilter = 'all';
+
+                function apply() {
+                    var term = searchInput ? searchInput.value.trim().toLowerCase() : '';
+                    rows.forEach(function (row) {
+                        var matchesSearch = !term || (row.getAttribute('data-search') || '').toLowerCase().indexOf(term) !== -1;
+                        var filterValues = (row.getAttribute('data-filter') || '').split(/\s+/);
+                        var matchesFilter = activeFilter === 'all' || filterValues.indexOf(activeFilter) !== -1;
+                        row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+                    });
+                }
+
+                if (searchInput) searchInput.addEventListener('input', apply);
+                pills.forEach(function (pill) {
+                    pill.addEventListener('click', function () {
+                        pills.forEach(function (p) { p.classList.remove('active'); });
+                        pill.classList.add('active');
+                        activeFilter = pill.getAttribute('data-filter') || 'all';
+                        apply();
+                    });
+                });
+            });
+
+            // Generic multi-step wizard for create/edit forms (.bo-wizard).
+            document.querySelectorAll('.bo-wizard').forEach(function (wizard) {
+                var steps = Array.prototype.slice.call(wizard.querySelectorAll('.bo-step'));
+                var tabs = Array.prototype.slice.call(wizard.querySelectorAll('.bo-stepper-tab'));
+                var current = 0;
+
+                function show(index) {
+                    current = Math.max(0, Math.min(index, steps.length - 1));
+                    steps.forEach(function (step, i) { step.style.display = i === current ? '' : 'none'; });
+                    tabs.forEach(function (tab, i) {
+                        tab.classList.toggle('active', i === current);
+                        tab.classList.toggle('done', i < current);
+                    });
+                    wizard.querySelectorAll('[data-step-prev]').forEach(function (b) { b.style.display = current === 0 ? 'none' : ''; });
+                    wizard.querySelectorAll('[data-step-next]').forEach(function (b) { b.style.display = current === steps.length - 1 ? 'none' : ''; });
+                    wizard.querySelectorAll('[data-step-submit]').forEach(function (b) { b.style.display = current === steps.length - 1 ? '' : 'none'; });
+                    if (current === steps.length - 1) buildReview();
+                }
+
+                function buildReview() {
+                    var target = wizard.querySelector('[data-review]');
+                    if (!target) return;
+                    target.textContent = '';
+                    steps.forEach(function (step, i) {
+                        if (i === steps.length - 1) return;
+                        step.querySelectorAll('.bo-form-row').forEach(function (row) {
+                            var label = row.querySelector('label');
+                            var field = row.querySelector('input:not([type=file]):not([data-controller~="rich-text"]), select, textarea:not([data-controller~="rich-text"])');
+                            if (!label || !field) return;
+                            var value;
+                            if (field.tagName === 'SELECT') {
+                                value = Array.prototype.slice.call(field.selectedOptions).map(function (o) { return o.text; }).join(', ');
+                            } else if (field.type === 'checkbox') {
+                                value = field.checked ? 'Oui' : 'Non';
+                            } else {
+                                value = field.value;
+                            }
+                            var line = document.createElement('div');
+                            line.className = 'bo-review-row';
+                            var span = document.createElement('span');
+                            span.textContent = label.textContent;
+                            var strong = document.createElement('strong');
+                            strong.textContent = value || '—';
+                            line.appendChild(span);
+                            line.appendChild(strong);
+                            target.appendChild(line);
+                        });
+                    });
+                }
+
+                wizard.querySelectorAll('[data-step-next]').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var fields = steps[current].querySelectorAll('input, select, textarea');
+                        for (var i = 0; i < fields.length; i++) {
+                            if (!fields[i].checkValidity()) { fields[i].reportValidity(); return; }
+                        }
+                        show(current + 1);
+                    });
+                });
+                wizard.querySelectorAll('[data-step-prev]').forEach(function (btn) {
+                    btn.addEventListener('click', function () { show(current - 1); });
+                });
+                tabs.forEach(function (tab, i) {
+                    tab.addEventListener('click', function () {
+                        if (i <= current) { show(i); return; }
+                        for (var s = current; s < i; s++) {
+                            var fields = steps[s].querySelectorAll('input, select, textarea');
+                            for (var f = 0; f < fields.length; f++) {
+                                if (!fields[f].checkValidity()) { fields[f].reportValidity(); return; }
+                            }
+                        }
+                        show(i);
+                    });
+                });
+
+                show(0);
+            });
+        })();
+    </script>
+{% endblock %}

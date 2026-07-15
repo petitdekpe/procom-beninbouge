@@ -1,0 +1,71 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Page d'accueil{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Page d'accueil</h1>
+    </div>
+    <p class="bo-muted" style="margin:-8px 0 20px">Choisis l'ordre d'affichage des sections et désactive celles que tu ne veux pas montrer. Les changements sont visibles immédiatement sur le site.</p>
+
+    <div class="bo-card">
+        {% if sections|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr><th>Ordre</th><th>Section</th><th>Rubrique</th><th>Statut</th><th style="text-align:right">Réordonner</th></tr>
+                </thead>
+                <tbody>
+                    {% for section in sections %}
+                        <tr>
+                            <td class="bo-muted">{{ loop.index }}</td>
+                            <td style="font-weight:700">
+                                {{ section.type|home_section_label }}
+                                {% if section.type.value == 'category_highlight' and not section.category %}
+                                    <span class="bo-muted" style="font-weight:400;font-size:12px"> — non configurée</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if section.type.value == 'category_highlight' %}
+                                    <form method="post" action="{{ path('admin_home_section_category', { id: section.id }) }}">
+                                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                        <select name="category_id" onchange="this.form.requestSubmit()" class="bo-select" aria-label="Rubrique affichée par la section {{ loop.index }}">
+                                            <option value="">— Choisir une rubrique —</option>
+                                            {% for category in categories %}
+                                                <option value="{{ category.id }}" {{ section.category and section.category.id == category.id ? 'selected' : '' }}>{{ category.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                {% else %}
+                                    <span class="bo-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="post" action="{{ path('admin_home_section_toggle', { id: section.id }) }}" style="display:flex;align-items:center;gap:10px">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <label class="bo-toggle">
+                                        <input type="checkbox" {{ section.enabled ? 'checked' : '' }} onchange="this.form.requestSubmit()" aria-label="{{ section.enabled ? 'Désactiver' : 'Activer' }} la section {{ section.type|home_section_label }}">
+                                        <span class="bo-toggle-track"></span>
+                                    </label>
+                                    <span class="bo-muted" style="font-size:12.5px;font-weight:700">{{ section.enabled ? 'Activée' : 'Désactivée' }}</span>
+                                    <noscript><button type="submit" class="bo-btn bo-btn-muted">Basculer</button></noscript>
+                                </form>
+                            </td>
+                            <td style="text-align:right;white-space:nowrap">
+                                <form method="post" action="{{ path('admin_home_section_move_up', { id: section.id }) }}" style="display:inline">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-muted" {{ loop.first ? 'disabled' : '' }} title="Monter">↑</button>
+                                </form>
+                                <form method="post" action="{{ path('admin_home_section_move_down', { id: section.id }) }}" style="display:inline">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-muted" {{ loop.last ? 'disabled' : '' }} title="Descendre">↓</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">Aucune section configurée.</p>
+        {% endif %}
+    </div>
+{% endblock %}

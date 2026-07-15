@@ -1,0 +1,44 @@
+{{ form_start(form, { attr: { class: 'bo-wizard' } }) }}
+    <div class="bo-wizard-head">
+        <div>
+            <p class="bo-wizard-title">{{ heading }}</p>
+            <div class="bo-stepper">
+                <button type="button" class="bo-stepper-tab">Informations</button>
+                <span class="bo-stepper-sep">›</span>
+                <button type="button" class="bo-stepper-tab">Détails</button>
+                <span class="bo-stepper-sep">›</span>
+                <button type="button" class="bo-stepper-tab">Vérifier</button>
+            </div>
+        </div>
+        <a href="{{ path('admin_project_index') }}" class="bo-wizard-close" title="Fermer">✕</a>
+    </div>
+
+    <div class="bo-step">
+        <div class="bo-form-row">{{ form_row(form.title) }}</div>
+        <div class="bo-form-row">{{ form_row(form.description) }}</div>
+        <div class="bo-form-row">{{ form_row(form.porteur) }}</div>
+    </div>
+
+    <div class="bo-step">
+        <div class="bo-form-row">{{ form_row(form.budget) }}</div>
+        <div class="bo-form-row">{{ form_row(form.progress) }}</div>
+        <div class="bo-form-row">{{ form_row(form.location) }}</div>
+        <div class="bo-form-row">{{ form_row(form.type) }}</div>
+    </div>
+
+    <div class="bo-step">
+        <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 4px">Récapitulatif</h2>
+        <div data-review></div>
+    </div>
+
+    {{ form_rest(form) }}
+
+    <div class="bo-wizard-footer">
+        <button type="button" class="bo-btn bo-btn-muted" data-step-prev>← Précédent</button>
+        <div style="display:flex;gap:10px">
+            <a href="{{ path('admin_project_index') }}" class="bo-btn bo-btn-muted">Annuler</a>
+            <button type="button" class="bo-btn bo-btn-black" data-step-next>Suivant</button>
+            <button type="submit" class="bo-btn bo-btn-accent" data-step-submit>Enregistrer</button>
+        </div>
+    </div>
+{{ form_end(form) }}

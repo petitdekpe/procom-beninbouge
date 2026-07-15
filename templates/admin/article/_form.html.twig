@@ -1,0 +1,71 @@
+{{ form_start(form, { attr: { class: 'bo-wizard' } }) }}
+    <div class="bo-wizard-head">
+        <div>
+            <p class="bo-wizard-title">{{ heading }}</p>
+            <div class="bo-stepper">
+                <button type="button" class="bo-stepper-tab">Contenu</button>
+                <span class="bo-stepper-sep">›</span>
+                <button type="button" class="bo-stepper-tab">Informations</button>
+                <span class="bo-stepper-sep">›</span>
+                <button type="button" class="bo-stepper-tab">Vérifier</button>
+            </div>
+        </div>
+        <a href="{{ path('admin_article_index') }}" class="bo-wizard-close" title="Fermer">✕</a>
+    </div>
+
+    {% if article.id %}
+        {% include 'admin/article/_workflow_panel.html.twig' %}
+    {% endif %}
+
+    <div class="bo-step">
+        <div class="bo-form-row">{{ form_row(form.title) }}</div>
+        <div class="bo-form-row">{{ form_row(form.slug) }}</div>
+        <div class="bo-form-row">{{ form_row(form.chapo) }}</div>
+        <div class="bo-form-row">{{ form_row(form.content) }}</div>
+        <div class="bo-form-row">{{ form_row(form.coverImage) }}</div>
+        <div class="bo-form-row">{{ form_row(form.coverImageFile) }}</div>
+    </div>
+
+    <div class="bo-step">
+        <div class="bo-form-row">{{ form_row(form.category) }}</div>
+        <div class="bo-form-row">{{ form_row(form.author) }}</div>
+        <div class="bo-form-row">{{ form_row(form.tags) }}</div>
+        <div class="bo-form-row">{{ form_row(form.featured) }}</div>
+        <div class="bo-form-row">{{ form_row(form.pinned) }}</div>
+    </div>
+
+    <div class="bo-step">
+        {% if article.pendingApproval %}
+            <div class="bo-flash" style="background:#fff7e0;color:#7a5b00">
+                <p style="margin:0 0 8px">Cet article est attribué à un autre auteur : il est en attente de validation par un administrateur (statut demandé : {{ article.requestedStatus.value == 'published' ? 'Publié' : 'Programmé' }}) et reste invisible sur le site jusque-là.</p>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <div style="display:flex;gap:8px;margin-top:6px">
+                        <form method="post" action="{{ path('admin_validation_article_approve', { id: article.id }) }}">
+                            <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                            <button type="submit" class="bo-btn bo-btn-accent">Valider</button>
+                        </form>
+                        <form method="post" action="{{ path('admin_validation_article_reject', { id: article.id }) }}" onsubmit="return confirm('Rejeter cet article ?');">
+                            <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                            <button type="submit" class="bo-btn bo-btn-muted">Rejeter</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+        {% if form.status is defined %}<div class="bo-form-row">{{ form_row(form.status) }}</div>{% endif %}
+        {% if form.publishedAt is defined %}<div class="bo-form-row">{{ form_row(form.publishedAt) }}</div>{% endif %}
+        <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:24px 0 4px">Récapitulatif</h2>
+        <div data-review></div>
+    </div>
+
+    {{ form_rest(form) }}
+
+    <div class="bo-wizard-footer">
+        <button type="button" class="bo-btn bo-btn-muted" data-step-prev>← Précédent</button>
+        <div style="display:flex;gap:10px">
+            <a href="{{ path('admin_article_index') }}" class="bo-btn bo-btn-muted">Annuler</a>
+            <button type="button" class="bo-btn bo-btn-black" data-step-next>Suivant</button>
+            <button type="submit" class="bo-btn bo-btn-accent" data-step-submit>Enregistrer</button>
+        </div>
+    </div>
+{{ form_end(form) }}

@@ -1,0 +1,58 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Relecture{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">📝 Relecture</h1>
+    </div>
+    <p class="bo-muted" style="margin-bottom:18px">Articles soumis par les journalistes, en attente de votre relecture. Approuvez pour les envoyer en correction, ou refusez avec un motif pour les renvoyer au journaliste.</p>
+
+    <div class="bo-card">
+        {% if articles|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr><th>Titre</th><th>Auteur</th><th>Catégorie</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for article in articles %}
+                        <tr>
+                            <td style="font-weight:700">
+                                <a href="{{ path('admin_article_edit', { id: article.id }) }}" class="bo-h">{{ article.title }}</a>
+                            </td>
+                            <td class="bo-muted">{{ article.author ? article.author.firstName ~ ' ' ~ article.author.lastName : '—' }}</td>
+                            <td class="bo-muted">{{ article.category ? article.category.name : '—' }}</td>
+                            <td style="text-align:right;white-space:nowrap">
+                                <form method="post" action="{{ path('admin_workflow_review_approve', { id: article.id }) }}" style="display:inline">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-accent">Approuver → Correction</button>
+                                </form>
+                                <button type="button" class="bo-btn bo-btn-danger" data-reject-toggle="review-{{ article.id }}">Refuser</button>
+                            </td>
+                        </tr>
+                        <tr id="review-{{ article.id }}" class="bo-reject-row" hidden>
+                            <td colspan="4">
+                                <form method="post" action="{{ path('admin_workflow_review_reject', { id: article.id }) }}" style="display:flex;gap:8px;align-items:flex-start;padding:8px 0">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <textarea name="reason" required placeholder="Motif du refus (obligatoire, visible par le journaliste)" rows="2" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--sp-border)"></textarea>
+                                    <button type="submit" class="bo-btn bo-btn-danger">Confirmer le refus</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">Aucun article en attente de relecture.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        document.querySelectorAll('[data-reject-toggle]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var row = document.getElementById(btn.getAttribute('data-reject-toggle'));
+                row.hidden = !row.hidden;
+            });
+        });
+    </script>
+{% endblock %}

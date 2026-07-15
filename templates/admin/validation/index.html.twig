@@ -1,0 +1,85 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Validations{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Validations</h1>
+    </div>
+
+    <h2 style="font-size:15px;font-weight:800;margin:0 0 12px">Profils en attente ({{ pendingProfiles|length }})</h2>
+    <div class="bo-card" style="margin-bottom:30px">
+        {% if pendingProfiles|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr><th>Compte</th><th>Modifications proposées</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for author in pendingProfiles %}
+                        <tr>
+                            <td class="bo-muted">{{ author.user ? author.user.email : '—' }}</td>
+                            <td>
+                                {% if author.pendingFirstName and author.pendingFirstName != author.firstName %}
+                                    <div>Prénom : <span class="bo-muted">{{ author.firstName }}</span> → <strong>{{ author.pendingFirstName }}</strong></div>
+                                {% endif %}
+                                {% if author.pendingLastName and author.pendingLastName != author.lastName %}
+                                    <div>Nom : <span class="bo-muted">{{ author.lastName }}</span> → <strong>{{ author.pendingLastName }}</strong></div>
+                                {% endif %}
+                                {% if author.pendingEmail and author.pendingEmail != author.email %}
+                                    <div>E-mail : <span class="bo-muted">{{ author.email }}</span> → <strong>{{ author.pendingEmail }}</strong></div>
+                                {% endif %}
+                            </td>
+                            <td style="text-align:right;white-space:nowrap">
+                                <form method="post" action="{{ path('admin_validation_profile_approve', { id: author.id }) }}" style="display:inline">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-accent">Valider</button>
+                                </form>
+                                <form method="post" action="{{ path('admin_validation_profile_reject', { id: author.id }) }}" style="display:inline" onsubmit="return confirm('Rejeter cette demande ?');">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-muted">Rejeter</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">Aucune demande de modification de profil en attente.</p>
+        {% endif %}
+    </div>
+
+    <h2 style="font-size:15px;font-weight:800;margin:0 0 12px">Articles en attente ({{ pendingArticles|length }})</h2>
+    <div class="bo-card">
+        {% if pendingArticles|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr><th>Titre</th><th>Auteur attribué</th><th>Statut demandé</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for article in pendingArticles %}
+                        <tr>
+                            <td style="font-weight:700">{{ article.title }}</td>
+                            <td class="bo-muted">{{ article.author.firstName }} {{ article.author.lastName }}</td>
+                            <td>
+                                {% if article.requestedStatus.value == 'published' %}Publié{% elseif article.requestedStatus.value == 'scheduled' %}Programmé{% else %}—{% endif %}
+                            </td>
+                            <td style="text-align:right;white-space:nowrap">
+                                <a href="{{ path('admin_article_edit', { id: article.id }) }}" class="bo-btn bo-btn-muted">Voir</a>
+                                <form method="post" action="{{ path('admin_validation_article_approve', { id: article.id }) }}" style="display:inline">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-accent">Valider</button>
+                                </form>
+                                <form method="post" action="{{ path('admin_validation_article_reject', { id: article.id }) }}" style="display:inline" onsubmit="return confirm('Rejeter cet article ?');">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-muted">Rejeter</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">Aucun article en attente de validation.</p>
+        {% endif %}
+    </div>
+{% endblock %}

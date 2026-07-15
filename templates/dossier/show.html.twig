@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% set dossierUrl = url('app_dossier_show', { slug: dossier.slug }) %}
+{% set dossierDescription = dossier.metaDescription ?: (dossier.description ? dossier.description|excerpt(180) : null) %}
+
+{% block title %}{{ dossier.metaTitle ?: dossier.title }} — Dossier {{ site_settings().siteName }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {{ include('partials/_seo_meta.html.twig', {
+        ogTitle: dossier.metaTitle ?: dossier.title,
+        metaDescription: dossierDescription,
+        canonicalUrl: dossierUrl,
+        ogImage: dossier.coverImage,
+        structuredData: {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            'name': dossier.metaTitle ?: dossier.title,
+            'description': dossierDescription,
+            'url': dossierUrl,
+        },
+    }) }}
+{% endblock %}
+
+{% block body %}
+{% set gradientPalette = [
+    'linear-gradient(140deg,#0E3F51,#2B6B43)',
+    'linear-gradient(140deg,#CF3732,#a3140d)',
+    'linear-gradient(140deg,#3a3f33,#14160F)',
+    'linear-gradient(140deg,#3A8556,#1C4A2E)',
+] %}
+
+<div style="background:#F4F2EA;color:#14160F;font-family:'Manrope',sans-serif">
+
+    {{ include('partials/_header.html.twig') }}
+
+    {# ===== BANNIÈRE DOSSIER ===== #}
+    <section style="position:relative;min-height:340px;display:flex;align-items:flex-end;overflow:hidden;{% if dossier.coverImage %}background:url('{{ dossier.coverImage }}') center/cover{% else %}background:linear-gradient(150deg,#0E3F51 0%,#2B6B43 100%){% endif %}">
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(7,10,6,.92) 0%,rgba(7,10,6,.5) 55%,rgba(7,10,6,.35) 100%)"></div>
+        <div style="position:relative;max-width:1240px;margin:0 auto;padding:44px 24px 38px;width:100%">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:#dfe3d8;margin-bottom:14px">
+                <a href="{{ path('app_home') }}" style="text-decoration:none;color:#dfe3d8">Accueil</a>
+                <span>/</span>
+                <a href="{{ path('app_dossier_index') }}" style="text-decoration:none;color:#dfe3d8">Dossiers</a>
+            </div>
+            <span style="display:inline-block;background:#F7CA46;color:#14160F;font-weight:800;font-size:11px;letter-spacing:.5px;padding:6px 14px;border-radius:999px;text-transform:uppercase;margin-bottom:14px">Dossier</span>
+            <h1 style="font-family:'Archivo';font-weight:900;font-size:34px;color:#fff;line-height:1.1;letter-spacing:-.4px;max-width:760px">{{ dossier.title }}</h1>
+            {% if dossier.description %}
+                <p style="color:#e7f1e9;font-size:15px;line-height:1.6;margin-top:14px;max-width:640px">{{ dossier.description }}</p>
+            {% endif %}
+            <div style="color:#bcd6c5;font-size:12.5px;font-weight:600;margin-top:16px">{{ articles|length }} article{{ articles|length > 1 ? 's' : '' }} dans ce dossier</div>
+        </div>
+    </section>
+
+    {# ===== ARTICLES DU DOSSIER ===== #}
+    <section style="max-width:1240px;margin:0 auto;padding:44px 24px 64px">
+        {% if articles|length > 0 %}
+        <div class="bb-grid-4" style="gap:20px" data-controller="impression-tracker" data-impression-tracker-context-value="dossier_page">
+            {% for article in articles %}
+                {% set gradient = gradientPalette[loop.index0 % 4] %}
+                <a href="{{ path('app_article_show', { slug: article.slug }) }}" class="bb-card" data-impression-tracker-target="card" data-article-id="{{ article.id }}" style="text-decoration:none;background:#fff;border-radius:13px;overflow:hidden;box-shadow:0 10px 26px -22px rgba(20,22,15,.55)">
+                    <div style="position:relative;aspect-ratio:5/3;overflow:hidden">
+                        <div class="bb-zoom" style="position:absolute;inset:0;{% if article.coverImage %}background:url('{{ article.coverImage }}') center/cover{% else %}background:{{ gradient }}{% endif %}"></div>
+                        {% if article.category %}<span style="position:absolute;top:10px;left:10px;background:{{ article.category.color }};color:#fff;font-size:10px;font-weight:800;letter-spacing:.4px;padding:4px 8px;border-radius:5px;text-transform:uppercase">{{ article.category.name }}</span>{% endif %}
+                    </div>
+                    <div style="padding:14px 14px 17px">
+                        <h3 class="bb-h" style="font-family:'Archivo';font-weight:800;font-size:15.5px;line-height:1.22;color:#14160F">{{ article.title }}</h3>
+                        <div style="color:#8a8a7c;font-size:11.5px;font-weight:600;margin-top:9px">{{ article.publishedAt|time_ago }}</div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p class="bb-empty">Aucun article publié dans ce dossier pour le moment.</p>
+        {% endif %}
+    </section>
+
+    {{ include('partials/_footer.html.twig') }}
+
+</div>
+{% endblock %}

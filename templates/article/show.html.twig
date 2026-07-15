@@ -1,0 +1,189 @@
+{% extends 'base.html.twig' %}
+
+{% set articleUrl = url('app_article_show', { slug: article.slug }) %}
+{% set metaDescription = (article.metaDescription ?: article.chapo)|excerpt(180) %}
+
+{% block title %}{{ article.metaTitle ?: article.title }} — {{ site_settings().siteName }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {{ include('partials/_seo_meta.html.twig', {
+        ogTitle: article.metaTitle ?: article.title,
+        metaDescription: metaDescription,
+        canonicalUrl: articleUrl,
+        ogType: 'article',
+        ogImage: article.coverImage,
+        structuredData: article.structuredData,
+    }) }}
+    {% if article.status.value != 'published' %}<meta name="robots" content="noindex, nofollow">{% endif %}
+{% endblock %}
+
+{% block body %}
+<div style="background:#F4F2EA;color:#14160F;font-family:'Manrope',sans-serif"
+    {%- if article.status.value == 'published' %}
+     data-controller="article-tracker share-tracker"
+     data-article-tracker-article-id-value="{{ article.id }}"
+     data-share-tracker-article-id-value="{{ article.id }}"
+    {%- endif %}>
+
+    {% if article.status.value != 'published' %}
+        {% set previewLabel = article.status.value == 'scheduled' ? 'Programmé · ' ~ (article.publishedAt ? article.publishedAt|date('d/m/Y à H:i') : '') : 'Brouillon' %}
+        <div style="position:sticky;top:0;z-index:60;background:#F7CA46;color:#14160F;text-align:center;padding:10px 16px;font-weight:800;font-size:13px;letter-spacing:.2px">
+            👁 Aperçu — cet article n'est pas encore public ({{ previewLabel }}). Seuls les comptes éditeurs/admin voient cette page.
+        </div>
+    {% endif %}
+
+    {{ include('partials/_header.html.twig') }}
+
+    {# ===== EN-TÊTE ARTICLE ===== #}
+    <article style="max-width:860px;margin:0 auto;padding:38px 24px 0">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:#8a8a7c;margin-bottom:18px">
+            <a href="{{ path('app_home') }}" style="text-decoration:none;color:#8a8a7c">Accueil</a>
+            {% if article.category %}<span>/</span><a href="{{ path('app_category_show', { slug: article.category.slug }) }}" style="text-decoration:none;color:#3a3f33">{{ article.category.name }}</a>{% endif %}
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+            {% if article.category %}
+                <a href="{{ path('app_category_show', { slug: article.category.slug }) }}" style="text-decoration:none;background:{{ article.category.color }};color:#fff;font-weight:800;font-size:11px;letter-spacing:.5px;padding:6px 11px;border-radius:6px;text-transform:uppercase">{{ article.category.name }}</a>
+            {% endif %}
+            {% if article.sponsored %}
+                <span style="background:#F0EEE4;color:#14160F;font-weight:800;font-size:11px;letter-spacing:.4px;padding:6px 11px;border-radius:6px;text-transform:uppercase">Publi-reportage</span>
+            {% endif %}
+        </div>
+
+        <h1 class="bb-h" style="font-family:'Archivo';font-weight:900;font-size:36px;line-height:1.1;letter-spacing:-.5px;text-wrap:balance;color:#14160F">{{ article.title }}</h1>
+
+        {% if article.chapo %}
+            <p style="color:#51544a;font-size:17px;line-height:1.55;margin-top:16px;max-width:720px">{{ article.chapo|raw }}</p>
+        {% endif %}
+
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:22px;padding-bottom:22px;border-bottom:1px solid #e3e0d4;color:#6b6e62;font-size:13px;font-weight:600">
+            {% if article.author %}<span style="color:#2B6B43;font-weight:800">{{ article.author.firstName }} {{ article.author.lastName }}</span><span>·</span>{% endif %}
+            <span>{{ article.publishedAt|french_date }}</span><span>·</span><span>{{ article.content|reading_time }} min de lecture</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ articleUrl|url_encode }}" target="_blank" rel="noopener" data-action="click->share-tracker#track" data-share-tracker-channel-param="facebook" style="width:30px;height:30px;border-radius:50%;background:#F0EEE4;display:grid;place-items:center;text-decoration:none"><img src="{{ asset('assets/icons/logo-facebook.svg') }}" alt="Partager sur Facebook" class="bb-social-icon-search" style="width:13px;height:13px"></a>
+                <a href="https://twitter.com/intent/tweet?url={{ articleUrl|url_encode }}&text={{ article.title|url_encode }}" target="_blank" rel="noopener" data-action="click->share-tracker#track" data-share-tracker-channel-param="twitter" style="width:30px;height:30px;border-radius:50%;background:#F0EEE4;display:grid;place-items:center;text-decoration:none"><img src="{{ asset('assets/icons/logo-twitter.svg') }}" alt="Partager sur X" class="bb-social-icon-search" style="width:12px;height:12px"></a>
+                <a href="https://wa.me/?text={{ (article.title ~ ' ' ~ articleUrl)|url_encode }}" target="_blank" rel="noopener" data-action="click->share-tracker#track" data-share-tracker-channel-param="whatsapp" style="width:30px;height:30px;border-radius:50%;background:#F0EEE4;display:grid;place-items:center;text-decoration:none"><img src="{{ asset('assets/icons/logo-whatsapp.svg') }}" alt="Partager sur WhatsApp" style="width:14px;height:14px;display:block"></a>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ articleUrl|url_encode }}" target="_blank" rel="noopener" data-action="click->share-tracker#track" data-share-tracker-channel-param="linkedin" style="width:30px;height:30px;border-radius:50%;background:#F0EEE4;display:grid;place-items:center;text-decoration:none"><img src="{{ asset('assets/icons/logo-linkedin.svg') }}" alt="Partager sur LinkedIn" class="bb-social-icon-search" style="width:13px;height:13px"></a>
+            </div>
+        </div>
+    </article>
+
+    {% if article.coverImage %}
+        <div style="max-width:1100px;margin:28px auto 0;padding:0 24px">
+            <div style="border-radius:16px;overflow:hidden;box-shadow:0 20px 50px -28px rgba(11,92,44,.35)">
+                <img src="{{ article.coverImage }}" alt="{{ article.title }}" style="width:100%;display:block;max-height:480px;object-fit:cover">
+            </div>
+        </div>
+    {% endif %}
+
+    {# ===== CORPS DE L'ARTICLE ===== #}
+    <section style="max-width:860px;margin:0 auto;padding:36px 24px 10px">
+        <div class="bb-article-body">{{ article.content|raw }}</div>
+
+        {% if article.tags|length > 0 %}
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:32px">
+                {% for tag in article.tags %}
+                    <span style="background:#fff;border:1px solid #e3e0d4;color:#3a3f33;font-weight:700;font-size:12px;padding:7px 13px;border-radius:999px">#{{ tag.name }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if article.author %}
+            <div style="display:flex;gap:16px;align-items:flex-start;background:#fff;border-radius:14px;padding:20px;margin-top:30px;box-shadow:0 8px 22px -18px rgba(20,22,15,.4)">
+                <div style="width:54px;height:54px;border-radius:50%;flex:none;overflow:hidden;background:#14160F;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Archivo';font-weight:800;font-size:17px">
+                    {% if article.author.avatar %}
+                        <img src="{{ article.author.avatar }}" alt="" style="width:100%;height:100%;object-fit:cover">
+                    {% else %}
+                        {{ article.author.firstName|first }}{{ article.author.lastName|first }}
+                    {% endif %}
+                </div>
+                <div>
+                    <div style="font-family:'Archivo';font-weight:900;font-size:15px;color:#14160F">{{ article.author.firstName }} {{ article.author.lastName }}</div>
+                    {% if article.author.bio %}<p style="color:#6b6e62;font-size:13.5px;line-height:1.55;margin-top:6px">{{ article.author.bio }}</p>{% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </section>
+
+    {# ===== COMMENTAIRES ===== #}
+    <section style="max-width:860px;margin:0 auto;padding:20px 24px 10px">
+        {% for label, messages in app.flashes(['success', 'error']) %}
+            {% for message in messages %}
+                <div style="background:{{ label == 'error' ? '#fdecee' : '#e7f1e9' }};color:{{ label == 'error' ? '#a3173a' : '#1c4a2e' }};font-weight:700;font-size:13.5px;padding:12px 16px;border-radius:10px;margin-bottom:20px">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        <h2 style="font-family:'Archivo';font-weight:900;font-size:22px;color:#14160F;letter-spacing:-.3px;margin-bottom:20px">
+            {{ comments|length }} commentaire{{ comments|length > 1 ? 's' : '' }}
+        </h2>
+
+        {% if comments|length > 0 %}
+            <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:30px">
+                {% for comment in comments %}
+                    <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 8px 20px -18px rgba(20,22,15,.5)">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                            <span style="font-family:'Archivo';font-weight:800;font-size:13.5px;color:#14160F">{{ comment.authorName }}</span>
+                            <span style="color:#8a8a7c;font-size:12px">· {{ comment.createdAt|time_ago }}</span>
+                        </div>
+                        <p style="color:#3a3f33;font-size:14px;line-height:1.6;margin:0;white-space:pre-line">{{ comment.content }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if article.status.value == 'published' %}
+            {% set fieldStyle = 'width:100%;padding:11px 14px;border:1px solid #e3e0d4;border-radius:9px;font-family:inherit;font-size:14px;background:#F4F2EA;box-sizing:border-box' %}
+            <div style="background:#fff;border-radius:14px;padding:22px;box-shadow:0 8px 20px -18px rgba(20,22,15,.5)">
+                <h3 style="font-family:'Archivo';font-weight:800;font-size:15px;color:#14160F;margin:0 0 14px">Laisser un commentaire</h3>
+                {{ form_start(commentForm, { action: path('app_comment_create', { slug: article.slug }), attr: { style: 'display:flex;flex-direction:column;gap:14px' } }) }}
+                    <div>
+                        {{ form_label(commentForm.authorName, null, { label_attr: { style: 'display:block;font-weight:700;font-size:13px;margin-bottom:6px;color:#3a3f33' } }) }}
+                        {{ form_widget(commentForm.authorName, { attr: { style: fieldStyle } }) }}
+                        {{ form_errors(commentForm.authorName) }}
+                    </div>
+                    <div>
+                        {{ form_label(commentForm.authorEmail, null, { label_attr: { style: 'display:block;font-weight:700;font-size:13px;margin-bottom:6px;color:#3a3f33' } }) }}
+                        {{ form_widget(commentForm.authorEmail, { attr: { style: fieldStyle } }) }}
+                        {{ form_errors(commentForm.authorEmail) }}
+                    </div>
+                    <div>
+                        {{ form_label(commentForm.content, null, { label_attr: { style: 'display:block;font-weight:700;font-size:13px;margin-bottom:6px;color:#3a3f33' } }) }}
+                        {{ form_widget(commentForm.content, { attr: { style: fieldStyle } }) }}
+                        {{ form_errors(commentForm.content) }}
+                    </div>
+                    <button type="submit" style="align-self:flex-start;background:#2B6B43;color:#fff;font-weight:800;font-size:14px;padding:12px 22px;border:none;border-radius:999px;cursor:pointer">Envoyer</button>
+                {{ form_end(commentForm) }}
+            </div>
+        {% endif %}
+    </section>
+
+    {# ===== À LIRE AUSSI ===== #}
+    {% if related|length > 0 %}
+        <section style="max-width:1240px;margin:0 auto;padding:48px 24px 10px">
+            <div style="display:flex;align-items:center;gap:13px;margin-bottom:22px">
+                <span style="width:5px;height:26px;background:#2B6B43;border-radius:3px"></span>
+                <h2 style="font-family:'Archivo';font-weight:900;font-size:24px;color:#14160F;letter-spacing:-.3px">À lire aussi</h2>
+            </div>
+            <div class="bb-grid-3" style="gap:20px">
+                {% for a in related %}
+                    <a href="{{ path('app_article_show', { slug: a.slug }) }}" class="bb-card" style="text-decoration:none;background:#fff;border-radius:13px;overflow:hidden;box-shadow:0 10px 26px -22px rgba(20,22,15,.55)">
+                        <div style="position:relative;aspect-ratio:5/3;overflow:hidden">
+                            <div class="bb-zoom" style="position:absolute;inset:0;{% if a.coverImage %}background:url('{{ a.coverImage }}') center/cover{% else %}background:linear-gradient(140deg,#2B6B43,#1C4A2E){% endif %}"></div>
+                            {% if a.category %}<span style="position:absolute;top:10px;left:10px;background:{{ a.category.color }};color:#fff;font-size:10px;font-weight:800;letter-spacing:.4px;padding:4px 8px;border-radius:5px;text-transform:uppercase">{{ a.category.name }}</span>{% endif %}
+                        </div>
+                        <div style="padding:14px 14px 17px">
+                            <h3 class="bb-h" style="font-family:'Archivo';font-weight:800;font-size:15.5px;line-height:1.22;color:#14160F">{{ a.title }}</h3>
+                            <div style="color:#8a8a7c;font-size:11.5px;font-weight:600;margin-top:9px">{{ a.publishedAt|time_ago }}</div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+    {{ include('partials/_footer.html.twig') }}
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Projets{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Projets</h1>
+        <a href="{{ path('admin_project_new') }}" class="bo-btn bo-btn-accent">+ Nouveau projet</a>
+    </div>
+
+    <div data-list-root>
+        <div class="bo-toolbar">
+            <div class="bo-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.8-3.8"/></svg>
+                <input type="text" data-list-search placeholder="Rechercher des projets">
+            </div>
+            <div class="bo-filters">
+                <button type="button" class="bo-pill active" data-filter="all">Tous</button>
+                <button type="button" class="bo-pill" data-filter="planifie">Planifié</button>
+                <button type="button" class="bo-pill" data-filter="en_cours">En cours</button>
+                <button type="button" class="bo-pill" data-filter="termine">Terminé</button>
+                <button type="button" class="bo-pill" data-filter="suspendu">Suspendu</button>
+                <button type="button" class="bo-pill" data-filter="abandonne">Abandonné</button>
+            </div>
+        </div>
+
+        <div class="bo-card">
+            {% if projects|length > 0 %}
+                <table class="bo-table">
+                    <thead>
+                        <tr><th>Titre</th><th>Localisation</th><th>Avancement</th><th>Type</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for project in projects %}
+                            <tr data-search="{{ (project.title ~ ' ' ~ project.location)|lower }}" data-filter="{{ project.progress.value }}">
+                                <td style="font-weight:700">{{ project.title }}</td>
+                                <td class="bo-muted">{{ project.location }}</td>
+                                <td>
+                                    {% set dot = project.progress.value == 'termine' ? 'var(--sp-green)' : (project.progress.value in ['suspendu', 'abandonne'] ? 'var(--sp-danger-text)' : 'var(--sp-amber)') %}
+                                    <span class="bo-status"><span class="dot" style="background:{{ dot }}"></span>{{ project.progress|project_progress_label }}</span>
+                                </td>
+                                <td><span class="bo-format-badge">{{ project.type|project_type_label }}</span></td>
+                                <td style="text-align:right;white-space:nowrap">
+                                    <a href="{{ path('admin_project_edit', { id: project.id }) }}" class="bo-btn bo-btn-muted">Modifier</a>
+                                    <form method="post" action="{{ path('admin_project_delete', { id: project.id }) }}" style="display:inline" onsubmit="return confirm('Supprimer ce projet ?');">
+                                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                        <button type="submit" class="bo-btn bo-btn-danger">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="bo-empty">Aucun projet pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

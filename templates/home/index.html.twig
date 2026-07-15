@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% set homeSettings = site_settings() %}
+{% set homeUrl = url('app_home') %}
+{% set homeDescription = "Politique, économie, culture et initiatives locales : l'actualité béninoise vérifiée et racontée depuis le terrain." %}
+{% set homeSameAs = [homeSettings.facebookUrl, homeSettings.twitterUrl, homeSettings.instagramUrl, homeSettings.youtubeUrl]|filter(u => u is not empty) %}
+
+{% block title %}{{ homeSettings.siteName }} — L'actualité du Bénin qui bouge{% endblock %}
+
+{% block stylesheets %}
+    {# Règles partagées (resets, .bb-card/.bb-h, etc.) vivent désormais dans
+       assets/styles/app.css, chargé globalement via assets/app.js — voir le
+       bloc javascripts de base.html.twig. #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {{ include('partials/_seo_meta.html.twig', {
+        ogTitle: homeSettings.siteName ~ ' — L\'actualité du Bénin qui bouge',
+        metaDescription: homeDescription,
+        canonicalUrl: homeUrl,
+        structuredData: {
+            '@context': 'https://schema.org',
+            '@graph': [
+                {
+                    '@type': 'WebSite',
+                    'name': homeSettings.siteName,
+                    'url': homeUrl,
+                },
+                {
+                    '@type': 'Organization',
+                    'name': homeSettings.siteName,
+                    'url': homeUrl,
+                    'logo': homeSettings.logoUrl ? absolute_url(homeSettings.logoUrl) : null,
+                    'sameAs': homeSameAs,
+                },
+            ],
+        },
+    }) }}
+{% endblock %}
+
+{% block body %}
+{% set gradientPalette = [
+    'linear-gradient(140deg,#0E3F51,#2B6B43)',
+    'linear-gradient(140deg,#CF3732,#a3140d)',
+    'linear-gradient(140deg,#3a3f33,#14160F)',
+    'linear-gradient(140deg,#3A8556,#1C4A2E)',
+] %}
+
+{# La page d'accueil est entièrement pilotée par homeSections (ordre +
+   activation configurés dans /admin/home-sections) — voir
+   App\Controller\HomeController et App\Entity\HomeSection. Chaque type de
+   section a son partial dans templates/partials/home_sections/. #}
+<div style="background:#F4F2EA;color:#14160F;font-family:'Manrope',sans-serif" data-controller="video-modal">
+
+    {{ include('partials/_header.html.twig') }}
+
+    {% for section in homeSections %}
+        {% if section.type.value == 'hero_slider' %}
+            {{ include('partials/home_sections/_hero_slider.html.twig', { slides: heroSlides, stats: stats }) }}
+        {% elseif section.type.value == 'latest_news' %}
+            {{ include('partials/home_sections/_latest_news.html.twig', { actu: actu, gradientPalette: gradientPalette }) }}
+        {% elseif section.type.value == 'popular_articles' %}
+            {{ include('partials/home_sections/_popular_articles.html.twig', { popular: popularArticles, gradientPalette: gradientPalette }) }}
+        {% elseif section.type.value == 'videos' %}
+            {{ include('partials/home_sections/_videos.html.twig', { videos: videos, gradientPalette: gradientPalette }) }}
+        {% elseif section.type.value == 'podcasts' %}
+            {{ include('partials/home_sections/_podcasts.html.twig', { podcasts: podcasts }) }}
+        {% elseif section.type.value == 'category_highlight' and section.category %}
+            {{ include('partials/home_sections/_category_highlight.html.twig', { category: section.category, articles: categoryHighlightArticles[section.id]|default([]), gradientPalette: gradientPalette }) }}
+        {% endif %}
+    {% endfor %}
+
+    {{ include('partials/_video_modal.html.twig') }}
+
+    {{ include('partials/_footer.html.twig') }}
+
+</div>
+{% endblock %}

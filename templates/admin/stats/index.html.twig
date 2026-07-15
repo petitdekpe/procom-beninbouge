@@ -1,0 +1,92 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Statistiques{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Statistiques</h1>
+        <a href="{{ path('admin_stats_articles') }}" class="bo-btn bo-btn-accent">Détail par article →</a>
+    </div>
+    <p class="bo-muted" style="margin:0 0 22px;font-size:14px">Vues, lecteurs uniques, partages et taux de clic sont mesurés en direct depuis le site — les chiffres ne couvrent que les visites survenues depuis la mise en place du suivi.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:26px">
+        <div class="bo-card" style="padding:18px">
+            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Vues totales</div>
+            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ totalViews|format_number }}</div>
+        </div>
+        <div class="bo-card" style="padding:18px">
+            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Lecteurs uniques</div>
+            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ uniqueVisitors|format_number }}</div>
+        </div>
+        <div class="bo-card" style="padding:18px">
+            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Temps de lecture moyen</div>
+            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ avgDuration is not null ? (avgDuration / 60)|round(1) ~ ' min' : '—' }}</div>
+        </div>
+        <div class="bo-card" style="padding:18px">
+            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Partages totaux</div>
+            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ totalShares|format_number }}</div>
+        </div>
+        <div class="bo-card" style="padding:18px">
+            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Commentaires en attente</div>
+            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">
+                <a href="{{ path('admin_comment_index', { status: 'pending' }) }}" style="color:inherit;text-decoration:none">{{ pendingComments|format_number }}</a>
+            </div>
+        </div>
+        <div class="bo-card" style="padding:18px">
+            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Commentaires approuvés</div>
+            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ approvedComments|format_number }}</div>
+        </div>
+    </div>
+
+    <div class="bo-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:26px">
+        <div class="bo-card" style="padding:22px">
+            <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 14px">Sources de trafic</h2>
+            {% if viewsBySource|length > 0 %}
+                <table class="bo-table">
+                    <tbody>
+                        {% for row in viewsBySource %}
+                            <tr><td>{{ row.source ?: '—' }}</td><td class="bo-muted" style="text-align:right">{{ row.count|format_number }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="bo-empty">Aucune vue enregistrée pour le moment.</p>
+            {% endif %}
+        </div>
+        <div class="bo-card" style="padding:22px">
+            <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 14px">Partages par canal</h2>
+            {% if sharesByChannel|length > 0 %}
+                <table class="bo-table">
+                    <tbody>
+                        {% for row in sharesByChannel %}
+                            <tr><td style="text-transform:capitalize">{{ row.channel }}</td><td class="bo-muted" style="text-align:right">{{ row.count|format_number }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="bo-empty">Aucun partage enregistré pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="bo-card">
+        <div style="padding:22px 22px 0">
+            <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 4px">Articles les plus vus</h2>
+        </div>
+        {% if topArticles|length > 0 %}
+            <table class="bo-table">
+                <thead><tr><th>Article</th><th style="text-align:right">Vues</th></tr></thead>
+                <tbody>
+                    {% for row in topArticles %}
+                        <tr>
+                            <td style="font-weight:700"><a href="{{ path('app_article_show', { slug: row.slug }) }}" target="_blank" style="color:inherit">{{ row.title }}</a></td>
+                            <td class="bo-muted" style="text-align:right">{{ row.viewsCount|format_number }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty" style="padding:0 22px 22px">Aucune vue enregistrée pour le moment.</p>
+        {% endif %}
+    </div>
+{% endblock %}

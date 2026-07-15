@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Modifier l'article{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-card" style="padding:28px">
+        {% include 'admin/article/_form.html.twig' with { heading: 'Modifier « ' ~ article.title ~ ' »' } %}
+    </div>
+{% endblock %}

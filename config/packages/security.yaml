@@ -5,7 +5,22 @@ security:
 
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        users_in_memory: { memory: null }
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    # ROLE_EDITOR (journaliste) implies ROLE_READER. ROLE_EDITOR_IN_CHIEF
+    # (rédacteur en chef) and ROLE_PROOFREADER (correcteur) each imply
+    # ROLE_EDITOR, so either can do everything a journalist can, plus their
+    # own workflow queue. ROLE_ADMIN implies both, so it can always reach
+    # every queue and bypass the workflow, exactly as it already does for
+    # the pending-approval gate (see ArticleSaver::applyAuthorshipGate()).
+    role_hierarchy:
+        ROLE_EDITOR: ROLE_READER
+        ROLE_EDITOR_IN_CHIEF: ROLE_EDITOR
+        ROLE_PROOFREADER: ROLE_EDITOR
+        ROLE_ADMIN: [ROLE_EDITOR_IN_CHIEF, ROLE_PROOFREADER]
 
     firewalls:
         dev:
@@ -14,7 +29,9 @@ security:
             security: false
         main:
             lazy: true
-            provider: users_in_memory
+            stateless: true
+            provider: app_user_provider
+            http_basic: ~
 
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall

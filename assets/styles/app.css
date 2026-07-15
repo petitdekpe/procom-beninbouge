@@ -1,3 +1,288 @@
+/*
+ * Styles globaux du projet Bénin Bouge, extraits de
+ * templates/home/index.html.twig. Chargé partout via assets/app.js
+ * (AssetMapper), donc disponible sur toutes les pages qui étendent
+ * base.html.twig — pas seulement la page d'accueil.
+ */
+
+:root {
+    /* Palette de marque */
+    --bb-green: #2B6B43;
+    --bb-green-light: #3A8556;
+    --bb-green-dark: #1C4A2E;
+    --bb-gold: #F7CA46;
+    --bb-red: #CF3732;
+    --bb-red-dark: #8a211d;
+    --bb-navy: #0E3F51;
+    --bb-ink: #14160F;
+    --bb-charcoal: #3a3f33;
+    --bb-bg: #F4F2EA;
+    --bb-bg-alt: #FBF7EC;
+    --bb-muted: #8a8a7c;
+    --bb-border: #e3e0d4;
+    --bb-border-dark: #e6e3d7;
+
+    /* Typographie */
+    --bb-font-display: 'Anton', system-ui, sans-serif;
+    --bb-font-heading: 'Archivo', system-ui, sans-serif;
+    --bb-font-body: 'Manrope', system-ui, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+img {
+    max-width: 100%;
+}
+
+/*
+ * Responsive grid utilities. Layouts across templates are otherwise
+ * inline-styled (grid-template-columns:repeat(N,1fr) directly in the
+ * style attribute), which media queries can't target without
+ * !important — these classes exist purely so the column count can
+ * respond to viewport width. Everything else (gap, colors, spacing)
+ * stays inline as before.
+ */
+.bb-grid-2,
+.bb-grid-3,
+.bb-grid-4 {
+    display: grid;
+}
+
+.bb-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.bb-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.bb-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.bb-footer-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+    .bb-grid-3,
+    .bb-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .bb-grid-2,
+    .bb-grid-3,
+    .bb-grid-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .bb-footer-grid {
+        grid-template-columns: 1fr;
+        gap: 34px !important;
+    }
+}
+
+/*
+ * Sticky sidebar + content split (homepage "Dernières actualités"): the
+ * sidebar's 34% flex-basis and sticky positioning only make sense
+ * side-by-side — below 900px it stacks full-width, non-sticky, instead.
+ */
+@media (max-width: 900px) {
+    .bb-actu-layout {
+        flex-direction: column !important;
+        gap: 30px !important;
+    }
+
+    .bb-actu-sidebar {
+        flex: none !important;
+    }
+
+    .bb-actu-sticky {
+        position: static !important;
+    }
+}
+
 body {
-    background-color: skyblue;
+    background: var(--bb-bg);
+    font-family: var(--bb-font-body);
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: inherit;
+}
+
+::selection {
+    background: var(--bb-gold);
+    color: var(--bb-ink);
+}
+
+/* Cartes (articles, projets) avec zoom léger de leur visuel au survol */
+.bb-card .bb-zoom {
+    transition: transform .5s cubic-bezier(.2, .7, .2, 1);
+}
+
+.bb-card:hover .bb-zoom {
+    transform: scale(1.06);
+}
+
+/* Titres qui passent en vert de marque au survol */
+.bb-h:hover {
+    color: var(--bb-green) !important;
+}
+
+/* Bouton play des cartes vidéo */
+.bb-play {
+    transition: transform .25s ease, background .25s ease;
+}
+
+.bb-vid:hover .bb-play {
+    transform: translate(-50%, -50%) scale(1.12);
+    background: var(--bb-green) !important;
+}
+
+/* Message d'état vide ("Aucun article publié pour le moment.", etc.) */
+.bb-empty {
+    color: var(--bb-muted);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 18px 4px;
+}
+
+/*
+ * Icônes de réseaux sociaux (public/assets/icons/*.svg). Ces fichiers sont
+ * monochromes (#1E293B) sans `fill="currentColor"` : le filtre CSS les
+ * passe en blanc pour qu'elles restent lisibles sur les fonds sombres/
+ * colorés où elles sont utilisées (bandeau utilitaire, footer, grille
+ * réseaux sociaux).
+ */
+.bb-social-icon {
+    display: block;
+    filter: brightness(0) invert(1);
+}
+
+.bb-social-icon-search {
+    display: block;
+    filter: brightness(0);
+}
+
+/* Corps d'article (Article::$content, saisi via l'éditeur riche admin) */
+.bb-article-body {
+    font-size: 16.5px;
+    line-height: 1.8;
+    color: #2c2e24;
+}
+
+.bb-article-body > * + * {
+    margin-top: 20px;
+}
+
+.bb-article-body h2,
+.bb-article-body h3 {
+    font-family: var(--bb-font-heading);
+    font-weight: 800;
+    color: var(--bb-ink);
+    line-height: 1.25;
+    margin-top: 34px;
+}
+
+.bb-article-body h2 {
+    font-size: 24px;
+}
+
+.bb-article-body h3 {
+    font-size: 19px;
+}
+
+.bb-article-body a {
+    color: var(--bb-green);
+    text-decoration: underline;
+}
+
+.bb-article-body img {
+    display: block;
+    max-width: 100%;
+    border-radius: 12px;
+}
+
+.bb-article-body ul,
+.bb-article-body ol {
+    padding-left: 22px;
+}
+
+.bb-article-body li + li {
+    margin-top: 8px;
+}
+
+.bb-article-body blockquote {
+    border-left: 4px solid var(--bb-gold);
+    padding-left: 18px;
+    color: #51544a;
+    font-style: italic;
+}
+
+.bb-article-body strong {
+    color: var(--bb-ink);
+}
+
+/*
+ * Header: collapses into a hamburger menu below 760px — see
+ * assets/controllers/nav_toggle_controller.js and
+ * templates/partials/_header.html.twig.
+ */
+.bb-menu-toggle {
+    display: none;
+}
+
+@media (max-width: 760px) {
+    .bb-utility-social {
+        display: none;
+    }
+
+    .bb-menu-toggle {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 10px;
+        background: var(--bb-bg);
+        cursor: pointer;
+        margin-left: auto;
+    }
+
+    .bb-header-nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 4px !important;
+        background: #fff;
+        padding: 10px 24px 20px;
+        border-bottom: 1px solid var(--bb-border-dark);
+        box-shadow: 0 16px 30px -20px rgba(20, 22, 15, .4);
+    }
+
+    .bb-header-nav.bb-nav-open {
+        display: flex;
+    }
+
+    .bb-header-nav a {
+        width: 100%;
+        padding: 10px 0;
+    }
 }

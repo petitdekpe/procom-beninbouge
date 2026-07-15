@@ -1,0 +1,30 @@
+{#
+    Meta description, canonical URL, Open Graph and Twitter Card tags —
+    shared by every public page so they don't each hand-roll their own
+    subset. Article structured data (JSON-LD) is NOT handled here, since
+    its shape is very content-specific (see Article::getStructuredData());
+    pass it separately via structuredData if the page has one.
+
+    Expects:
+      ogTitle        (string, required)   — usually the same text as the page's <title>
+      canonicalUrl    (string, required)   — absolute URL, e.g. via url('route_name', {...})
+      metaDescription (string|null)        — omitted entirely if not given
+      ogType          (string, default 'website') — 'article' for article pages
+      ogImage         (string|null)        — falls back to the site logo when not given
+      structuredData  (array|null)         — rendered as a single JSON-LD <script> block if given
+#}
+{% set seoSettings = site_settings() %}
+{% set seoImage = (ogImage ?? null) ?: seoSettings.logoUrl %}
+{% set metaDescription = metaDescription ?? null %}
+{% if metaDescription %}<meta name="description" content="{{ metaDescription }}">{% endif %}
+<link rel="canonical" href="{{ canonicalUrl }}">
+<meta property="og:type" content="{{ ogType|default('website') }}">
+<meta property="og:title" content="{{ ogTitle }}">
+{% if metaDescription %}<meta property="og:description" content="{{ metaDescription }}">{% endif %}
+{% if seoImage %}<meta property="og:image" content="{{ seoImage starts with 'http' ? seoImage : absolute_url(seoImage) }}">{% endif %}
+<meta property="og:url" content="{{ canonicalUrl }}">
+<meta name="twitter:card" content="{{ seoImage ? 'summary_large_image' : 'summary' }}">
+<meta name="twitter:title" content="{{ ogTitle }}">
+{% if metaDescription %}<meta name="twitter:description" content="{{ metaDescription }}">{% endif %}
+{% if seoImage %}<meta name="twitter:image" content="{{ seoImage starts with 'http' ? seoImage : absolute_url(seoImage) }}">{% endif %}
+{% if structuredData is defined and structuredData %}<script type="application/ld+json">{{ structuredData|json_encode|raw }}</script>{% endif %}

@@ -1,0 +1,44 @@
+{{ form_start(form, { attr: { class: 'bo-wizard' } }) }}
+    <div class="bo-wizard-head">
+        <div>
+            <p class="bo-wizard-title">{{ heading }}</p>
+            <div class="bo-stepper">
+                <button type="button" class="bo-stepper-tab">Contenu</button>
+                <span class="bo-stepper-sep">›</span>
+                <button type="button" class="bo-stepper-tab">SEO &amp; publication</button>
+                <span class="bo-stepper-sep">›</span>
+                <button type="button" class="bo-stepper-tab">Vérifier</button>
+            </div>
+        </div>
+        <a href="{{ path('admin_page_index') }}" class="bo-wizard-close" title="Fermer">✕</a>
+    </div>
+
+    <div class="bo-step">
+        <div class="bo-form-row">{{ form_row(form.title) }}</div>
+        <div class="bo-form-row">{{ form_row(form.slug) }}</div>
+        <div class="bo-form-row">{{ form_row(form.content) }}</div>
+    </div>
+
+    <div class="bo-step">
+        <div class="bo-form-row">{{ form_row(form.metaTitle) }}</div>
+        <div class="bo-form-row">{{ form_row(form.metaDescription) }}</div>
+        <div class="bo-form-row">{{ form_row(form.published) }}</div>
+        <div class="bo-form-row">{{ form_row(form.position) }}</div>
+    </div>
+
+    <div class="bo-step">
+        <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 4px">Récapitulatif</h2>
+        <div data-review></div>
+    </div>
+
+    {{ form_rest(form) }}
+
+    <div class="bo-wizard-footer">
+        <button type="button" class="bo-btn bo-btn-muted" data-step-prev>← Précédent</button>
+        <div style="display:flex;gap:10px">
+            <a href="{{ path('admin_page_index') }}" class="bo-btn bo-btn-muted">Annuler</a>
+            <button type="button" class="bo-btn bo-btn-black" data-step-next>Suivant</button>
+            <button type="submit" class="bo-btn bo-btn-accent" data-step-submit>Enregistrer</button>
+        </div>
+    </div>
+{{ form_end(form) }}

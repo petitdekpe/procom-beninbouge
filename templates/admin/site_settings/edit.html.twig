@@ -1,0 +1,89 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Paramètres généraux{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Paramètres généraux</h1>
+    </div>
+
+    <div class="bo-card" style="padding:28px">
+        {{ form_start(form, { attr: { class: 'bo-wizard' } }) }}
+            <div class="bo-wizard-head">
+                <div>
+                    <p class="bo-wizard-title">Paramètres du site</p>
+                    <div class="bo-stepper">
+                        <button type="button" class="bo-stepper-tab">Identité</button>
+                        <span class="bo-stepper-sep">›</span>
+                        <button type="button" class="bo-stepper-tab">Contenu public</button>
+                        <span class="bo-stepper-sep">›</span>
+                        <button type="button" class="bo-stepper-tab">Emails &amp; maintenance</button>
+                        <span class="bo-stepper-sep">›</span>
+                        <button type="button" class="bo-stepper-tab">Vérifier</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bo-step">
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 4px">Nom du site</h2>
+                <div class="bo-form-row">{{ form_row(form.siteName) }}</div>
+
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:20px 0 4px">Logo</h2>
+                {% if settings.logoUrl %}<img src="{{ settings.logoUrl }}" alt="" style="height:28px;margin-bottom:10px;background:#f0f0f1;padding:6px 10px;border-radius:6px">{% endif %}
+                <div class="bo-form-row">{{ form_row(form.logoUrl) }}</div>
+                <div class="bo-form-row">{{ form_row(form.logoFile) }}</div>
+                {% if settings.logoFooterUrl %}<img src="{{ settings.logoFooterUrl }}" alt="" style="height:28px;margin-bottom:10px;background:#0E3F51;padding:6px 10px;border-radius:6px">{% endif %}
+                <div class="bo-form-row">{{ form_row(form.logoFooterUrl) }}</div>
+                <div class="bo-form-row">{{ form_row(form.logoFooterFile) }}</div>
+
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:20px 0 4px">Favicon</h2>
+                {% if settings.faviconUrl %}<img src="{{ settings.faviconUrl }}" alt="" style="height:24px;width:24px;margin-bottom:10px;background:#f0f0f1;padding:4px;border-radius:6px">{% endif %}
+                <div class="bo-form-row">{{ form_row(form.faviconUrl) }}</div>
+                <div class="bo-form-row">{{ form_row(form.faviconFile) }}</div>
+            </div>
+
+            <div class="bo-step">
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 4px">Pied de page</h2>
+                <div class="bo-form-row">{{ form_row(form.footerTagline) }}</div>
+
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:20px 0 4px">Contacts</h2>
+                <div class="bo-form-row">{{ form_row(form.contactAddress) }}</div>
+                <div class="bo-form-row">{{ form_row(form.contactPhone) }}</div>
+                <div class="bo-form-row">{{ form_row(form.contactEmail) }}</div>
+
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:20px 0 4px">Réseaux sociaux</h2>
+                <p class="bo-muted" style="font-size:12.5px;margin:0 0 12px">Laisser un champ vide masque l'icône correspondante sur le site.</p>
+                <div class="bo-form-row">{{ form_row(form.facebookUrl) }}</div>
+                <div class="bo-form-row">{{ form_row(form.twitterUrl) }}</div>
+                <div class="bo-form-row">{{ form_row(form.instagramUrl) }}</div>
+                <div class="bo-form-row">{{ form_row(form.youtubeUrl) }}</div>
+                <div class="bo-form-row">{{ form_row(form.whatsappUrl) }}</div>
+            </div>
+
+            <div class="bo-step">
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 4px">Emails</h2>
+                <div class="bo-form-row">{{ form_row(form.emailFromName) }}</div>
+                <div class="bo-form-row">{{ form_row(form.emailFromAddress) }}</div>
+
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:20px 0 4px">Maintenance</h2>
+                <div class="bo-form-row">{{ form_row(form.maintenanceMode) }}</div>
+                <div class="bo-form-row">{{ form_row(form.maintenanceMessage) }}</div>
+            </div>
+
+            <div class="bo-step">
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 4px">Récapitulatif</h2>
+                <div data-review></div>
+            </div>
+
+            {{ form_rest(form) }}
+
+            <div class="bo-wizard-footer">
+                <button type="button" class="bo-btn bo-btn-muted" data-step-prev>← Précédent</button>
+                <div style="display:flex;gap:10px">
+                    <button type="button" class="bo-btn bo-btn-black" data-step-next>Suivant</button>
+                    <button type="submit" class="bo-btn bo-btn-accent" data-step-submit>Enregistrer</button>
+                </div>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Corbeille{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">🗑 Corbeille</h1>
+        <a href="{{ path('admin_article_index') }}" class="bo-btn bo-btn-muted">← Retour aux articles</a>
+    </div>
+
+    <div class="bo-card">
+        {% if articles|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr><th>Titre</th><th>Catégorie</th><th>Auteur</th><th>Supprimé le</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for article in articles %}
+                        <tr>
+                            <td>
+                                <div class="bo-row-title">
+                                    {% if article.coverImage %}
+                                        <img class="bo-thumb" src="{{ article.coverImage }}" alt="">
+                                    {% else %}
+                                        <span class="bo-thumb-fallback">{{ article.title|slice(0, 1)|upper }}</span>
+                                    {% endif %}
+                                    {{ article.title }}
+                                </div>
+                            </td>
+                            <td class="bo-muted">{{ article.category ? article.category.name : '—' }}</td>
+                            <td class="bo-muted">{{ article.author ? article.author.firstName ~ ' ' ~ article.author.lastName : '—' }}</td>
+                            <td class="bo-muted">{{ article.deletedAt ? article.deletedAt|date('d/m/Y à H:i') : '—' }}</td>
+                            <td style="text-align:right;white-space:nowrap">
+                                <form method="post" action="{{ path('admin_article_restore', { id: article.id }) }}" style="display:inline">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-muted">↩ Restaurer</button>
+                                </form>
+                                <form method="post" action="{{ path('admin_article_force_delete', { id: article.id }) }}" style="display:inline" onsubmit="return confirm('Supprimer définitivement cet article ? Cette action est irréversible.');">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-danger">Supprimer définitivement</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">La corbeille est vide.</p>
+        {% endif %}
+    </div>
+{% endblock %}

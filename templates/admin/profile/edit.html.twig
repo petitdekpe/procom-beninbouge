@@ -1,0 +1,32 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Mon profil{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Mon profil</h1>
+    </div>
+    <p class="bo-muted" style="margin:0 0 22px;font-size:14px">C'est le nom qui apparaît sur les articles que vous publiez sous votre propre identité. Toute modification doit être validée par un administrateur avant de prendre effet.</p>
+
+    {% if author.hasPendingChanges %}
+        <div class="bo-flash" style="background:#fff7e0;color:#7a5b00">
+            <p style="margin:0 0 8px">Une demande de modification est en attente de validation :</p>
+            <div class="bo-review-row" style="border-bottom:none"><span>Prénom</span><strong>{{ author.pendingFirstName ?? author.firstName }}</strong></div>
+            <div class="bo-review-row" style="border-bottom:none"><span>Nom</span><strong>{{ author.pendingLastName ?? author.lastName }}</strong></div>
+            <div class="bo-review-row" style="border-bottom:none"><span>E-mail</span><strong>{{ author.pendingEmail ?? author.email }}</strong></div>
+            <form method="post" action="{{ path('admin_profile_cancel_request') }}" style="margin-top:10px" onsubmit="return confirm('Annuler cette demande de modification ?');">
+                <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                <button type="submit" class="bo-btn bo-btn-muted">Annuler la demande</button>
+            </form>
+        </div>
+    {% endif %}
+
+    <div class="bo-card" style="padding:28px;max-width:560px">
+        {{ form_start(form) }}
+            <div class="bo-form-row">{{ form_row(form.firstName) }}</div>
+            <div class="bo-form-row">{{ form_row(form.lastName) }}</div>
+            <div class="bo-form-row">{{ form_row(form.email) }}</div>
+            <button type="submit" class="bo-btn bo-btn-accent">Envoyer la demande</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

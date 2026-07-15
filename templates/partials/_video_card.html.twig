@@ -1,0 +1,13 @@
+{# Attend les variables : media (App\Entity\Media), gradient (dégradé de secours si pas de miniature). #}
+<a href="{{ media.youtubeEmbedUrl ?: '#' }}"
+   data-action="video-modal#open"
+   data-video-modal-url-param="{{ media.youtubeEmbedUrl }}"
+   class="bb-card bb-vid" style="text-decoration:none;display:block">
+    <div style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/9">
+        <div class="bb-zoom" style="position:absolute;inset:0;{% if media.effectiveThumbnail %}background:url('{{ media.effectiveThumbnail }}') center/cover{% else %}background:{{ gradient }}{% endif %}"></div>
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(7,10,6,.45),transparent 55%)"></div>
+        <div class="bb-play" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:rgba(207,55,50,.92);display:grid;place-items:center;color:#fff;font-size:18px">▶</div>
+    </div>
+    <h3 class="bb-h" style="font-family:'Archivo';font-weight:800;font-size:16px;line-height:1.25;color:#14160F;margin-top:14px">{{ media.title ?: (media.article ? media.article.title : 'Vidéo Bénin Bouge') }}</h3>
+    <div style="color:#8a8a7c;font-size:12px;font-weight:600;margin-top:8px">{% if media.article and media.article.category %}{{ media.article.category.name }} · {% endif %}{{ media.createdAt|time_ago }}</div>
+</a>

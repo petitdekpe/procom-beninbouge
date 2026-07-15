@@ -1,0 +1,33 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Tableau de bord{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Tableau de bord</h1>
+    </div>
+    <p class="bo-muted" style="margin:0 0 22px;font-size:14px">Gérez ici le contenu qui alimente la page d'accueil : articles, catégories, auteurs, projets et médias vidéo.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px">
+        <a href="{{ path('admin_article_index') }}" class="bo-card" style="text-decoration:none;color:inherit;padding:18px;display:block">
+            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Articles</div>
+            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ counts.articles }}</div>
+        </a>
+        <a href="{{ path('admin_category_index') }}" class="bo-card" style="text-decoration:none;color:inherit;padding:18px;display:block">
+            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Catégories</div>
+            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ counts.categories }}</div>
+        </a>
+        <a href="{{ path('admin_author_index') }}" class="bo-card" style="text-decoration:none;color:inherit;padding:18px;display:block">
+            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Auteurs</div>
+            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ counts.authors }}</div>
+        </a>
+        <a href="{{ path('admin_project_index') }}" class="bo-card" style="text-decoration:none;color:inherit;padding:18px;display:block">
+            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Projets</div>
+            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ counts.projects }}</div>
+        </a>
+        <a href="{{ path('admin_media_index') }}" class="bo-card" style="text-decoration:none;color:inherit;padding:18px;display:block">
+            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Médias</div>
+            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ counts.media }}</div>
+        </a>
+    </div>
+{% endblock %}

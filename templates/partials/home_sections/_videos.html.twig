@@ -1,0 +1,21 @@
+{# Attend : videos (list<Media>), gradientPalette (list<string>). #}
+<section id="video" style="max-width:1240px;margin:64px auto 0;padding:0 24px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:30px">
+        <div>
+            <span style="display:inline-block;background:#CF3732;color:#fff;font-weight:800;font-size:11.5px;letter-spacing:.5px;padding:7px 16px;border-radius:999px;text-transform:uppercase">Vidéos</span>
+            <h2 style="font-family:'Archivo';font-weight:900;font-size:32px;color:#14160F;margin-top:16px;letter-spacing:-.4px">Le Bénin <em style="font-style:italic;color:#2B6B43">en images</em></h2>
+            <p style="color:#51544a;font-size:14.5px;line-height:1.7;margin-top:12px;max-width:460px">Reportages, interviews et formats courts filmés sur le terrain, pour voir le Bénin qui bouge autrement.</p>
+        </div>
+        <a href="{{ path('app_videos') }}" style="text-decoration:none;color:#2B6B43;font-weight:800;font-size:13px;white-space:nowrap">Toutes les vidéos →</a>
+    </div>
+
+    {% if videos|length > 0 %}
+    <div class="bb-grid-3" style="gap:20px">
+        {% for media in videos %}
+            {{ include('partials/_video_card.html.twig', { media: media, gradient: gradientPalette[loop.index0 % 4] }) }}
+        {% endfor %}
+    </div>
+    {% else %}
+        <p class="bb-empty">Aucune vidéo publiée pour le moment.</p>
+    {% endif %}
+</section>

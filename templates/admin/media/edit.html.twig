@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Modifier le média{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-card" style="padding:28px">
+        {% include 'admin/media/_form.html.twig' with { heading: 'Modifier « ' ~ (media_item.title ?: ('#' ~ media_item.id)) ~ ' »' } %}
+    </div>
+{% endblock %}

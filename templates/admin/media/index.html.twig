@@ -1,0 +1,65 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Médias{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Médias</h1>
+        <a href="{{ path('admin_media_new') }}" class="bo-btn bo-btn-accent">+ Nouveau média</a>
+    </div>
+
+    <div data-list-root>
+        <div class="bo-toolbar">
+            <div class="bo-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.8-3.8"/></svg>
+                <input type="text" data-list-search placeholder="Rechercher des médias">
+            </div>
+            <div class="bo-filters">
+                <button type="button" class="bo-pill active" data-filter="all">Tous</button>
+                <button type="button" class="bo-pill" data-filter="image">Image</button>
+                <button type="button" class="bo-pill" data-filter="video">Vidéo</button>
+                <button type="button" class="bo-pill" data-filter="audio">Podcast</button>
+                <button type="button" class="bo-pill" data-filter="pdf">PDF</button>
+                <button type="button" class="bo-pill" data-filter="infographic">Infographie</button>
+            </div>
+        </div>
+
+        <div class="bo-card">
+            {% if media|length > 0 %}
+                <table class="bo-table">
+                    <thead>
+                        <tr><th>Type</th><th>Titre</th><th>Auteur</th><th>Catégorie</th><th>Licence</th><th>Article</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for item in media %}
+                            {% set searchTerms = [item.title, item.article ? item.article.title : '', item.categories|map(c => c.name)|join(' '), item.author ? item.author.firstName ~ ' ' ~ item.author.lastName : ''] %}
+                            <tr data-search="{{ searchTerms|join(' ')|lower }}" data-filter="{{ item.type.value }}">
+                                <td><span class="bo-format-badge">{{ item.type.value }}</span></td>
+                                <td style="font-weight:700">{{ item.title ?: '—' }}</td>
+                                <td class="bo-muted">{{ item.author ? item.author.firstName ~ ' ' ~ item.author.lastName : '—' }}</td>
+                                <td>
+                                    {% for cat in item.categories %}
+                                        <span style="display:inline-block;background:{{ cat.color }};color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;margin:0 3px 3px 0">{{ cat.name }}</span>
+                                    {% else %}
+                                        <span class="bo-muted">—</span>
+                                    {% endfor %}
+                                </td>
+                                <td class="bo-muted">{{ item.license ? item.license|media_license_label : '—' }}</td>
+                                <td class="bo-muted">{{ item.article ? item.article.title : '—' }}</td>
+                                <td style="text-align:right;white-space:nowrap">
+                                    <a href="{{ path('admin_media_edit', { id: item.id }) }}" class="bo-btn bo-btn-muted">Modifier</a>
+                                    <form method="post" action="{{ path('admin_media_delete', { id: item.id }) }}" style="display:inline" onsubmit="return confirm('Supprimer ce média ?');">
+                                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                        <button type="submit" class="bo-btn bo-btn-danger">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="bo-empty">Aucun média pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

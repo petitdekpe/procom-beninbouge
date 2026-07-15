@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Nouveau dossier{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-card" style="padding:28px">
+        {% include 'admin/dossier/_form.html.twig' with { heading: 'Créer un dossier' } %}
+    </div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Modifier le dossier{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-card" style="padding:28px">
+        {% include 'admin/dossier/_form.html.twig' with { heading: 'Modifier « ' ~ dossier.title ~ ' »' } %}
+    </div>
+{% endblock %}

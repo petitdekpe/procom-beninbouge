@@ -1,0 +1,99 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Articles{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Articles</h1>
+        <div style="display:flex;gap:10px">
+            <a href="{{ path('admin_article_trash') }}" class="bo-btn bo-btn-muted">🗑 Corbeille{% if trashedCount > 0 %} ({{ trashedCount }}){% endif %}</a>
+            <a href="{{ path('admin_article_new') }}" class="bo-btn bo-btn-accent">+ Nouvel article</a>
+        </div>
+    </div>
+
+    <div data-list-root>
+        <div class="bo-toolbar">
+            <div class="bo-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.8-3.8"/></svg>
+                <input type="text" data-list-search placeholder="Rechercher des titres d'articles">
+            </div>
+            <div class="bo-filters">
+                <button type="button" class="bo-pill active" data-filter="all">Tous</button>
+                <button type="button" class="bo-pill" data-filter="draft">Brouillons</button>
+                <button type="button" class="bo-pill" data-filter="in_review">En relecture</button>
+                <button type="button" class="bo-pill" data-filter="in_correction">En correction</button>
+                <button type="button" class="bo-pill" data-filter="scheduled">Programmé</button>
+                <button type="button" class="bo-pill" data-filter="published">Publié</button>
+                <button type="button" class="bo-pill" data-filter="archived">Archivé</button>
+                <button type="button" class="bo-pill" data-filter="pending_approval">À valider</button>
+            </div>
+        </div>
+
+        <div class="bo-card">
+            {% if articles|length > 0 %}
+                <table class="bo-table">
+                    <thead>
+                        <tr><th>Titre</th><th>Catégorie</th><th>Auteur</th><th>Statut</th><th>Mis en avant</th><th>Publié</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for article in articles %}
+                            <tr data-search="{{ (article.title ~ ' ' ~ (article.category ? article.category.name : ''))|lower }}" data-filter="{{ article.status.value }}{{ article.pendingApproval ? ' pending_approval' : '' }}">
+                                <td>
+                                    <div class="bo-row-title">
+                                        {% if article.coverImage %}
+                                            <img class="bo-thumb" src="{{ article.coverImage }}" alt="">
+                                        {% else %}
+                                            <span class="bo-thumb-fallback">{{ article.title|slice(0, 1)|upper }}</span>
+                                        {% endif %}
+                                        {{ article.title }}
+                                    </div>
+                                </td>
+                                <td class="bo-muted">{{ article.category ? article.category.name : '—' }}</td>
+                                <td class="bo-muted">{{ article.author ? article.author.firstName ~ ' ' ~ article.author.lastName : '—' }}</td>
+                                <td>
+                                    {% if article.pendingApproval %}
+                                        <span class="bo-status"><span class="dot" style="background:var(--sp-amber)"></span>À valider</span>
+                                    {% else %}
+                                        {% set statusLabels = {
+                                            'draft': 'Brouillon',
+                                            'in_review': 'En relecture',
+                                            'in_correction': 'En correction',
+                                            'scheduled': 'Programmé',
+                                            'published': 'Publié',
+                                            'archived': 'Archivé',
+                                        } %}
+                                        {% set statusDots = {
+                                            'draft': 'var(--sp-gray-dot)',
+                                            'in_review': 'var(--sp-amber)',
+                                            'in_correction': 'var(--sp-amber)',
+                                            'scheduled': 'var(--sp-amber)',
+                                            'published': 'var(--sp-green)',
+                                            'archived': 'var(--sp-gray-dot)',
+                                        } %}
+                                        <span class="bo-status"><span class="dot" style="background:{{ statusDots[article.status.value] }}"></span>{{ statusLabels[article.status.value] }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if article.featured %}<span title="Mis en avant">⭐</span>{% endif %}
+                                    {% if article.pinned %}<span title="Épinglé">📌</span>{% endif %}
+                                </td>
+                                <td class="bo-muted">{{ article.publishedAt ? article.publishedAt|date('d/m/Y') : '—' }}</td>
+                                <td style="text-align:right;white-space:nowrap">
+                                    <a href="{{ path('app_article_show', { slug: article.slug }) }}" target="_blank" rel="noopener" class="bo-btn bo-btn-muted">Aperçu</a>
+                                    <a href="{{ path('admin_article_history', { id: article.id }) }}" class="bo-btn bo-btn-muted">Historique</a>
+                                    <a href="{{ path('admin_article_edit', { id: article.id }) }}" class="bo-btn bo-btn-muted">Modifier</a>
+                                    <form method="post" action="{{ path('admin_article_delete', { id: article.id }) }}" style="display:inline" onsubmit="return confirm('Déplacer cet article dans la corbeille ?');">
+                                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                        <button type="submit" class="bo-btn bo-btn-danger">🗑 Corbeille</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="bo-empty">Aucun article pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

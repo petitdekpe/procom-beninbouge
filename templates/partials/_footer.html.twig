@@ -1,0 +1,59 @@
+{# ===== FOOTER ===== #}
+{% set settings = site_settings() %}
+<footer style="background:#0E3F51;color:#cfd2c8;margin-top:46px">
+    <div class="bb-footer-grid" style="max-width:1240px;margin:0 auto;padding:44px 24px 30px;gap:34px">
+        <div>
+            {% if settings.logoFooterUrl %}
+                <img src="{{ settings.logoFooterUrl }}" alt="{{ settings.siteName }}" style="height:30px;width:auto;display:block">
+            {% else %}
+                <span style="font-family:'Archivo';font-weight:900;font-size:18px;color:#fff">{{ settings.siteName }}</span>
+            {% endif %}
+            {% if settings.footerTagline %}<p style="font-size:13.5px;line-height:1.6;margin-top:16px;max-width:300px;color:#9a9d90">{{ settings.footerTagline }}</p>{% endif %}
+            {% if settings.facebookUrl or settings.twitterUrl or settings.instagramUrl or settings.youtubeUrl or settings.whatsappUrl %}
+                <div style="display:flex;gap:10px;margin-top:18px">
+                    {% if settings.facebookUrl %}<a href="{{ settings.facebookUrl }}" target="_blank" rel="noopener" style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.08);display:grid;place-items:center;text-decoration:none"><img src="{{ asset('assets/icons/logo-facebook.svg') }}" alt="Facebook" class="bb-social-icon" style="width:16px;height:16px"></a>{% endif %}
+                    {% if settings.twitterUrl %}<a href="{{ settings.twitterUrl }}" target="_blank" rel="noopener" style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.08);display:grid;place-items:center;text-decoration:none"><img src="{{ asset('assets/icons/logo-twitter.svg') }}" alt="X / Twitter" class="bb-social-icon" style="width:15px;height:15px"></a>{% endif %}
+                    {% if settings.instagramUrl %}<a href="{{ settings.instagramUrl }}" target="_blank" rel="noopener" style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.08);display:grid;place-items:center;text-decoration:none"><img src="{{ asset('assets/icons/logo-instagram.svg') }}" alt="Instagram" class="bb-social-icon" style="width:16px;height:16px"></a>{% endif %}
+                    {% if settings.youtubeUrl %}<a href="{{ settings.youtubeUrl }}" target="_blank" rel="noopener" style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.08);display:grid;place-items:center;text-decoration:none"><img src="{{ asset('assets/icons/logo-youtube.svg') }}" alt="YouTube" class="bb-social-icon" style="width:16px;height:16px"></a>{% endif %}
+                    {% if settings.whatsappUrl %}<a href="{{ settings.whatsappUrl }}" target="_blank" rel="noopener" style="width:34px;height:34px;border-radius:9px;background:rgba(248,198,28,.92);display:grid;place-items:center;text-decoration:none"><img src="{{ asset('assets/icons/logo-whatsapp.svg') }}" alt="WhatsApp" style="width:16px;height:16px;display:block"></a>{% endif %}
+                </div>
+            {% endif %}
+        </div>
+        <div>
+            <div style="font-family:'Archivo';font-weight:800;color:#fff;font-size:13px;letter-spacing:.4px;margin-bottom:14px">Rubriques</div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px">
+                <a href="{{ path('app_home') }}" style="text-decoration:none;color:#9a9d90">Accueil</a>
+                <a href="{{ path('app_home') }}#actu" style="text-decoration:none;color:#9a9d90">Actualité</a>
+                <a href="{{ path('app_dossier_index') }}" style="text-decoration:none;color:#9a9d90">Dossiers</a>
+                <a href="{{ path('app_videos') }}" style="text-decoration:none;color:#9a9d90">Vidéos</a>
+            </div>
+        </div>
+        {% set footerPages = static_pages() %}
+        {% if footerPages|length > 0 %}
+        <div>
+            <div style="font-family:'Archivo';font-weight:800;color:#fff;font-size:13px;letter-spacing:.4px;margin-bottom:14px">Bénin Bouge</div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px">
+                {% for page in footerPages %}
+                    <a href="{{ path('app_page_show', { slug: page.slug }) }}" style="text-decoration:none;color:#9a9d90">{{ page.title }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,.08)">
+        <div style="max-width:1240px;margin:0 auto;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:12px;color:#6f7268;flex-wrap:wrap">
+            <span>© {{ "now"|date("Y") }} {{ settings.siteName }} · Tous droits réservés</span>
+            {% if settings.contactAddress or settings.contactEmail or settings.contactPhone %}
+                <span>
+                    {{- settings.contactAddress -}}
+                    {%- if settings.contactAddress and (settings.contactEmail or settings.contactPhone) %} · {% endif -%}
+                    {%- if settings.contactEmail -%}
+                        <a href="mailto:{{ settings.contactEmail }}" style="color:#6f7268;text-decoration:none">{{ settings.contactEmail }}</a>
+                    {%- endif -%}
+                    {%- if settings.contactEmail and settings.contactPhone %} · {% endif -%}
+                    {{- settings.contactPhone -}}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+</footer>

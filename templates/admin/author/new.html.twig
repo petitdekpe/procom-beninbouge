@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Nouvel auteur{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-card" style="padding:28px">
+        {% include 'admin/author/_form.html.twig' with { heading: 'Créer un auteur' } %}
+    </div>
+{% endblock %}

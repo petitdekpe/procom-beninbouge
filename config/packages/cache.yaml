@@ -14,6 +14,11 @@ framework:
         # APCu (not recommended with heavy random-write workloads as memory fragmentation can cause perf issues)
         #app: cache.adapter.apcu
 
-        # Namespaced pools use the above "app" backend by default
-        #pools:
-            #my.dedicated.cache: null
+        # Dedicated Redis-backed pool used to cache the Article/Category
+        # listing queries (see App\State\CachedArticleCollectionProvider
+        # and App\State\CachedCategoryCollectionProvider).
+        pools:
+            cache.listings:
+                adapter: cache.adapter.redis
+                provider: '%env(REDIS_URL)%'
+                default_lifetime: 60

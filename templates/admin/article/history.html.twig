@@ -1,0 +1,52 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Historique — {{ article.title }}{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Historique des modifications</h1>
+        <a href="{{ path('admin_article_edit', { id: article.id }) }}" class="bo-btn bo-btn-muted">← Retour à l'article</a>
+    </div>
+
+    <p class="bo-muted" style="margin-bottom:18px">« {{ article.title }} » — {{ revisions|length }} version{{ revisions|length > 1 ? 's' : '' }} enregistrée{{ revisions|length > 1 ? 's' : '' }}.</p>
+
+    <div class="bo-card">
+        {% if revisions|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr><th>Date</th><th>Éditeur·rice</th><th>Titre</th><th>Statut</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for revision in revisions %}
+                        <tr>
+                            <td class="bo-muted">{{ revision.createdAt|date('d/m/Y à H:i') }}{% if loop.first %} <span class="bo-status" style="margin-left:6px"><span class="dot" style="background:var(--sp-green)"></span>Actuelle</span>{% endif %}</td>
+                            <td class="bo-muted">{{ revision.editedBy ? revision.editedBy.displayName : 'Système' }}</td>
+                            <td style="font-weight:700">
+                                {{ revision.title }}
+                                <details style="margin-top:6px">
+                                    <summary class="bo-muted" style="cursor:pointer;font-weight:600;font-size:12.5px">Voir le contenu de cette version</summary>
+                                    <div class="bb-article-body" style="margin-top:10px;font-size:13.5px;max-width:520px">{{ revision.content|raw }}</div>
+                                </details>
+                            </td>
+                            <td>
+                                {% set dot = revision.status.value == 'published' ? 'var(--sp-green)' : (revision.status.value == 'scheduled' ? 'var(--sp-amber)' : 'var(--sp-gray-dot)') %}
+                                {% set label = revision.status.value == 'published' ? 'Publié' : (revision.status.value == 'scheduled' ? 'Programmé' : 'Ébauche') %}
+                                <span class="bo-status"><span class="dot" style="background:{{ dot }}"></span>{{ label }}</span>
+                            </td>
+                            <td style="text-align:right;white-space:nowrap">
+                                {% if not loop.first %}
+                                    <form method="post" action="{{ path('admin_article_restore_revision', { id: article.id, revisionId: revision.id }) }}" style="display:inline" onsubmit="return confirm('Restaurer le titre, le chapô et le contenu de cette version ? Le statut de publication actuel sera conservé.');">
+                                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                        <button type="submit" class="bo-btn bo-btn-muted">↩ Restaurer</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">Aucune version enregistrée pour le moment.</p>
+        {% endif %}
+    </div>
+{% endblock %}

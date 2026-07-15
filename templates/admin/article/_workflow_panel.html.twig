@@ -1,0 +1,70 @@
+{# Panneau de statut du workflow éditorial (Création → Relecture → Correction → Publication).
+   Attend la variable `article`. #}
+{% set statusLabels = {
+    'draft': 'Brouillon',
+    'in_review': 'En relecture',
+    'in_correction': 'En correction',
+    'scheduled': 'Programmé',
+    'published': 'Publié',
+    'archived': 'Archivé',
+} %}
+{% set statusColors = {
+    'draft': 'var(--sp-gray-dot)',
+    'in_review': 'var(--sp-amber)',
+    'in_correction': 'var(--sp-amber)',
+    'scheduled': 'var(--sp-amber)',
+    'published': 'var(--sp-green)',
+    'archived': 'var(--sp-gray-dot)',
+} %}
+
+<div class="bo-flash" style="background:#f4f4f2;color:#14160F;margin-bottom:18px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+            <span class="bo-status"><span class="dot" style="background:{{ statusColors[article.status.value] }}"></span>{{ statusLabels[article.status.value] }}</span>
+            {% if article.status.value == 'scheduled' and article.publishedAt %}
+                <span class="bo-muted" style="margin-left:8px;font-size:12.5px">Publication le {{ article.publishedAt|date('d/m/Y à H:i') }}</span>
+            {% endif %}
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            {% if article.status.value == 'draft' %}
+                <form method="post" action="{{ path('admin_article_submit_for_review', { id: article.id }) }}">
+                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                    <button type="submit" class="bo-btn bo-btn-accent">Soumettre pour relecture →</button>
+                </form>
+            {% elseif article.status.value == 'in_review' %}
+                <span class="bo-muted" style="font-size:13px">En attente de relecture par le rédacteur en chef.</span>
+                {% if is_granted('ROLE_EDITOR_IN_CHIEF') %}
+                    <a href="{{ path('admin_workflow_review') }}" class="bo-btn bo-btn-muted">Aller à la file de relecture</a>
+                {% endif %}
+            {% elseif article.status.value == 'in_correction' %}
+                <span class="bo-muted" style="font-size:13px">En cours de correction.</span>
+                {% if is_granted('ROLE_PROOFREADER') %}
+                    <a href="{{ path('admin_workflow_correction') }}" class="bo-btn bo-btn-muted">Aller à la file de correction</a>
+                {% endif %}
+            {% elseif article.status.value in ['published', 'scheduled'] and is_granted('ROLE_EDITOR_IN_CHIEF') %}
+                <form method="post" action="{{ path('admin_article_unpublish', { id: article.id }) }}" onsubmit="return confirm('Dépublier cet article ? Il repassera en brouillon.');">
+                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                    <button type="submit" class="bo-btn bo-btn-muted">Dépublier</button>
+                </form>
+                {% if article.status.value == 'published' %}
+                    <form method="post" action="{{ path('admin_article_archive', { id: article.id }) }}" onsubmit="return confirm('Archiver cet article ? Il sera retiré du site public mais conservé dans l\'admin.');">
+                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                        <button type="submit" class="bo-btn bo-btn-muted">Archiver</button>
+                    </form>
+                {% endif %}
+            {% elseif article.status.value == 'archived' and is_granted('ROLE_EDITOR_IN_CHIEF') %}
+                <form method="post" action="{{ path('admin_article_unarchive', { id: article.id }) }}">
+                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                    <button type="submit" class="bo-btn bo-btn-accent">Désarchiver</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if article.rejectionReason %}
+        <div style="margin-top:12px;padding:10px 12px;background:#fdeceb;border-radius:8px;color:#7a1f1a;font-size:13px">
+            <strong>Motif du dernier refus :</strong> {{ article.rejectionReason }}
+        </div>
+    {% endif %}
+</div>

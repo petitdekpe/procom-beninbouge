@@ -1,0 +1,52 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Utilisateurs{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Utilisateurs</h1>
+    </div>
+    <p class="bo-muted" style="margin:0 0 22px;font-size:14px">Accordez ROLE_EDITOR (journaliste) pour donner accès au back-office (un profil auteur est créé automatiquement). Rédacteur en chef et Correcteur donnent accès à leur file du workflow éditorial en plus des droits journaliste. ROLE_ADMIN donne accès à tout, y compris les validations et cette page.</p>
+
+    <div class="bo-card">
+        <table class="bo-table">
+            <thead>
+                <tr><th>Compte</th><th>Profil auteur</th><th>Rôles</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                    <tr>
+                        <td>
+                            <div style="font-weight:700">{{ u.displayName }}</div>
+                            <div class="bo-muted" style="font-size:12.5px">{{ u.email }}</div>
+                        </td>
+                        <td class="bo-muted">
+                            {% if u.author %}{{ u.author.firstName }} {{ u.author.lastName }}{% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% for role in u.roles %}<span class="bo-format-badge" style="margin-right:4px">{{ role|replace({'ROLE_': ''}) }}</span>{% endfor %}
+                        </td>
+                        <td style="text-align:right;white-space:nowrap">
+                            <form method="post" action="{{ path('admin_user_update_roles', { id: u.id }) }}" style="display:inline-flex;align-items:center;gap:10px">
+                                <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                <label style="font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:4px">
+                                    <input type="checkbox" name="editor" {{ 'ROLE_EDITOR' in u.roles ? 'checked' : '' }}> Journaliste
+                                </label>
+                                <label style="font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:4px">
+                                    <input type="checkbox" name="editor_in_chief" {{ 'ROLE_EDITOR_IN_CHIEF' in u.roles ? 'checked' : '' }}> Rédac. chef
+                                </label>
+                                <label style="font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:4px">
+                                    <input type="checkbox" name="proofreader" {{ 'ROLE_PROOFREADER' in u.roles ? 'checked' : '' }}> Correcteur
+                                </label>
+                                <label style="font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:4px">
+                                    <input type="checkbox" name="admin" {{ 'ROLE_ADMIN' in u.roles ? 'checked' : '' }} {{ u == app.user ? 'disabled' : '' }}> Admin
+                                </label>
+                                <button type="submit" class="bo-btn bo-btn-muted">Mettre à jour</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

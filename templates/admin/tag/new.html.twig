@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Nouveau mot-clé{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-card" style="padding:28px">
+        {% include 'admin/tag/_form.html.twig' with { heading: 'Créer un mot-clé' } %}
+    </div>
+{% endblock %}

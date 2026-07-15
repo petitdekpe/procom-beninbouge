@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>{{ url('app_home') }}</loc>
+        <changefreq>hourly</changefreq>
+        <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>{{ url('app_videos') }}</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>{{ url('app_dossier_index') }}</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    {% for article in articles %}
+    <url>
+        <loc>{{ url('app_article_show', { slug: article.slug }) }}</loc>
+        {% if article.updatedAt %}<lastmod>{{ article.updatedAt|date('c') }}</lastmod>{% endif %}
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    {% endfor %}
+    {% for category in categories %}
+    <url>
+        <loc>{{ url('app_category_show', { slug: category.slug }) }}</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.7</priority>
+    </url>
+    {% endfor %}
+    {% for dossier in dossiers %}
+    <url>
+        <loc>{{ url('app_dossier_show', { slug: dossier.slug }) }}</loc>
+        {% if dossier.updatedAt %}<lastmod>{{ dossier.updatedAt|date('c') }}</lastmod>{% endif %}
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    {% endfor %}
+    {% for page in pages %}
+    <url>
+        <loc>{{ url('app_page_show', { slug: page.slug }) }}</loc>
+        {% if page.updatedAt %}<lastmod>{{ page.updatedAt|date('c') }}</lastmod>{% endif %}
+        <changefreq>monthly</changefreq>
+        <priority>0.4</priority>
+    </url>
+    {% endfor %}
+    {% for tag in tags %}
+    <url>
+        <loc>{{ url('app_tag_show', { slug: tag.slug }) }}</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.3</priority>
+    </url>
+    {% endfor %}
+</urlset>

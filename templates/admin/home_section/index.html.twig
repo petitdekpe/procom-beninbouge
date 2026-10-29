@@ -21,7 +21,7 @@
                             <td style="font-weight:700">
                                 {{ section.type|home_section_label }}
                                 {% if section.type.value == 'category_highlight' and not section.category %}
-                                    <span class="bo-muted" style="font-weight:400;font-size:12px"> — non configurée</span>
+                                    <span class="bo-muted" style="font-weight:400;font-size:12px"> (rubrique non configurée)</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -29,7 +29,7 @@
                                     <form method="post" action="{{ path('admin_home_section_category', { id: section.id }) }}">
                                         <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
                                         <select name="category_id" onchange="this.form.requestSubmit()" class="bo-select" aria-label="Rubrique affichée par la section {{ loop.index }}">
-                                            <option value="">— Choisir une rubrique —</option>
+                                            <option value="">Choisir une rubrique</option>
                                             {% for category in categories %}
                                                 <option value="{{ category.id }}" {{ section.category and section.category.id == category.id ? 'selected' : '' }}>{{ category.name }}</option>
                                             {% endfor %}

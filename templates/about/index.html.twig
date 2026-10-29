@@ -1,0 +1,237 @@
+{% extends 'base.html.twig' %}
+
+{# Page « À propos », calquée sur la section about de beninroots.bj :
+   mission et vision, valeurs, formats, puis ce qui vient de la base
+   (chiffres clés, équipe) et un appel à nous joindre.
+   Données : App\Controller\AboutController. Styles : .bb-about* et
+   .bb-section-* dans assets/styles/app.css. #}
+
+{% set settings = site_settings() %}
+{% set aboutUrl = url('app_about') %}
+{% set aboutDescription = settings.footerTagline ?: "Politique, économie, culture et initiatives locales : l'actualité béninoise vérifiée et racontée depuis le terrain." %}
+{% set channelUrl = settings.youtubeUrl ?: 'https://www.youtube.com/@BeninBouge' %}
+
+{% block title %}À propos | {{ settings.siteName }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {{ include('partials/_seo_meta.html.twig', {
+        ogTitle: 'À propos | ' ~ settings.siteName,
+        metaDescription: aboutDescription,
+        canonicalUrl: aboutUrl,
+        structuredData: {
+            '@context': 'https://schema.org',
+            '@type': 'AboutPage',
+            'name': 'À propos de ' ~ settings.siteName,
+            'url': aboutUrl,
+            'description': aboutDescription,
+            'about': {
+                '@type': 'NewsMediaOrganization',
+                'name': settings.siteName,
+                'url': url('app_home'),
+                'logo': settings.logoUrl ? absolute_url(settings.logoUrl) : null,
+            },
+        },
+    }) }}
+{% endblock %}
+
+{% block body %}
+<div class="bb-about">
+
+    {{ include('partials/_header.html.twig') }}
+
+    {# ===== EN-TÊTE ===== #}
+    <section class="bb-about-hero">
+        <div class="bb-about-inner">
+            <nav class="bb-breadcrumb" aria-label="Fil d'Ariane">
+                <a href="{{ path('app_home') }}">Accueil</a>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page">À propos</span>
+            </nav>
+            <div class="bb-section-head">
+                <span class="bb-section-badge">
+                    Mission · Vision · Valeurs
+                </span>
+                <h1 class="bb-section-title">À propos de {{ settings.siteName }}</h1>
+                <p class="bb-section-lead">{{ aboutDescription }}</p>
+            </div>
+
+            {# ===== MISSION / VISION ===== #}
+            <div class="bb-about-grid-2">
+                <article class="bb-about-card bb-about-card--green">
+                    <h2 class="bb-about-card-title">Notre mission</h2>
+                    <p>Informer les Béninois, ici et dans la diaspora, sur ce qui fait bouger le pays : la politique, l'économie, la culture et les initiatives locales. Nous vérifions avant de publier et nous racontons l'actualité depuis le terrain, au plus près de celles et ceux qui la vivent.</p>
+                </article>
+                <article class="bb-about-card bb-about-card--navy">
+                    <h2 class="bb-about-card-title">Notre vision</h2>
+                    <p>Devenir le rendez-vous quotidien de celles et ceux qui veulent comprendre le Bénin qui se transforme, en donnant autant de place aux grandes décisions nationales qu'aux projets qui changent la vie des quartiers et des communes.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    {# ===== VALEURS ===== #}
+    <section class="bb-about-section">
+        <div class="bb-about-inner">
+            <div class="bb-section-head">
+                <h2 class="bb-section-title">Nos valeurs</h2>
+                <p class="bb-section-lead">Trois principes guident notre travail au quotidien, du choix des sujets à la publication.</p>
+            </div>
+            <div class="bb-about-grid-3">
+                <article class="bb-about-card bb-about-card--green">
+                    <h3 class="bb-about-card-title">Rigueur</h3>
+                    <p>Chaque information est vérifiée et sourcée avant d'être publiée. Nous préférons l'exactitude à la vitesse, et nous corrigeons nos erreurs quand nous en faisons.</p>
+                </article>
+                <article class="bb-about-card bb-about-card--navy">
+                    <h3 class="bb-about-card-title">Proximité</h3>
+                    <p>Nos sujets partent du terrain : des marchés, des communes, des entreprises et des lieux de culture. Nous donnons la parole à celles et ceux qui font l'actualité au quotidien.</p>
+                </article>
+                <article class="bb-about-card bb-about-card--gold">
+                    <h3 class="bb-about-card-title">Valorisation</h3>
+                    <p>Nous mettons en lumière les talents, les projets et les initiatives locales qui font avancer le Bénin, pour montrer le pays tel qu'il se construit.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    {# ===== FORMATS ===== #}
+    <section class="bb-about-section bb-about-section--tinted">
+        <div class="bb-about-inner">
+            <div class="bb-section-head">
+                <span class="bb-section-badge">Nos formats</span>
+                <h2 class="bb-section-title">Comment nous racontons le Bénin</h2>
+            </div>
+            <div class="bb-about-grid-3">
+                <a href="{{ path('app_home') }}#actu" class="bb-about-format">
+                    <h3 class="bb-about-card-title">L'actualité</h3>
+                    <p>Les faits du jour, expliqués et remis en contexte : politique, économie, société et culture.</p>
+                    <span class="bb-about-link">Lire l'actualité →</span>
+                </a>
+                <a href="{{ path('app_dossier_index') }}" class="bb-about-format">
+                    <h3 class="bb-about-card-title">Les dossiers</h3>
+                    <p>Des enquêtes et des séries d'articles pour prendre le temps de comprendre un sujet en profondeur.</p>
+                    <span class="bb-about-link">Voir les dossiers →</span>
+                </a>
+                <a href="{{ path('app_videos') }}" class="bb-about-format">
+                    <h3 class="bb-about-card-title">Les vidéos</h3>
+                    <p>Reportages, interviews et formats courts filmés sur le terrain, à retrouver aussi sur notre chaîne YouTube.</p>
+                    <span class="bb-about-link">Voir les vidéos →</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {# ===== CHIFFRES CLÉS ===== #}
+    <section class="bb-about-section bb-about-section--flush">
+        <div class="bb-about-inner">
+            <div class="bb-about-figures">
+                {% for figure in figures %}
+                    <div class="bb-about-figure">
+                        <p class="bb-about-figure-value">{{ figure.value|format_number }}</p>
+                        <p class="bb-about-figure-label">{{ figure.label }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    {# ===== ÉQUIPE =====
+       Membres saisis dans le back-office (Équipe), dans l'ordre choisi.
+       Cliquer une carte ouvre la présentation complète (assets/controllers/team_dialog_controller.js). #}
+    {% if team|length > 0 %}
+        <section class="bb-about-section" id="equipe">
+            <div class="bb-about-inner">
+                <div class="bb-section-head">
+                    <span class="bb-section-badge">L'équipe</span>
+                    <h2 class="bb-section-title">Notre équipe</h2>
+                    <p class="bb-section-lead">Les femmes et les hommes qui font {{ settings.siteName }} au quotidien.</p>
+                </div>
+                <div class="bb-team" data-controller="team-dialog">
+                    {% for member in team %}
+                        {% set socials = [
+                            { url: member.linkedinUrl, label: 'LinkedIn', icon: 'linkedin' },
+                            { url: member.twitterUrl, label: 'X / Twitter', icon: 'x' },
+                            { url: member.facebookUrl, label: 'Facebook', icon: 'facebook' },
+                            { url: member.email ? 'mailto:' ~ member.email : null, label: 'E-mail', icon: 'mail' },
+                        ]|filter(s => s.url) %}
+                        <article class="bb-team-card">
+                            {% if member.photo %}
+                                <img src="{{ member.photo }}" alt="{{ member.fullName }}" class="bb-team-photo" loading="lazy">
+                            {% else %}
+                                <span class="bb-team-photo bb-team-photo--initials" aria-hidden="true">{{ member.initials }}</span>
+                            {% endif %}
+                            <div class="bb-team-shade"></div>
+                            {% if member.bio %}
+                                <button type="button" class="bb-team-open" data-action="team-dialog#open" data-team-dialog-id-param="team-member-{{ member.id }}" aria-label="Lire la présentation de {{ member.fullName }}"></button>
+                            {% endif %}
+                            <div class="bb-team-info">
+                                <h3 class="bb-team-name">{{ member.fullName }}</h3>
+                                <p class="bb-team-role">{{ member.role }}</p>
+                                {% if socials|length > 0 %}
+                                    <div class="bb-team-socials">
+                                        {% for social in socials %}
+                                            <a href="{{ social.url }}" {% if social.icon != 'mail' %}target="_blank" rel="noopener noreferrer"{% endif %} class="bb-team-social" aria-label="{{ social.label }} de {{ member.fullName }}">
+                                                {{ include('about/_social_icon.html.twig', { icon: social.icon }) }}
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </article>
+
+                        {% if member.bio %}
+                            <dialog class="bb-team-dialog" id="team-member-{{ member.id }}" aria-labelledby="team-member-{{ member.id }}-name" data-action="click->team-dialog#closeOnBackdrop">
+                                <div class="bb-team-dialog-body">
+                                    <button type="button" class="bb-team-dialog-close" data-action="team-dialog#close" aria-label="Fermer">
+                                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                                    </button>
+                                    <div class="bb-team-dialog-media">
+                                        {% if member.photo %}
+                                            <img src="{{ member.photo }}" alt="{{ member.fullName }}">
+                                        {% else %}
+                                            <span class="bb-team-photo--initials" aria-hidden="true">{{ member.initials }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="bb-team-dialog-text">
+                                        <h3 id="team-member-{{ member.id }}-name">{{ member.fullName }}</h3>
+                                        <p class="bb-team-dialog-role">{{ member.role }}</p>
+                                        <p class="bb-team-dialog-bio">{{ member.bio }}</p>
+                                        {% if socials|length > 0 %}
+                                            <div class="bb-team-dialog-socials">
+                                                {% for social in socials %}
+                                                    <a href="{{ social.url }}" {% if social.icon != 'mail' %}target="_blank" rel="noopener noreferrer"{% endif %} aria-label="{{ social.label }} de {{ member.fullName }}">
+                                                        {{ include('about/_social_icon.html.twig', { icon: social.icon }) }}
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </dialog>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    {# ===== APPEL À NOUS JOINDRE ===== #}
+    <section class="bb-about-section">
+        <div class="bb-about-inner">
+            <div class="bb-about-cta">
+                <h2>Une information, une suggestion, un projet de partenariat ?</h2>
+                <p>Écrivez à la rédaction depuis notre formulaire de contact.</p>
+                <div class="bb-about-cta-actions">
+                    <a href="{{ path('app_home') }}#contact" class="bb-about-cta-primary">Nous joindre</a>
+                    <a href="{{ channelUrl }}" target="_blank" rel="noopener" class="bb-about-cta-secondary">Voir la chaîne YouTube</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{ include('partials/_footer.html.twig') }}
+
+</div>
+{% endblock %}

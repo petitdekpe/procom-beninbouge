@@ -1,0 +1,23 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Tarifs des annonces{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Tarifs des annonces</h1>
+        <a href="{{ path('admin_announcement_index') }}" class="bo-btn bo-btn-muted">← Annonces</a>
+    </div>
+
+    <div class="bo-card" style="padding:28px;max-width:640px">
+        <p class="bo-muted" style="margin:0 0 20px">Prix payé = (tarif page + options choisies) × nombre de jours. Les nouveaux tarifs s'appliquent aux annonces déposées après l'enregistrement ; les annonces déjà payées gardent leur prix.</p>
+        {{ form_start(form) }}
+            <div class="bo-form-row">{{ form_row(form.announcementDailyPrice) }}</div>
+            <div class="bo-form-row">{{ form_row(form.announcementHomeCardDailyPrice) }}</div>
+            <div class="bo-form-row">{{ form_row(form.announcementPopupDailyPrice) }}</div>
+            <div class="bo-form-row">{{ form_row(form.announcementMinDays) }}</div>
+            <div class="bo-form-row">{{ form_row(form.announcementMaxDays) }}</div>
+            {{ form_rest(form) }}
+            <button type="submit" class="bo-btn bo-btn-accent">Enregistrer les tarifs</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

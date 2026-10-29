@@ -3,7 +3,7 @@
 {% set pageUrl = url('app_page_show', { slug: page.slug }) %}
 {% set metaDescription = page.metaDescription|excerpt(180) %}
 
-{% block title %}{{ page.metaTitle ?: page.title }} — {{ site_settings().siteName }}{% endblock %}
+{% block title %}{{ page.metaTitle ?: page.title }} | {{ site_settings().siteName }}{% endblock %}
 
 {% block stylesheets %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,7 +24,7 @@
 {% endblock %}
 
 {% block body %}
-<div style="background:#F4F2EA;color:#14160F;font-family:'Manrope',sans-serif">
+<div style="background:var(--bb-bg);color:#14160F;font-family:'Manrope',sans-serif">
 
     {{ include('partials/_header.html.twig') }}
 

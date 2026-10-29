@@ -386,6 +386,19 @@ class Media
      * Only a fallback for hand-entered videos: ones imported from the
      * channel feed already have youtubeVideoId stored directly.
      */
+    /**
+     * Canonical https://www.youtube.com/embed/{id} URL, whatever form
+     * youtubeEmbedUrl was entered in (embed, watch?v=, youtu.be short link
+     * with ?si= tracking…) — safe to put in an iframe src and to append
+     * player parameters to. Null when no video ID can be found.
+     */
+    public function getYoutubeEmbedSrc(): ?string
+    {
+        $videoId = $this->youtubeVideoId ?? $this->extractYoutubeVideoId();
+
+        return $videoId ? "https://www.youtube.com/embed/{$videoId}" : null;
+    }
+
     private function extractYoutubeVideoId(): ?string
     {
         if (!$this->youtubeEmbedUrl) {

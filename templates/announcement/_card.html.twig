@@ -1,0 +1,39 @@
+{# Carte d'annonce (page Annonces & Opportunités et section d'accueil).
+   Attend : announcement (App\Entity\Announcement, en ligne).
+   Styles : .bb-ann-card* dans assets/styles/app.css. #}
+{% set categoryTone = {
+    'emploi': 'var(--bb-green)',
+    'appel-offres': 'var(--bb-navy)',
+    'bourse-formation': '#b8860b',
+    'evenement': 'var(--bb-red)',
+    'annonce': 'var(--bb-charcoal)',
+}[announcement.category.value] ?? 'var(--bb-green)' %}
+<a href="{{ path('app_announcement_show', { reference: announcement.reference }) }}" class="bb-ann-card" style="--bb-cat:{{ categoryTone }}">
+    <div class="bb-ann-card-media">
+        {% if announcement.image %}
+            <img src="{{ announcement.image }}" alt="" loading="lazy">
+        {% else %}
+            <span class="bb-ann-card-placeholder" aria-hidden="true">{{ announcement.organization|slice(0, 1)|upper }}</span>
+        {% endif %}
+        <span class="bb-ann-card-badge">{{ announcement.category.label }}</span>
+    </div>
+    <div class="bb-ann-card-body">
+        <p class="bb-ann-card-org">{{ announcement.organization }}</p>
+        <h3 class="bb-ann-card-title">{{ announcement.title }}</h3>
+        <p class="bb-ann-card-excerpt">{{ announcement.description|excerpt(160) }}</p>
+        <div class="bb-ann-card-meta">
+            {% if announcement.location %}
+                <span>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+                    {{ announcement.location }}
+                </span>
+            {% endif %}
+            {% if announcement.deadline %}
+                <span>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                    Jusqu'au {{ announcement.deadline|french_date_short }}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+</a>

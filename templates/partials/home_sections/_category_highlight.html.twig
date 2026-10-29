@@ -1,5 +1,5 @@
 {# Attend : category (App\Entity\Category), articles (list<Article>), gradientPalette (list<string>). #}
-<section id="rubrique-{{ category.slug }}" style="max-width:1240px;margin:64px auto 0;padding:0 24px">
+<section id="rubrique-{{ category.slug }}" style="max-width:var(--bb-container);margin:64px auto 0;padding:0 24px">
     <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:30px">
         <div>
             <span style="display:inline-block;background:{{ category.color }};color:#fff;font-weight:800;font-size:11.5px;letter-spacing:.5px;padding:7px 16px;border-radius:999px;text-transform:uppercase">{{ category.name }}</span>
@@ -9,18 +9,10 @@
     </div>
 
     {% if articles|length > 0 %}
-    <div class="bb-grid-4" style="gap:20px" data-controller="impression-tracker" data-impression-tracker-context-value="home_category_highlight">
+    <div class="bb-grid-3" style="gap:32px" data-controller="impression-tracker" data-impression-tracker-context-value="home_category_highlight">
         {% for article in articles %}
             {% set gradient = gradientPalette[loop.index0 % 4] %}
-            <a href="{{ path('app_article_show', { slug: article.slug }) }}" class="bb-card" data-impression-tracker-target="card" data-article-id="{{ article.id }}" style="text-decoration:none;background:#fff;border-radius:13px;overflow:hidden;box-shadow:0 10px 26px -22px rgba(20,22,15,.55)">
-                <div style="position:relative;aspect-ratio:5/3;overflow:hidden">
-                    <div class="bb-zoom" style="position:absolute;inset:0;{% if article.coverImage %}background:url('{{ article.coverImage }}') center/cover{% else %}background:{{ gradient }}{% endif %}"></div>
-                </div>
-                <div style="padding:14px 14px 17px">
-                    <h3 class="bb-h" style="font-family:'Archivo';font-weight:800;font-size:15.5px;line-height:1.22;color:#14160F">{{ article.title }}</h3>
-                    <div style="color:#8a8a7c;font-size:11.5px;font-weight:600;margin-top:9px">{{ article.publishedAt|time_ago }}</div>
-                </div>
-            </a>
+            {{ include('partials/_article_card.html.twig', { article: article, gradient: gradient }) }}
         {% endfor %}
     </div>
     {% else %}

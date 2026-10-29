@@ -27,7 +27,7 @@ final class SiteSettingsAdminType extends AbstractType
             ->add('siteName', TextType::class, ['label' => 'Nom du site'])
 
             // ----- Logo / favicon -----
-            ->add('logoUrl', TextType::class, ['label' => 'Logo (en-tête, fond clair) — URL', 'required' => false])
+            ->add('logoUrl', TextType::class, ['label' => 'URL du logo (en-tête, fond clair)', 'required' => false])
             ->add('logoFile', FileType::class, [
                 'label' => 'Ou téléversez un logo (en-tête)',
                 'required' => false,
@@ -35,7 +35,7 @@ final class SiteSettingsAdminType extends AbstractType
                 'help' => 'JPEG, PNG, WebP ou GIF, 5 Mo maximum. Remplace l\'URL ci-dessus.',
                 'constraints' => [new File(...self::IMAGE_CONSTRAINTS)],
             ])
-            ->add('logoFooterUrl', TextType::class, ['label' => 'Logo (pied de page, fond sombre) — URL', 'required' => false])
+            ->add('logoFooterUrl', TextType::class, ['label' => 'URL du logo (pied de page, fond sombre)', 'required' => false])
             ->add('logoFooterFile', FileType::class, [
                 'label' => 'Ou téléversez un logo (pied de page)',
                 'required' => false,
@@ -43,7 +43,7 @@ final class SiteSettingsAdminType extends AbstractType
                 'help' => 'JPEG, PNG, WebP ou GIF, 5 Mo maximum. Remplace l\'URL ci-dessus.',
                 'constraints' => [new File(...self::IMAGE_CONSTRAINTS)],
             ])
-            ->add('faviconUrl', TextType::class, ['label' => 'Favicon — URL', 'required' => false])
+            ->add('faviconUrl', TextType::class, ['label' => 'URL du favicon', 'required' => false])
             ->add('faviconFile', FileType::class, [
                 'label' => 'Ou téléversez un favicon',
                 'required' => false,

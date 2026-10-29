@@ -1,0 +1,28 @@
+{# Pop-up d'accueil payant (option « pop-up sur l'accueil »). Une annonce tirée
+   au hasard parmi celles qui l'ont achetée (AnnouncementRepository::findRandomOnlinePopup).
+   Ouverture différée et fermeture mémorisée 24 h par annonce :
+   assets/controllers/announcement_popup_controller.js. Attend : announcement. #}
+<dialog class="bb-ann-popup"
+        aria-labelledby="bb-ann-popup-title"
+        data-controller="announcement-popup"
+        data-announcement-popup-key-value="{{ announcement.reference }}"
+        data-action="click->announcement-popup#closeOnBackdrop close->announcement-popup#remember">
+    <div class="bb-ann-popup-body">
+        <button type="button" class="bb-ann-popup-close" data-action="announcement-popup#close" aria-label="Fermer">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+        {% if announcement.image %}
+            <img src="{{ announcement.image }}" alt="" class="bb-ann-popup-image">
+        {% endif %}
+        <div class="bb-ann-popup-text">
+            <p class="bb-ann-popup-kicker">Annonce · {{ announcement.category.label }}</p>
+            <h2 id="bb-ann-popup-title">{{ announcement.title }}</h2>
+            <p class="bb-ann-popup-org">{{ announcement.organization }}{% if announcement.location %} · {{ announcement.location }}{% endif %}</p>
+            <p>{{ announcement.description|excerpt(180) }}</p>
+            <div class="bb-ann-popup-actions">
+                <a href="{{ path('app_announcement_show', { reference: announcement.reference }) }}" class="bb-btn-primary">Voir l'annonce</a>
+                <button type="button" class="bb-btn-secondary" data-action="announcement-popup#close">Plus tard</button>
+            </div>
+        </div>
+    </div>
+</dialog>

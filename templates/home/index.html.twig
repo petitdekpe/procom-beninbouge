@@ -5,7 +5,7 @@
 {% set homeDescription = "Politique, économie, culture et initiatives locales : l'actualité béninoise vérifiée et racontée depuis le terrain." %}
 {% set homeSameAs = [homeSettings.facebookUrl, homeSettings.twitterUrl, homeSettings.instagramUrl, homeSettings.youtubeUrl]|filter(u => u is not empty) %}
 
-{% block title %}{{ homeSettings.siteName }} — L'actualité du Bénin qui bouge{% endblock %}
+{% block title %}{{ homeSettings.siteName }} | L'actualité du Bénin qui bouge{% endblock %}
 
 {% block stylesheets %}
     {# Règles partagées (resets, .bb-card/.bb-h, etc.) vivent désormais dans
@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     {{ include('partials/_seo_meta.html.twig', {
-        ogTitle: homeSettings.siteName ~ ' — L\'actualité du Bénin qui bouge',
+        ogTitle: homeSettings.siteName ~ ' | L\'actualité du Bénin qui bouge',
         metaDescription: homeDescription,
         canonicalUrl: homeUrl,
         structuredData: {
@@ -50,13 +50,13 @@
    activation configurés dans /admin/home-sections) — voir
    App\Controller\HomeController et App\Entity\HomeSection. Chaque type de
    section a son partial dans templates/partials/home_sections/. #}
-<div style="background:#F4F2EA;color:#14160F;font-family:'Manrope',sans-serif" data-controller="video-modal">
+<div style="background:var(--bb-bg);color:#14160F;font-family:'Manrope',sans-serif" data-controller="video-modal">
 
     {{ include('partials/_header.html.twig') }}
 
     {% for section in homeSections %}
         {% if section.type.value == 'hero_slider' %}
-            {{ include('partials/home_sections/_hero_slider.html.twig', { slides: heroSlides, stats: stats }) }}
+            {{ include('partials/home_sections/_hero_slider.html.twig', { slides: heroSlides }) }}
         {% elseif section.type.value == 'latest_news' %}
             {{ include('partials/home_sections/_latest_news.html.twig', { actu: actu, gradientPalette: gradientPalette }) }}
         {% elseif section.type.value == 'popular_articles' %}
@@ -65,12 +65,20 @@
             {{ include('partials/home_sections/_videos.html.twig', { videos: videos, gradientPalette: gradientPalette }) }}
         {% elseif section.type.value == 'podcasts' %}
             {{ include('partials/home_sections/_podcasts.html.twig', { podcasts: podcasts }) }}
+        {% elseif section.type.value == 'announcements' %}
+            {{ include('partials/home_sections/_announcements.html.twig', { announcements: homeAnnouncements }) }}
+        {% elseif section.type.value == 'contact' %}
+            {{ include('partials/home_sections/_contact.html.twig') }}
         {% elseif section.type.value == 'category_highlight' and section.category %}
             {{ include('partials/home_sections/_category_highlight.html.twig', { category: section.category, articles: categoryHighlightArticles[section.id]|default([]), gradientPalette: gradientPalette }) }}
         {% endif %}
     {% endfor %}
 
     {{ include('partials/_video_modal.html.twig') }}
+
+    {% if popupAnnouncement %}
+        {{ include('partials/_announcement_popup.html.twig', { announcement: popupAnnouncement }) }}
+    {% endif %}
 
     {{ include('partials/_footer.html.twig') }}
 

@@ -1,0 +1,85 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Annonces{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Annonces & Opportunités</h1>
+        <div style="display:flex;gap:10px">
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('admin_announcement_pricing') }}" class="bo-btn bo-btn-muted">Tarifs</a>
+            {% endif %}
+            <a href="{{ path('app_announcement_index') }}" target="_blank" rel="noopener" class="bo-btn bo-btn-muted">Voir la page publique</a>
+        </div>
+    </div>
+
+    <div class="bo-toolbar">
+        <div class="bo-filters">
+            {% for key, label in tabs %}
+                <a href="{{ path('admin_announcement_index', key != 'review' ? { tab: key } : {}) }}" class="bo-pill {{ currentTab == key ? 'active' : '' }}">{{ label }}{% if key == 'review' and pendingCount > 0 %} ({{ pendingCount }}){% endif %}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if currentTab == 'review' %}
+        <p class="bo-muted" style="margin:-6px 0 18px">Chaque annonce payée doit être validée ou refusée dans les 48 h suivant le paiement. Les plus anciennes sont en haut.</p>
+    {% endif %}
+
+    <div class="bo-card">
+        {% if announcements|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr>
+                        <th>Annonce</th>
+                        <th>Catégorie</th>
+                        <th>Formule</th>
+                        <th>Montant</th>
+                        <th>{{ currentTab == 'review' ? 'À valider avant' : (currentTab in ['online', 'expired'] ? 'Fin de diffusion' : 'Date') }}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for announcement in announcements %}
+                        {% set overdue = announcement.reviewOverdue %}
+                        <tr{% if overdue %} style="background:#fef2f2"{% endif %}>
+                            <td>
+                                <div style="font-weight:700">{{ announcement.title }}</div>
+                                <div class="bo-muted" style="font-size:11.5px">{{ announcement.reference }} · {{ announcement.organization }}</div>
+                            </td>
+                            <td class="bo-muted">{{ announcement.category.label }}</td>
+                            <td class="bo-muted" style="white-space:nowrap">
+                                {{ announcement.durationDays }} j
+                                {%- if announcement.withHomeCard %} · carte{% endif -%}
+                                {%- if announcement.withPopup %} · pop-up{% endif %}
+                            </td>
+                            <td class="bo-muted" style="white-space:nowrap">{{ announcement.amount|format_number }} FCFA</td>
+                            <td style="white-space:nowrap">
+                                {% if currentTab == 'review' %}
+                                    <span style="font-weight:700;color:{{ overdue ? '#b91c1c' : 'inherit' }}">{{ announcement.reviewDeadline|date('d/m/Y H:i') }}</span>
+                                    {% if overdue %}<div style="font-size:11.5px;color:#b91c1c;font-weight:700">Délai de 48 h dépassé</div>{% endif %}
+                                {% elseif currentTab in ['online', 'expired'] %}
+                                    <span class="bo-muted">{{ announcement.endsAt|date('d/m/Y H:i') }}</span>
+                                {% elseif currentTab == 'rejected' %}
+                                    <span class="bo-muted">{{ announcement.reviewedAt|date('d/m/Y H:i') }}</span>
+                                {% else %}
+                                    <span class="bo-muted">{{ announcement.createdAt|date('d/m/Y H:i') }} · {{ announcement.status.label }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align:right;white-space:nowrap">
+                                <a href="{{ path('admin_announcement_show', { id: announcement.id }) }}" class="bo-btn {{ currentTab == 'review' ? 'bo-btn-accent' : 'bo-btn-muted' }}">{{ currentTab == 'review' ? 'Examiner' : 'Voir' }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">{{ {
+                review: 'Aucune annonce en attente de validation.',
+                online: 'Aucune annonce en ligne.',
+                expired: 'Aucune annonce expirée.',
+                rejected: 'Aucune annonce refusée.',
+                unpaid: 'Aucune annonce en attente de paiement.',
+            }[currentTab] }}</p>
+        {% endif %}
+    </div>
+{% endblock %}

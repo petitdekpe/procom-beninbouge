@@ -1,0 +1,38 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Newsletter{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Newsletter ({{ subscribers|length }} abonné{{ subscribers|length > 1 ? 's' }})</h1>
+        {% if subscribers|length > 0 %}
+            <a href="{{ path('admin_newsletter_export') }}" class="bo-btn bo-btn-accent">Exporter en CSV</a>
+        {% endif %}
+    </div>
+
+    <div class="bo-card">
+        {% if subscribers|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr><th>E-mail</th><th>Inscrit le</th><th style="text-align:right">Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for subscriber in subscribers %}
+                        <tr>
+                            <td style="font-weight:700"><a href="mailto:{{ subscriber.email }}">{{ subscriber.email }}</a></td>
+                            <td class="bo-muted">{{ subscriber.createdAt|date('d/m/Y H:i') }}</td>
+                            <td style="text-align:right">
+                                <form method="post" action="{{ path('admin_newsletter_delete', { id: subscriber.id }) }}" style="display:inline" onsubmit="return confirm('Désinscrire cette adresse ?');">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-danger">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">Aucun abonné pour le moment.</p>
+        {% endif %}
+    </div>
+{% endblock %}

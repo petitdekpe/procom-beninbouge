@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{# Suivi d'une annonce par son annonceur, via le lien secret /annonces/suivi/{token}
+   (pas de compte annonceur). Données : App\Controller\AnnouncementController::track. #}
+
+{% set settings = site_settings() %}
+{% set status = announcement.status.value %}
+{# Lu une seule fois (voir la remarque sur app.flashes dans _contact.html.twig). #}
+{% set paymentError = app.flashes('announcement_error')|first %}
+{% set trackUrl = url('app_announcement_track', { token: announcement.trackingToken }) %}
+
+{% block title %}Suivi de l'annonce {{ announcement.reference }} | {{ settings.siteName }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {# Lien personnel : jamais indexé. #}
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+{% endblock %}
+
+{% block body %}
+<div class="bb-ann-page">
+
+    {{ include('partials/_header.html.twig') }}
+
+    <section class="bb-about-section">
+        <div class="bb-ann-track">
+            <p class="bb-ann-track-ref">Annonce {{ announcement.reference }}</p>
+            <h1>{{ announcement.title }}</h1>
+
+            {% if paymentError %}
+                <div class="bb-alert bb-alert-error" role="alert">{{ paymentError }}</div>
+            {% endif %}
+
+            <div class="bb-ann-status bb-ann-status--{{ announcement.online ? 'online' : (announcement.expired ? 'expired' : status) }}" role="status">
+                {% if status == 'pending_payment' %}
+                    <strong>En attente de paiement</strong>
+                    <p>Nous n'avons pas encore reçu la confirmation de votre paiement. Si vous venez de payer, actualisez cette page dans quelques instants.</p>
+                {% elseif status == 'payment_failed' %}
+                    <strong>Le paiement n'a pas abouti</strong>
+                    <p>Le paiement a été refusé ou annulé. Votre annonce est conservée : vous pouvez relancer le paiement.</p>
+                {% elseif status == 'pending_review' %}
+                    <strong>Paiement reçu, annonce en cours de validation</strong>
+                    <p>La rédaction relit votre annonce et vous répondra au plus tard le {{ announcement.reviewDeadline|french_date_short }} à {{ announcement.reviewDeadline|date('H:i') }}. L'affichage de {{ announcement.durationDays }} jours commencera à la validation.</p>
+                {% elseif announcement.online %}
+                    <strong>Votre annonce est en ligne</strong>
+                    <p>Elle est affichée jusqu'au {{ announcement.endsAt|french_date_short }} à {{ announcement.endsAt|date('H:i') }}.</p>
+                    <a href="{{ path('app_announcement_show', { reference: announcement.reference }) }}" class="bb-btn-primary">Voir mon annonce</a>
+                {% elseif announcement.expired %}
+                    <strong>Diffusion terminée</strong>
+                    <p>Votre annonce a été affichée du {{ announcement.startsAt|french_date_short }} au {{ announcement.endsAt|french_date_short }}.</p>
+                    <a href="{{ path('app_announcement_submit') }}" class="bb-btn-primary">Publier une nouvelle annonce</a>
+                {% elseif status == 'rejected' %}
+                    <strong>Annonce refusée</strong>
+                    <p>Motif indiqué par la rédaction :</p>
+                    <blockquote>{{ announcement.rejectionReason }}</blockquote>
+                    <p>Pour toute question, écrivez-nous en mentionnant la référence {{ announcement.reference }}.</p>
+                    <a href="{{ path('app_home') }}#contact" class="bb-btn-secondary">Nous joindre</a>
+                {% endif %}
+
+                {% if status in ['pending_payment', 'payment_failed'] %}
+                    <form method="post" action="{{ path('app_announcement_retry_payment', { token: announcement.trackingToken }) }}">
+                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                        <button type="submit" class="bb-btn-primary">{{ status == 'payment_failed' ? 'Relancer le paiement' : 'Payer maintenant' }} ({{ announcement.amount|format_number }} FCFA)</button>
+                    </form>
+                {% endif %}
+            </div>
+
+            <dl class="bb-ann-track-details">
+                <div><dt>Catégorie</dt><dd>{{ announcement.category.label }}</dd></div>
+                <div><dt>Annonceur</dt><dd>{{ announcement.organization }}</dd></div>
+                <div><dt>Durée</dt><dd>{{ announcement.durationDays }} jours</dd></div>
+                <div><dt>Options</dt><dd>Page Annonces{{ announcement.withHomeCard ? ' · carte sur l\'accueil' }}{{ announcement.withPopup ? ' · pop-up sur l\'accueil' }}</dd></div>
+                <div><dt>Montant</dt><dd>{{ announcement.amount|format_number }} FCFA</dd></div>
+                <div><dt>Déposée le</dt><dd>{{ announcement.createdAt|french_date_short }}</dd></div>
+            </dl>
+
+            <div class="bb-ann-track-link">
+                <p><strong>Conservez ce lien</strong> : c'est le seul moyen de suivre votre annonce.</p>
+                <input type="text" value="{{ trackUrl }}" readonly aria-label="Lien de suivi de l'annonce" onclick="this.select()">
+            </div>
+        </div>
+    </section>
+
+    {{ include('partials/_footer.html.twig') }}
+
+</div>
+{% endblock %}

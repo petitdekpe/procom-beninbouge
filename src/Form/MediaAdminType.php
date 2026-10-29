@@ -52,12 +52,12 @@ final class MediaAdminType extends AbstractType
                 'class' => Author::class,
                 'choice_label' => fn (Author $author) => trim($author->getFirstName().' '.$author->getLastName()),
                 'required' => false,
-                'placeholder' => '— Non renseigné —',
+                'placeholder' => 'Non renseigné',
             ])
             ->add('license', ChoiceType::class, [
                 'label' => 'Licence',
                 'required' => false,
-                'placeholder' => '— Non renseignée —',
+                'placeholder' => 'Non renseignée',
                 'choices' => array_combine(
                     array_map(fn (MediaLicense $l) => $l->name, MediaLicense::cases()),
                     MediaLicense::cases(),
@@ -83,7 +83,7 @@ final class MediaAdminType extends AbstractType
                 'class' => Article::class,
                 'choice_label' => 'title',
                 'required' => false,
-                'placeholder' => '— Média autonome, non rattaché à un article —',
+                'placeholder' => 'Média autonome, non rattaché à un article',
             ])
             ->add('gallery', EntityType::class, [
                 'label' => 'Galerie',

@@ -1,32 +1,35 @@
 import { Controller } from '@hotwired/stimulus';
 
 /*
- * Auto-rotating hero slider for the homepage (templates/partials/home_sections/_hero_slider.html.twig).
- * data-controller="hero-slider" wraps one data-hero-slider-target="slide" per
- * article and one data-hero-slider-target="dot" per slide, in the same order.
+ * Full-screen crossfading hero for the homepage
+ * (templates/partials/home_sections/_hero_slider.html.twig), modelled on the
+ * beninroots.bj "accueil" carousel: rotates every 10s until the reader picks
+ * a slide (dot or swipe), after which autoplay stays off. One
+ * data-hero-slider-target="slide" per article and one "dot" per slide, in
+ * the same order. Styling lives in .bb-hero* in assets/styles/app.css.
  */
+const SWIPE_THRESHOLD = 50;
+
 export default class extends Controller {
     static targets = ['slide', 'dot'];
-    static values = { interval: { type: Number, default: 6000 } };
+    static values = { interval: { type: Number, default: 10000 } };
 
     connect() {
         this.index = 0;
         this.show(0);
-        this.restartAutoplay();
+        this.startAutoplay();
     }
 
     disconnect() {
-        window.clearInterval(this.timer);
+        this.stopAutoplay();
     }
 
     next() {
         this.show((this.index + 1) % this.slideTargets.length);
-        this.restartAutoplay();
     }
 
     previous() {
         this.show((this.index - 1 + this.slideTargets.length) % this.slideTargets.length);
-        this.restartAutoplay();
     }
 
     goTo(event) {
@@ -34,27 +37,58 @@ export default class extends Controller {
         if (undefined === target) {
             return;
         }
+        this.stopAutoplay();
         this.show(target);
-        this.restartAutoplay();
+    }
+
+    touchStart(event) {
+        this.touchStartX = this.touchCurrentX = event.touches[0].clientX;
+    }
+
+    touchMove(event) {
+        this.touchCurrentX = event.touches[0].clientX;
+    }
+
+    touchEnd() {
+        const delta = this.touchStartX - this.touchCurrentX;
+        if (Math.abs(delta) < SWIPE_THRESHOLD) {
+            return;
+        }
+        this.stopAutoplay();
+        delta > 0 ? this.next() : this.previous();
     }
 
     show(index) {
         this.index = index;
 
         this.slideTargets.forEach((slide, i) => {
-            slide.style.display = i === index ? 'block' : 'none';
+            const active = i === index;
+            slide.classList.toggle('is-active', active);
+            slide.toggleAttribute('inert', !active);
+            if (active) {
+                slide.removeAttribute('aria-hidden');
+            } else {
+                slide.setAttribute('aria-hidden', 'true');
+            }
         });
 
         this.dotTargets.forEach((dot, i) => {
-            dot.style.opacity = i === index ? '1' : '.4';
+            dot.classList.toggle('is-active', i === index);
+            if (i === index) {
+                dot.setAttribute('aria-current', 'true');
+            } else {
+                dot.removeAttribute('aria-current');
+            }
         });
     }
 
-    restartAutoplay() {
-        window.clearInterval(this.timer);
-
-        if (this.slideTargets.length > 1) {
+    startAutoplay() {
+        if (this.slideTargets.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             this.timer = window.setInterval(() => this.next(), this.intervalValue);
         }
+    }
+
+    stopAutoplay() {
+        window.clearInterval(this.timer);
     }
 }

@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Modifier {{ member.fullName }}{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-card" style="padding:28px">
+        {% include 'admin/team_member/_form.html.twig' with { heading: 'Modifier ' ~ member.fullName } %}
+    </div>
+{% endblock %}

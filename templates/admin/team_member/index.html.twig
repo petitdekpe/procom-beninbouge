@@ -1,0 +1,70 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Équipe{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Équipe</h1>
+        <div style="display:flex;gap:10px">
+            <a href="{{ path('app_about') }}#equipe" target="_blank" rel="noopener" class="bo-btn bo-btn-muted">Voir sur la page À propos</a>
+            <a href="{{ path('admin_team_member_new') }}" class="bo-btn bo-btn-accent">+ Ajouter un membre</a>
+        </div>
+    </div>
+
+    <p class="bo-muted" style="margin:-6px 0 18px">Les membres visibles s'affichent dans cet ordre dans le bloc « Notre équipe » de la page À propos.</p>
+
+    <div class="bo-card">
+        {% if members|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr><th>Membre</th><th>Fonction</th><th>Affichage</th><th style="text-align:right">Ordre et actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                        <tr>
+                            <td>
+                                <div class="bo-row-title">
+                                    {% if member.photo %}
+                                        <img class="bo-thumb" src="{{ member.photo }}" alt="" style="border-radius:50%">
+                                    {% else %}
+                                        <span class="bo-thumb-fallback" style="border-radius:50%">{{ member.initials }}</span>
+                                    {% endif %}
+                                    {{ member.fullName }}
+                                </div>
+                            </td>
+                            <td class="bo-muted">{{ member.role }}</td>
+                            <td>
+                                <form method="post" action="{{ path('admin_team_member_toggle', { id: member.id }) }}" style="display:flex;align-items:center;gap:10px">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <label class="bo-toggle">
+                                        <input type="checkbox" {{ member.visible ? 'checked' : '' }} onchange="this.form.requestSubmit()" aria-label="{{ member.visible ? 'Masquer' : 'Afficher' }} {{ member.fullName }}">
+                                        <span class="bo-toggle-track"></span>
+                                    </label>
+                                    <span class="bo-muted" style="font-size:12.5px;font-weight:700">{{ member.visible ? 'Visible' : 'Masqué' }}</span>
+                                    <noscript><button type="submit" class="bo-btn bo-btn-muted">Basculer</button></noscript>
+                                </form>
+                            </td>
+                            <td style="text-align:right;white-space:nowrap">
+                                <form method="post" action="{{ path('admin_team_member_move_up', { id: member.id }) }}" style="display:inline">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-muted" {{ loop.first ? 'disabled' : '' }} title="Monter">↑</button>
+                                </form>
+                                <form method="post" action="{{ path('admin_team_member_move_down', { id: member.id }) }}" style="display:inline">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-muted" {{ loop.last ? 'disabled' : '' }} title="Descendre">↓</button>
+                                </form>
+                                <a href="{{ path('admin_team_member_edit', { id: member.id }) }}" class="bo-btn bo-btn-muted">Modifier</a>
+                                <form method="post" action="{{ path('admin_team_member_delete', { id: member.id }) }}" style="display:inline" onsubmit="return confirm('Retirer {{ member.fullName|e('js') }} de l\'équipe ?');">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-danger">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">Aucun membre pour le moment. Ajoutez le premier pour afficher le bloc « Notre équipe » sur la page À propos.</p>
+        {% endif %}
+    </div>
+{% endblock %}

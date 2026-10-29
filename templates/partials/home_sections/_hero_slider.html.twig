@@ -1,57 +1,54 @@
-{# Attend : slides (list<Article>, peut être vide), stats (array avec totalViews). #}
-<section id="top" style="position:relative;min-height:620px;overflow:hidden" {% if slides|length > 1 %}data-controller="hero-slider"{% endif %}>
+{# Attend : slides (list<Article>, peut être vide).
+   Calqué sur la section « accueil » de beninroots.bj : plein écran, fondu
+   enchaîné entre les diapositives, voile dégradé de gauche à droite, texte
+   centré verticalement, puces en bas (la puce active s'allonge). Rotation
+   toutes les 10 s, stoppée dès que le lecteur choisit une diapositive ;
+   balayage tactile sur mobile. Voir
+   assets/controllers/hero_slider_controller.js et .bb-hero* dans
+   assets/styles/app.css. #}
+<section id="accueil" class="bb-hero" {% if slides|length > 1 %}data-controller="hero-slider" data-action="touchstart->hero-slider#touchStart:passive touchmove->hero-slider#touchMove:passive touchend->hero-slider#touchEnd"{% endif %}>
     {% if slides|length > 0 %}
         {% for featured in slides %}
-            <div {% if slides|length > 1 %}data-hero-slider-target="slide"{% endif %} style="{% if not loop.first %}display:none;{% endif %}position:relative;min-height:620px;display:flex;align-items:flex-end;overflow:hidden;{% if featured.coverImage %}background:url('{{ featured.coverImage }}') center/cover{% else %}background:linear-gradient(150deg,#2B6B43 0%,#3A8556 48%,#1C4A2E 100%){% endif %}">
-                <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(7,10,6,.95) 0%,rgba(7,10,6,.6) 42%,rgba(7,10,6,.28) 68%,rgba(7,10,6,.48) 100%)"></div>
-
-                <div style="position:relative;max-width:1240px;margin:0 auto;padding:70px 24px 54px;width:100%">
-                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:22px">
+            <div class="bb-hero-slide{{ loop.first ? ' is-active' }}" {% if slides|length > 1 %}data-hero-slider-target="slide"{% endif %} {% if not loop.first %}aria-hidden="true" inert{% endif %}>
+                <div class="bb-hero-bg" {% if featured.coverImage %}style="background-image:url('{{ featured.coverImage }}')"{% endif %}></div>
+                <div class="bb-hero-inner">
+                    <div class="bb-hero-content">
                         {% if featured.category %}
-                            <a href="{{ path('app_category_show', { slug: featured.category.slug }) }}" style="text-decoration:none;display:inline-block;transform:rotate(-5deg);background:{{ featured.category.color }};color:#fff;font-weight:800;font-size:12.5px;letter-spacing:.4px;padding:7px 16px;border-radius:999px;text-transform:uppercase;box-shadow:0 8px 18px -8px rgba(0,0,0,.4)">{{ featured.category.name }}</a>
+                            <a href="{{ path('app_category_show', { slug: featured.category.slug }) }}" class="bb-hero-badge">{{ featured.category.name }}</a>
                         {% endif %}
-                        <span style="display:inline-block;transform:rotate(4deg);background:#2B6B43;color:#fff;font-weight:800;font-size:12.5px;letter-spacing:.4px;padding:7px 16px;border-radius:999px;text-transform:uppercase;box-shadow:0 8px 18px -8px rgba(0,0,0,.4)">Terrain &amp; enquêtes</span>
-                    </div>
-
-                    <h1 style="font-family:'Anton';font-weight:400;color:#fff;font-size:clamp(40px,6.4vw,84px);line-height:.98;letter-spacing:-.5px;max-width:920px;text-transform:uppercase;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden">{{ featured.title }}</h1>
-
-                    {% if featured.chapo %}
-                        <p style="color:#e7f1e9;font-size:16.5px;line-height:1.6;margin-top:22px;max-width:600px">{{ featured.chapo|raw }}</p>
-                    {% endif %}
-
-                    <div style="display:flex;align-items:center;gap:18px;margin-top:30px;flex-wrap:wrap">
-                        <a href="{{ path('app_article_show', { slug: featured.slug }) }}" style="text-decoration:none;display:flex;align-items:center;gap:9px;background:#fff;color:#14160F;font-weight:800;font-size:14.5px;padding:15px 24px;border-radius:999px">
-                            Lire les dernières actus <span>→</span>
-                        </a>
-                    </div>
-
-                    <div style="display:inline-flex;align-items:center;gap:14px;margin-top:38px;background:rgba(255,255,255,.08);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:12px 18px">
-                        <span style="color:#F7CA46;font-size:15px;letter-spacing:2px">★★★★★</span>
-                        <span style="color:#fff;font-size:13px;font-weight:600"><strong style="font-weight:900">+{{ stats.totalViews|format_number }}</strong> lectures cumulées sur le site</span>
+                        {% if loop.first %}
+                            <h1 class="bb-hero-title">{{ featured.title }}</h1>
+                        {% else %}
+                            <h2 class="bb-hero-title">{{ featured.title }}</h2>
+                        {% endif %}
+                        {% if featured.chapo %}
+                            <p class="bb-hero-text">{{ featured.chapo|striptags }}</p>
+                        {% endif %}
+                        <div class="bb-hero-actions">
+                            <a href="{{ path('app_article_show', { slug: featured.slug }) }}" class="bb-hero-button">Lire l'article</a>
+                        </div>
                     </div>
                 </div>
             </div>
         {% endfor %}
 
         {% if slides|length > 1 %}
-            <div style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:2">
+            <div class="bb-hero-dots">
                 {% for s in slides %}
-                    <button type="button" data-hero-slider-target="dot" data-action="hero-slider#goTo" data-hero-slider-index-param="{{ loop.index0 }}" aria-label="Diapositive {{ loop.index }}" style="width:9px;height:9px;border-radius:50%;background:#fff;border:none;cursor:pointer;padding:0;opacity:{{ loop.first ? '1' : '.4' }}"></button>
+                    <button type="button" class="bb-hero-dot{{ loop.first ? ' is-active' }}" data-hero-slider-target="dot" data-action="hero-slider#goTo" data-hero-slider-index-param="{{ loop.index0 }}" aria-label="Aller à la diapositive {{ loop.index }}"{% if loop.first %} aria-current="true"{% endif %}></button>
                 {% endfor %}
             </div>
-            <button type="button" data-action="hero-slider#previous" aria-label="Précédent" style="position:absolute;top:50%;left:16px;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.35);color:#fff;border:none;cursor:pointer;font-size:18px;z-index:2">‹</button>
-            <button type="button" data-action="hero-slider#next" aria-label="Suivant" style="position:absolute;top:50%;right:16px;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.35);color:#fff;border:none;cursor:pointer;font-size:18px;z-index:2">›</button>
         {% endif %}
     {% else %}
-        <div style="position:relative;min-height:620px;display:flex;align-items:flex-end;overflow:hidden;background:linear-gradient(150deg,#2B6B43 0%,#3A8556 48%,#1C4A2E 100%)">
-            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(7,10,6,.95) 0%,rgba(7,10,6,.6) 42%,rgba(7,10,6,.28) 68%,rgba(7,10,6,.48) 100%)"></div>
-            <div style="position:relative;max-width:1240px;margin:0 auto;padding:70px 24px 54px;width:100%">
-                <h1 style="font-family:'Anton';font-weight:400;color:#fff;font-size:clamp(40px,6.4vw,84px);line-height:.98;letter-spacing:-.5px;max-width:920px;text-transform:uppercase;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden">Le Bénin qui bouge, raconté au quotidien</h1>
-                <p style="color:#e7f1e9;font-size:16.5px;line-height:1.6;margin-top:22px;max-width:600px">Politique, économie, culture et initiatives locales : l'actualité béninoise vérifiée et racontée depuis le terrain.</p>
-                <div style="display:flex;align-items:center;gap:18px;margin-top:30px;flex-wrap:wrap">
-                    <a href="{{ path('app_home') }}#actu" style="text-decoration:none;display:flex;align-items:center;gap:9px;background:#fff;color:#14160F;font-weight:800;font-size:14.5px;padding:15px 24px;border-radius:999px">
-                        Lire les dernières actus <span>→</span>
-                    </a>
+        <div class="bb-hero-slide is-active">
+            <div class="bb-hero-bg"></div>
+            <div class="bb-hero-inner">
+                <div class="bb-hero-content">
+                    <h1 class="bb-hero-title">Le Bénin qui bouge, raconté au quotidien</h1>
+                    <p class="bb-hero-text">Politique, économie, culture et initiatives locales : l'actualité béninoise vérifiée et racontée depuis le terrain.</p>
+                    <div class="bb-hero-actions">
+                        <a href="{{ path('app_home') }}#actu" class="bb-hero-button">Lire les dernières actus</a>
+                    </div>
                 </div>
             </div>
         </div>

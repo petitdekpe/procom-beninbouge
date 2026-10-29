@@ -2,14 +2,14 @@
 
 {% set dossierIndexUrl = url('app_dossier_index') %}
 
-{% block title %}Dossiers — {{ site_settings().siteName }}{% endblock %}
+{% block title %}Dossiers | {{ site_settings().siteName }}{% endblock %}
 
 {% block stylesheets %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     {{ include('partials/_seo_meta.html.twig', {
-        ogTitle: 'Dossiers — ' ~ site_settings().siteName,
+        ogTitle: 'Dossiers | ' ~ site_settings().siteName,
         metaDescription: 'Nos grandes enquêtes et sujets suivis dans la durée, tous leurs articles réunis au même endroit.',
         canonicalUrl: dossierIndexUrl,
     }) }}
@@ -23,12 +23,12 @@
     'linear-gradient(140deg,#3A8556,#1C4A2E)',
 ] %}
 
-<div style="background:#F4F2EA;color:#14160F;font-family:'Manrope',sans-serif">
+<div style="background:var(--bb-bg);color:#14160F;font-family:'Manrope',sans-serif">
 
     {{ include('partials/_header.html.twig') }}
 
     {# ===== EN-TÊTE PAGE ===== #}
-    <section style="max-width:1240px;margin:0 auto;padding:54px 24px 10px">
+    <section style="max-width:var(--bb-container);margin:0 auto;padding:54px 24px 10px">
         <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:#8a8a7c;margin-bottom:18px">
             <a href="{{ path('app_home') }}" style="text-decoration:none;color:#8a8a7c">Accueil</a>
             <span>/</span>
@@ -40,7 +40,7 @@
     </section>
 
     {# ===== GRILLE DOSSIERS ===== #}
-    <section style="max-width:1240px;margin:0 auto;padding:34px 24px 64px">
+    <section style="max-width:var(--bb-container);margin:0 auto;padding:34px 24px 64px">
         {% if dossiers|length > 0 %}
         <div class="bb-grid-3" style="gap:24px">
             {% for dossier in dossiers %}

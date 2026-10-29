@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{# Page « Annonces & Opportunités » : annonces payantes validées et en ligne,
+   filtrables par catégorie, paginées. Données : App\Controller\AnnouncementController::index.
+   Styles : .bb-ann* dans assets/styles/app.css. #}
+
+{% set settings = site_settings() %}
+{% set pageUrl = url('app_announcement_index', routeParams|merge(page > 1 ? { page: page } : {})) %}
+{% set pageDescription = "Offres d'emploi et de stage, appels d'offres, bourses, formations et événements au Bénin. Publiez votre annonce sur " ~ settings.siteName ~ '.' %}
+
+{% block title %}Annonces & Opportunités{% if currentCategory %} : {{ currentCategory.label }}{% endif %}{% if page > 1 %} (page {{ page }}){% endif %} | {{ settings.siteName }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {{ include('partials/_seo_meta.html.twig', {
+        ogTitle: 'Annonces & Opportunités | ' ~ settings.siteName,
+        metaDescription: pageDescription,
+        canonicalUrl: pageUrl,
+    }) }}
+{% endblock %}
+
+{% block body %}
+<div class="bb-ann-page">
+
+    {{ include('partials/_header.html.twig') }}
+
+    <section class="bb-ann-hero">
+        <div class="bb-about-inner">
+            <nav class="bb-breadcrumb" aria-label="Fil d'Ariane">
+                <a href="{{ path('app_home') }}">Accueil</a>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page">Annonces & Opportunités</span>
+            </nav>
+            <div class="bb-section-head">
+                <span class="bb-section-badge">Emplois · Appels d'offres · Bourses · Événements</span>
+                <h1 class="bb-section-title">Annonces & Opportunités</h1>
+                <p class="bb-section-lead">Les offres et opportunités à saisir au Bénin, publiées par les organisations et vérifiées par notre rédaction.</p>
+                <div class="bb-ann-hero-cta">
+                    <a href="{{ path('app_announcement_submit') }}" class="bb-btn-primary">Publier une annonce</a>
+                    <span class="bb-ann-hero-price">À partir de {{ startingPrice|format_number }} FCFA pour {{ minDays }} jours · validation sous 48 h</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bb-about-section bb-ann-list">
+        <div class="bb-about-inner">
+            {% if totalOnline > 0 %}
+                <nav class="bb-chips" aria-label="Filtrer par catégorie">
+                    <a href="{{ path('app_announcement_index') }}" class="bb-chip{{ currentCategory is null ? ' is-active' }}"{% if currentCategory is null %} aria-current="page"{% endif %}>
+                        Toutes <span class="bb-chip-count">{{ totalOnline }}</span>
+                    </a>
+                    {% for category in enum_cases('App\\Entity\\Enum\\AnnouncementCategory') %}
+                        {% set count = categoryCounts[category.value] ?? 0 %}
+                        {% if count > 0 or currentCategory == category %}
+                            <a href="{{ path('app_announcement_index', { categorie: category.value }) }}" class="bb-chip{{ currentCategory == category ? ' is-active' }}"{% if currentCategory == category %} aria-current="page"{% endif %}>
+                                {{ category.label }} <span class="bb-chip-count">{{ count }}</span>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </nav>
+            {% endif %}
+
+            {% if announcements|length > 0 %}
+                <div class="bb-ann-grid">
+                    {% for announcement in announcements %}
+                        {{ include('announcement/_card.html.twig', { announcement: announcement }) }}
+                    {% endfor %}
+                </div>
+                {{ include('partials/_pagination.html.twig', { page: page, pageCount: pageCount, route: 'app_announcement_index', routeParams: routeParams }) }}
+            {% else %}
+                <div class="bb-ann-empty">
+                    <h2>{{ currentCategory ? 'Aucune annonce dans cette catégorie pour le moment.' : 'Aucune annonce en ligne pour le moment.' }}</h2>
+                    <p>Vous avez une offre d'emploi, un appel d'offres, une bourse ou un événement à faire connaître ?</p>
+                    <a href="{{ path('app_announcement_submit') }}" class="bb-btn-primary">Publier une annonce</a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {{ include('partials/_footer.html.twig') }}
+
+</div>
+{% endblock %}

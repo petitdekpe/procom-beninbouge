@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{# Page d'une annonce en ligne. Données : App\Controller\AnnouncementController::show. #}
+
+{% set settings = site_settings() %}
+{% set pageUrl = url('app_announcement_show', { reference: announcement.reference }) %}
+
+{% block title %}{{ announcement.title }} | Annonces & Opportunités | {{ settings.siteName }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {{ include('partials/_seo_meta.html.twig', {
+        ogTitle: announcement.title ~ ' | ' ~ announcement.organization,
+        metaDescription: announcement.description|excerpt(160),
+        canonicalUrl: pageUrl,
+        ogImage: announcement.image,
+    }) }}
+{% endblock %}
+
+{% block body %}
+<div class="bb-ann-page">
+
+    {{ include('partials/_header.html.twig') }}
+
+    <article class="bb-ann-detail">
+        <nav class="bb-breadcrumb" aria-label="Fil d'Ariane">
+            <a href="{{ path('app_home') }}">Accueil</a>
+            <span aria-hidden="true">/</span>
+            <a href="{{ path('app_announcement_index') }}">Annonces & Opportunités</a>
+            <span aria-hidden="true">/</span>
+            <a href="{{ path('app_announcement_index', { categorie: announcement.category.value }) }}">{{ announcement.category.label }}</a>
+        </nav>
+
+        <header class="bb-ann-detail-head">
+            <span class="bb-section-badge">{{ announcement.category.label }}</span>
+            <h1>{{ announcement.title }}</h1>
+            <p class="bb-ann-detail-org">{{ announcement.organization }}</p>
+            <ul class="bb-ann-detail-facts">
+                {% if announcement.location %}<li><strong>Lieu</strong> {{ announcement.location }}</li>{% endif %}
+                {% if announcement.deadline %}<li><strong>Date limite</strong> {{ announcement.deadline|french_date_short }}</li>{% endif %}
+                <li><strong>Publiée le</strong> {{ announcement.startsAt|french_date_short }}</li>
+                <li><strong>Référence</strong> {{ announcement.reference }}</li>
+            </ul>
+        </header>
+
+        {% if announcement.image %}
+            <img src="{{ announcement.image }}" alt="{{ announcement.title }}" class="bb-ann-detail-image">
+        {% endif %}
+
+        <div class="bb-ann-detail-body">{{ announcement.description }}</div>
+
+        {% if announcement.externalUrl or announcement.showContact %}
+            <aside class="bb-ann-detail-contact">
+                <h2>Pour postuler ou en savoir plus</h2>
+                {% if announcement.showContact %}
+                    <ul>
+                        <li>{{ announcement.contactName }}</li>
+                        <li><a href="mailto:{{ announcement.contactEmail }}">{{ announcement.contactEmail }}</a></li>
+                        <li><a href="tel:{{ announcement.contactPhone|replace({' ': ''}) }}">{{ announcement.contactPhone }}</a></li>
+                    </ul>
+                {% endif %}
+                {% if announcement.externalUrl %}
+                    <a href="{{ announcement.externalUrl }}" target="_blank" rel="noopener nofollow sponsored" class="bb-btn-primary">Voir l'annonce complète</a>
+                {% endif %}
+            </aside>
+        {% endif %}
+
+        <p class="bb-ann-detail-disclaimer">Annonce publiée par {{ announcement.organization }} et relue par la rédaction de {{ settings.siteName }} avant sa mise en ligne. Son contenu relève de la responsabilité de l'annonceur.</p>
+
+        <div class="bb-ann-detail-actions">
+            <a href="{{ path('app_announcement_index') }}" class="bb-btn-secondary">← Toutes les annonces</a>
+            <a href="{{ path('app_announcement_submit') }}" class="bb-btn-primary">Publier une annonce</a>
+        </div>
+    </article>
+
+    {{ include('partials/_footer.html.twig') }}
+
+</div>
+{% endblock %}

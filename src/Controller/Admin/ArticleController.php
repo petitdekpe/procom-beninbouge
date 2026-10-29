@@ -134,7 +134,7 @@ final class ArticleController extends AbstractController
 
         if ($revision && $revision->getArticle() === $article && $this->isCsrfTokenValid('submit', (string) $request->request->get('_token'))) {
             $this->articleSaver->restoreRevision($article, $revision);
-            $this->addFlash('success', 'Version restaurée. Le titre, le chapô et le contenu ont été remis à cet état — le statut de publication n\'a pas été modifié.');
+            $this->addFlash('success', 'Version restaurée. Le titre, le chapô et le contenu ont été remis à cet état, sans modifier le statut de publication.');
         }
 
         return $this->redirectToRoute('admin_article_history', ['id' => $article->getId()]);

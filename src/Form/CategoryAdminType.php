@@ -48,7 +48,7 @@ final class CategoryAdminType extends AbstractType
                 'class' => Category::class,
                 'choice_label' => 'name',
                 'required' => false,
-                'placeholder' => '— Aucune (catégorie de premier niveau) —',
+                'placeholder' => 'Aucune (catégorie de premier niveau)',
                 'help' => 'Laisser vide pour une catégorie de premier niveau.',
                 'query_builder' => function (\App\Repository\CategoryRepository $repo) use ($category): QueryBuilder {
                     $qb = $repo->createQueryBuilder('c')->orderBy('c.name', 'ASC');

@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Enum\DonationStatus;
+use App\Repository\AnnouncementRepository;
 use App\Repository\DonationRepository;
+use App\Service\AnnouncementPayment;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,11 +22,17 @@ use Symfony\Component\Routing\Attribute\Route;
  * Référence FedaPay : l'en-tête de signature a la forme
  * "t=<timestamp>,s=<hmac>", où <hmac> = HMAC-SHA256("<timestamp>.<payload>")
  * calculé avec le secret de webhook.
+ *
+ * Une seule URL de webhook sert les deux paiements du site : les dons et
+ * les annonces payantes (App\Entity\Announcement). La transaction est
+ * cherchée d'abord parmi les dons, puis parmi les annonces.
  */
 final class FedaPayWebhookController
 {
     public function __construct(
         private DonationRepository $donationRepository,
+        private AnnouncementRepository $announcementRepository,
+        private AnnouncementPayment $announcementPayment,
         private EntityManagerInterface $entityManager,
         #[Autowire(env: 'FEDAPAY_WEBHOOK_SECRET')]
         private string $webhookSecret,
@@ -57,7 +65,14 @@ final class FedaPayWebhookController
         $donation = $this->donationRepository->findOneBy(['transactionReference' => (string) $transactionId]);
 
         if (null === $donation) {
-            return new JsonResponse(['error' => 'Don introuvable pour cette transaction.'], Response::HTTP_NOT_FOUND);
+            $announcement = $this->announcementRepository->findOneBy(['transactionReference' => (string) $transactionId]);
+            if (null === $announcement) {
+                return new JsonResponse(['error' => 'Aucun don ni aucune annonce pour cette transaction.'], Response::HTTP_NOT_FOUND);
+            }
+
+            $this->announcementPayment->applyFedaPayStatus($announcement, \is_string($fedaPayStatus) ? $fedaPayStatus : null);
+
+            return new JsonResponse(['ok' => true]);
         }
 
         $newStatus = match ($fedaPayStatus) {

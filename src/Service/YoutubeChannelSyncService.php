@@ -13,7 +13,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * Imports the latest videos from a YouTube channel's public RSS feed as
  * Media entities (type Video, no article attached — see Media::$article).
  * Videos already imported are skipped by matching Media::$youtubeVideoId,
- * so running the sync repeatedly is safe.
+ * so running the sync repeatedly is safe — except that an already-imported
+ * video with no description gets it filled in from the feed (videos
+ * imported before descriptions were synced, or edited on YouTube later).
  *
  * Deliberately uses the free, key-less RSS feed rather than the YouTube
  * Data API: no quota to manage, no credentials to provision, and "latest
@@ -46,23 +48,37 @@ final class YoutubeChannelSyncService
         $entries = $xml->children('http://www.w3.org/2005/Atom')->entry;
 
         $imported = 0;
+        $changed = false;
 
         foreach ($entries as $entry) {
             $ytChildren = $entry->children('http://www.youtube.com/xml/schemas/2015');
             $videoId = (string) $ytChildren->videoId;
 
-            if ('' === $videoId || null !== $this->mediaRepository->findOneBy(['youtubeVideoId' => $videoId])) {
+            if ('' === $videoId) {
+                continue;
+            }
+
+            $mediaChildren = $entry->children('http://search.yahoo.com/mrss/');
+            $description = trim((string) ($mediaChildren->group?->description ?? ''));
+
+            $existing = $this->mediaRepository->findOneBy(['youtubeVideoId' => $videoId]);
+            if (null !== $existing) {
+                if ('' !== $description && '' === trim((string) $existing->getDescription())) {
+                    $existing->setDescription($description);
+                    $changed = true;
+                }
+
                 continue;
             }
 
             $atomChildren = $entry->children('http://www.w3.org/2005/Atom');
-            $mediaChildren = $entry->children('http://search.yahoo.com/mrss/');
             $thumbnailUrl = (string) ($mediaChildren->group?->thumbnail?->attributes()->url ?? '');
             $publishedAt = new \DateTimeImmutable((string) $atomChildren->published);
 
             $video = (new Media())
                 ->setType(MediaType::Video)
                 ->setTitle((string) $atomChildren->title)
+                ->setDescription('' !== $description ? $description : null)
                 ->setYoutubeEmbedUrl("https://www.youtube.com/embed/{$videoId}")
                 ->setYoutubeVideoId($videoId)
                 ->setThumbnail('' !== $thumbnailUrl ? $thumbnailUrl : null)
@@ -70,9 +86,10 @@ final class YoutubeChannelSyncService
 
             $this->entityManager->persist($video);
             ++$imported;
+            $changed = true;
         }
 
-        if ($imported > 0) {
+        if ($changed) {
             $this->entityManager->flush();
         }
 

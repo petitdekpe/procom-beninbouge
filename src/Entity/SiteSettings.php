@@ -101,6 +101,34 @@ class SiteSettings
     #[Assert\Url]
     private ?string $whatsappUrl = null;
 
+    // ----- Annonces & Opportunités (tarifs, en FCFA par jour d'affichage) -----
+    // Voir App\Service\AnnouncementPricing. Valeurs par défaut provisoires,
+    // à ajuster dans l'admin (Réglages → Tarifs des annonces).
+
+    /** Affichage sur la page Annonces (toujours inclus). */
+    #[ORM\Column(options: ['default' => 1000])]
+    #[Assert\PositiveOrZero]
+    private int $announcementDailyPrice = 1000;
+
+    /** Supplément « carte sur la page d'accueil ». */
+    #[ORM\Column(options: ['default' => 1000])]
+    #[Assert\PositiveOrZero]
+    private int $announcementHomeCardDailyPrice = 1000;
+
+    /** Supplément « pop-up sur la page d'accueil ». */
+    #[ORM\Column(options: ['default' => 2000])]
+    #[Assert\PositiveOrZero]
+    private int $announcementPopupDailyPrice = 2000;
+
+    #[ORM\Column(options: ['default' => 3])]
+    #[Assert\Range(min: 1, max: 365)]
+    private int $announcementMinDays = 3;
+
+    #[ORM\Column(options: ['default' => 60])]
+    #[Assert\Range(min: 1, max: 365)]
+    #[Assert\Expression('this.getAnnouncementMaxDays() >= this.getAnnouncementMinDays()', message: 'La durée maximale doit être supérieure ou égale à la durée minimale.')]
+    private int $announcementMaxDays = 60;
+
     // ----- Maintenance -----
 
     #[ORM\Column]
@@ -304,6 +332,66 @@ class SiteSettings
     public function setWhatsappUrl(?string $whatsappUrl): static
     {
         $this->whatsappUrl = $whatsappUrl;
+
+        return $this;
+    }
+
+    public function getAnnouncementDailyPrice(): int
+    {
+        return $this->announcementDailyPrice;
+    }
+
+    public function setAnnouncementDailyPrice(int $price): static
+    {
+        $this->announcementDailyPrice = $price;
+
+        return $this;
+    }
+
+    public function getAnnouncementHomeCardDailyPrice(): int
+    {
+        return $this->announcementHomeCardDailyPrice;
+    }
+
+    public function setAnnouncementHomeCardDailyPrice(int $price): static
+    {
+        $this->announcementHomeCardDailyPrice = $price;
+
+        return $this;
+    }
+
+    public function getAnnouncementPopupDailyPrice(): int
+    {
+        return $this->announcementPopupDailyPrice;
+    }
+
+    public function setAnnouncementPopupDailyPrice(int $price): static
+    {
+        $this->announcementPopupDailyPrice = $price;
+
+        return $this;
+    }
+
+    public function getAnnouncementMinDays(): int
+    {
+        return $this->announcementMinDays;
+    }
+
+    public function setAnnouncementMinDays(int $days): static
+    {
+        $this->announcementMinDays = $days;
+
+        return $this;
+    }
+
+    public function getAnnouncementMaxDays(): int
+    {
+        return $this->announcementMaxDays;
+    }
+
+    public function setAnnouncementMaxDays(int $days): static
+    {
+        $this->announcementMaxDays = $days;
 
         return $this;
     }

@@ -85,7 +85,7 @@ final class ArticleAdminType extends AbstractType
                 'label' => 'Auteur',
                 'class' => Author::class,
                 'choice_label' => fn (Author $author) => trim($author->getFirstName().' '.$author->getLastName()),
-                'help' => "Par défaut, l'article est publié sous votre propre nom. Si vous l'attribuez à quelqu'un d'autre — un autre auteur existant, ou un nouveau créé depuis Auteurs > Nouveau — sa diffusion devra être validée par un administrateur.",
+                'help' => "Par défaut, l'article est publié sous votre propre nom. S'il est attribué à un autre auteur, existant ou créé depuis Auteurs > Nouveau, sa diffusion devra être validée par un administrateur.",
             ])
             ->add('tags', EntityType::class, [
                 'label' => 'Tags',

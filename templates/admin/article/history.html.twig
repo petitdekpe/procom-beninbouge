@@ -1,6 +1,6 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block admin_title %}Historique — {{ article.title }}{% endblock %}
+{% block admin_title %}Historique | {{ article.title }}{% endblock %}
 
 {% block admin_body %}
     <div class="bo-page-head">
@@ -8,7 +8,7 @@
         <a href="{{ path('admin_article_edit', { id: article.id }) }}" class="bo-btn bo-btn-muted">← Retour à l'article</a>
     </div>
 
-    <p class="bo-muted" style="margin-bottom:18px">« {{ article.title }} » — {{ revisions|length }} version{{ revisions|length > 1 ? 's' : '' }} enregistrée{{ revisions|length > 1 ? 's' : '' }}.</p>
+    <p class="bo-muted" style="margin-bottom:18px">{{ revisions|length }} version{{ revisions|length > 1 ? 's' : '' }} enregistrée{{ revisions|length > 1 ? 's' : '' }} pour « {{ article.title }} ».</p>
 
     <div class="bo-card">
         {% if revisions|length > 0 %}

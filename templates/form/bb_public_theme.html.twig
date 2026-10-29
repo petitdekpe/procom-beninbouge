@@ -1,0 +1,49 @@
+{# Thème de formulaire pour les formulaires publics (annonces), aux styles du
+   formulaire « Nous joindre » : .bb-field, .bb-label, .bb-input, .bb-field-error.
+   Usage : {% form_theme form 'form/bb_public_theme.html.twig' %} #}
+{% use 'form_div_layout.html.twig' %}
+
+{% block form_row %}
+    {%- set isChoice = 'choice' in block_prefixes -%}
+    {%- set isFile = 'file' in block_prefixes -%}
+    {%- set widgetClass = isFile ? 'bb-file' : ('bb-input' ~ (isChoice ? ' bb-select' : '') ~ ('textarea' in block_prefixes ? ' bb-textarea' : '') ~ (errors|length > 0 ? ' is-invalid' : '')) -%}
+    <div class="bb-field">
+        {{- form_label(form) -}}
+        {{- form_widget(form, { attr: attr|merge({ class: ((attr.class ?? '') ~ ' ' ~ widgetClass)|trim }) }) -}}
+        {{- form_help(form) -}}
+        {{- form_errors(form) -}}
+    </div>
+{% endblock %}
+
+{% block checkbox_row %}
+    <div class="bb-field bb-check">
+        <div class="bb-check-line">
+            {{- form_widget(form) -}}
+            {{- form_label(form) -}}
+        </div>
+        {{- form_help(form) -}}
+        {{- form_errors(form) -}}
+    </div>
+{% endblock %}
+
+{% block form_label %}
+    {%- set label_attr = label_attr|merge({ class: ((label_attr.class ?? '') ~ ' bb-label')|trim }) -%}
+    {{- parent() -}}
+{% endblock %}
+
+{% block form_help %}
+    {%- if help is not empty -%}
+        <p id="{{ id }}_help" class="bb-field-help">{{ help|trans(help_translation_parameters, translation_domain) }}</p>
+    {%- endif -%}
+{% endblock %}
+
+{% block form_errors %}
+    {%- for error in errors -%}
+        <p class="bb-field-error">{{ error.message }}</p>
+    {%- endfor -%}
+{% endblock %}
+
+{# La mention « obligatoire » est portée par l'astérisque du libellé. #}
+{% block form_label_content %}
+    {{- parent() -}}{% if required and 'checkbox' not in block_prefixes %}<span class="bb-required" aria-hidden="true"> *</span>{% endif %}
+{% endblock %}

@@ -9,3 +9,8 @@ framework:
             - submit
             - authenticate
             - logout
+            # Formulaires publics « Nous joindre » et newsletter (footer, présent
+            # sur toutes les pages) : sans état pour ne pas ouvrir de session
+            # chez chaque visiteur.
+            - contact
+            - newsletter

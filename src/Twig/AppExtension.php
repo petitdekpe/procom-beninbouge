@@ -2,23 +2,32 @@
 
 namespace App\Twig;
 
+use App\Entity\Article;
 use App\Entity\Enum\HomeSectionType;
 use App\Entity\Enum\MediaLicense;
 use App\Entity\Enum\ProjectProgress;
 use App\Entity\Enum\ProjectType;
 use App\Entity\Page;
 use App\Entity\SiteSettings;
+use App\Repository\ArticleViewRepository;
 use App\Repository\PageRepository;
 use App\Repository\SiteSettingsRepository;
+use Symfony\Contracts\Service\ResetInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-final class AppExtension extends AbstractExtension
+final class AppExtension extends AbstractExtension implements ResetInterface
 {
+    private const MONTHS = [1 => 'janvier', 2 => 'février', 3 => 'mars', 4 => 'avril', 5 => 'mai', 6 => 'juin', 7 => 'juillet', 8 => 'août', 9 => 'septembre', 10 => 'octobre', 11 => 'novembre', 12 => 'décembre'];
+
+    /** @var array<int, int>|null view counts keyed by article id, loaded once per request */
+    private ?array $viewCounts = null;
+
     public function __construct(
         private readonly PageRepository $pageRepository,
         private readonly SiteSettingsRepository $siteSettingsRepository,
+        private readonly ArticleViewRepository $articleViewRepository,
     ) {
     }
 
@@ -31,6 +40,7 @@ final class AppExtension extends AbstractExtension
             new TwigFilter('project_type_label', [$this, 'projectTypeLabel']),
             new TwigFilter('excerpt', [$this, 'excerpt']),
             new TwigFilter('french_date', [$this, 'frenchDate']),
+            new TwigFilter('french_date_short', [$this, 'frenchDateShort']),
             new TwigFilter('format_number', [$this, 'formatNumber']),
             new TwigFilter('media_license_label', [$this, 'mediaLicenseLabel']),
             new TwigFilter('home_section_label', [$this, 'homeSectionLabel']),
@@ -59,6 +69,8 @@ final class AppExtension extends AbstractExtension
             HomeSectionType::Videos => 'Vidéos',
             HomeSectionType::Podcasts => 'Podcasts',
             HomeSectionType::CategoryHighlight => 'Rubrique en avant',
+            HomeSectionType::Contact => 'Nous joindre',
+            HomeSectionType::Announcements => 'Annonces & Opportunités',
         };
     }
 
@@ -67,6 +79,7 @@ final class AppExtension extends AbstractExtension
         return [
             new TwigFunction('static_pages', [$this, 'staticPages']),
             new TwigFunction('site_settings', [$this, 'siteSettings']),
+            new TwigFunction('article_views', [$this, 'articleViews']),
         ];
     }
 
@@ -100,7 +113,12 @@ final class AppExtension extends AbstractExtension
 
     public function excerpt(?string $text, int $length = 140): string
     {
-        $text = trim(strip_tags((string) $text));
+        // Espace avant chaque balise pour ne pas coller les paragraphes
+        // (« fin.</p><p>Début »), puis décodage des entités de l'éditeur
+        // riche (&nbsp;, &amp;…) et espaces normalisés.
+        $text = strip_tags(str_replace('<', ' <', (string) $text));
+        $text = html_entity_decode($text, \ENT_QUOTES | \ENT_HTML5, 'UTF-8');
+        $text = trim((string) preg_replace('/\s+/u', ' ', $text));
 
         if ('' === $text) {
             return '';
@@ -116,15 +134,35 @@ final class AppExtension extends AbstractExtension
     public function frenchDate(\DateTimeInterface $date): string
     {
         $days = [1 => 'lundi', 2 => 'mardi', 3 => 'mercredi', 4 => 'jeudi', 5 => 'vendredi', 6 => 'samedi', 7 => 'dimanche'];
-        $months = [1 => 'janvier', 2 => 'février', 3 => 'mars', 4 => 'avril', 5 => 'mai', 6 => 'juin', 7 => 'juillet', 8 => 'août', 9 => 'septembre', 10 => 'octobre', 11 => 'novembre', 12 => 'décembre'];
 
-        return sprintf(
-            '%s %d %s %d',
-            ucfirst($days[(int) $date->format('N')]),
-            (int) $date->format('j'),
-            $months[(int) $date->format('n')],
-            (int) $date->format('Y'),
-        );
+        return ucfirst($days[(int) $date->format('N')]).' '.$this->frenchDateShort($date);
+    }
+
+    /**
+     * « 4 février 2026 » — same as french_date without the weekday, used
+     * on article cards.
+     */
+    public function frenchDateShort(\DateTimeInterface $date): string
+    {
+        return sprintf('%d %s %d', (int) $date->format('j'), self::MONTHS[(int) $date->format('n')], (int) $date->format('Y'));
+    }
+
+    /**
+     * Total views of an article, for article cards. The whole id => count
+     * map is loaded with a single GROUP BY on first use, so a page listing
+     * many cards costs one query rather than one per card; reset() clears
+     * it between requests (FrankenPHP worker mode keeps services alive).
+     */
+    public function articleViews(Article $article): int
+    {
+        $this->viewCounts ??= $this->articleViewRepository->countByArticleMap();
+
+        return $this->viewCounts[$article->getId()] ?? 0;
+    }
+
+    public function reset(): void
+    {
+        $this->viewCounts = null;
     }
 
     public function timeAgo(?\DateTimeInterface $date): string

@@ -1,0 +1,102 @@
+{# Section « Nous joindre », calquée sur le formulaire de contact de
+   beninroots.bj : en-tête centré (pastille, titre, texte), carte blanche
+   avec nom, téléphone avec indicatif, e-mail facultatif, objet et message.
+   Envoi vers App\Controller\ContactController::submit, qui renvoie ici
+   (#contact) avec un message de succès, ou les erreurs et la saisie
+   précédente. Styles : .bb-contact* dans assets/styles/app.css. #}
+{% set contactSuccess = app.flashes('contact_success')|first %}
+{% set contactError = app.flashes('contact_error')|first %}
+{# Lus une seule fois dans une variable : « app.flashes(…) ?: {} » appellerait
+   app.flashes deux fois (Twig compile a ?: b en a ? a : b), et le second
+   appel ne renverrait plus rien puisque le premier a consommé le message. #}
+{% set errors = app.flashes('contact_errors')|first %}
+{% set errors = errors ?: {} %}
+{% set old = app.flashes('contact_old')|first %}
+{% set old = old ?: {} %}
+{% set countryCodes = constant('App\\Contact\\CountryCallingCodes::LIST') %}
+{% set selectedCode = old.countryCode|default(constant('App\\Contact\\CountryCallingCodes::DEFAULT')) %}
+<section id="contact" class="bb-contact">
+    <div class="bb-contact-inner">
+        <div class="bb-section-head">
+            <span class="bb-section-badge">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                Joignez-nous
+            </span>
+            <h2 class="bb-section-title">Contactez-nous</h2>
+            <p class="bb-section-lead">Pour tous renseignements ou suggestions, veuillez nous écrire en remplissant le formulaire ci-dessous.</p>
+        </div>
+
+        <div class="bb-contact-card">
+            {% if contactSuccess %}
+                <div class="bb-alert bb-alert-success" role="status">
+                    <strong>{{ contactSuccess }}</strong>
+                </div>
+            {% elseif contactError %}
+                <div class="bb-alert bb-alert-error" role="alert">{{ contactError }}</div>
+            {% elseif errors|length > 0 %}
+                <div class="bb-alert bb-alert-error" role="alert">Le message n'a pas pu être envoyé : vérifiez les champs signalés.</div>
+            {% endif %}
+
+            <form method="post" action="{{ path('app_contact_submit') }}" class="bb-contact-form" novalidate>
+                <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('contact') }}">
+                <div class="bb-hp" aria-hidden="true">
+                    <label for="contact-website">Ne pas remplir</label>
+                    <input type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off">
+                </div>
+
+                <div class="bb-field">
+                    <label for="contact-name" class="bb-label">Nom et Prénom</label>
+                    <div class="bb-input-wrap">
+                        <svg class="bb-input-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <input type="text" id="contact-name" name="fullName" class="bb-input bb-input-with-icon{{ errors.fullName is defined ? ' is-invalid' }}" placeholder="Nom et Prénom" value="{{ old.fullName|default('') }}" required minlength="2" maxlength="100" autocomplete="name"{% if errors.fullName is defined %} aria-invalid="true" aria-describedby="contact-name-error"{% endif %}>
+                    </div>
+                    {% if errors.fullName is defined %}<p class="bb-field-error" id="contact-name-error">{{ errors.fullName }}</p>{% endif %}
+                </div>
+
+                <div class="bb-field">
+                    <label for="contact-phone" class="bb-label">Numéro de téléphone</label>
+                    <div class="bb-phone-row">
+                        <select name="countryCode" class="bb-input bb-select bb-phone-code" aria-label="Indicatif pays">
+                            {% for code, country in countryCodes %}
+                                <option value="{{ code }}"{% if code == selectedCode %} selected{% endif %}>{{ country }} ({{ code }})</option>
+                            {% endfor %}
+                        </select>
+                        <div class="bb-input-wrap bb-phone-number">
+                            <svg class="bb-input-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg>
+                            <input type="tel" id="contact-phone" name="phone" class="bb-input bb-input-with-icon{{ errors.phone is defined ? ' is-invalid' }}" placeholder="XX XX XX XX XX" value="{{ old.phone|default('') }}" required inputmode="numeric" pattern="[0-9 ]*" maxlength="20" autocomplete="tel-national"{% if errors.phone is defined %} aria-invalid="true" aria-describedby="contact-phone-error"{% endif %}>
+                        </div>
+                    </div>
+                    {% if errors.phone is defined %}<p class="bb-field-error" id="contact-phone-error">{{ errors.phone }}</p>{% endif %}
+                </div>
+
+                <div class="bb-field">
+                    <label for="contact-email" class="bb-label">Email (optionnel)</label>
+                    <div class="bb-input-wrap">
+                        <svg class="bb-input-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+                        <input type="email" id="contact-email" name="email" class="bb-input bb-input-with-icon{{ errors.email is defined ? ' is-invalid' }}" placeholder="Entrer votre adresse email" value="{{ old.email|default('') }}" maxlength="180" autocomplete="email"{% if errors.email is defined %} aria-invalid="true" aria-describedby="contact-email-error"{% endif %}>
+                    </div>
+                    {% if errors.email is defined %}<p class="bb-field-error" id="contact-email-error">{{ errors.email }}</p>{% endif %}
+                </div>
+
+                <div class="bb-field">
+                    <label for="contact-subject" class="bb-label">Objet</label>
+                    <select id="contact-subject" name="subject" class="bb-input bb-select{{ errors.subject is defined ? ' is-invalid' }}" required{% if errors.subject is defined %} aria-invalid="true" aria-describedby="contact-subject-error"{% endif %}>
+                        <option value="" disabled{% if old.subject is not defined or old.subject == '' %} selected{% endif %}>Sélectionnez un objet</option>
+                        {% for subject in enum_cases('App\\Entity\\Enum\\ContactSubject') %}
+                            <option value="{{ subject.value }}"{% if old.subject|default('') == subject.value %} selected{% endif %}>{{ subject.label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if errors.subject is defined %}<p class="bb-field-error" id="contact-subject-error">{{ errors.subject }}</p>{% endif %}
+                </div>
+
+                <div class="bb-field">
+                    <label for="contact-message" class="bb-label">Message</label>
+                    <textarea id="contact-message" name="message" class="bb-input bb-textarea{{ errors.message is defined ? ' is-invalid' }}" placeholder="Écrivez votre message ici..." required minlength="10" maxlength="1000"{% if errors.message is defined %} aria-invalid="true" aria-describedby="contact-message-error"{% endif %}>{{ old.message|default('') }}</textarea>
+                    {% if errors.message is defined %}<p class="bb-field-error" id="contact-message-error">{{ errors.message }}</p>{% endif %}
+                </div>
+
+                <button type="submit" class="bb-contact-submit">Envoyer le message</button>
+            </form>
+        </div>
+    </div>
+</section>

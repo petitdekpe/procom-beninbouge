@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{% block admin_title %}Backoffice{% endblock %} — {{ site_settings().siteName }}{% endblock %}
+{% block title %}{% block admin_title %}Backoffice{% endblock %} | {{ site_settings().siteName }}{% endblock %}
 
 {% block stylesheets %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -220,6 +220,24 @@
                         <svg viewBox="0 0 24 24"><path d="M4 19.5V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5 4.5Z"/></svg>
                         <span class="bo-label">Commentaires</span>
                     </a>
+                    {% if is_granted('ROLE_EDITOR_IN_CHIEF') %}
+                        <a href="{{ path('admin_announcement_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_announcement' ? 'active' : '' }}">
+                            <svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+                            <span class="bo-label">Annonces</span>
+                        </a>
+                        <a href="{{ path('admin_contact_message_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_contact_message' ? 'active' : '' }}">
+                            <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            <span class="bo-label">Messages</span>
+                        </a>
+                        <a href="{{ path('admin_newsletter_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_newsletter' ? 'active' : '' }}">
+                            <svg viewBox="0 0 24 24"><path d="M3.7 3.05a.5.5 0 0 0-.68.63l2.84 7.62a2 2 0 0 1 0 1.4l-2.84 7.62a.5.5 0 0 0 .68.63l18-8.5a.5.5 0 0 0 0-.9z"/><path d="M6 12h16"/></svg>
+                            <span class="bo-label">Newsletter</span>
+                        </a>
+                        <a href="{{ path('admin_team_member_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_team_member' ? 'active' : '' }}">
+                            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <span class="bo-label">Équipe</span>
+                        </a>
+                    {% endif %}
                     <a href="{{ path('admin_page_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_page' ? 'active' : '' }}">
                         <svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 12h6M9 16h6"/></svg>
                         <span class="bo-label">Pages</span>

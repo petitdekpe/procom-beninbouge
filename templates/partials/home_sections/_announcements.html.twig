@@ -1,0 +1,30 @@
+{# Section d'accueil « Annonces & Opportunités » : les annonces en ligne ayant
+   acheté l'option « carte sur l'accueil » (3 au plus). Sans annonce, une
+   carte d'information invite à publier. Attend : announcements (list<Announcement>). #}
+<section id="annonces" class="bb-ann-home">
+    <div class="bb-about-inner">
+        <div class="bb-ann-home-head">
+            <div>
+                <span class="bb-section-badge">Annonces & Opportunités</span>
+                <h2 class="bb-ann-home-title">Emplois, appels d'offres, bourses et événements</h2>
+            </div>
+            <a href="{{ path('app_announcement_index') }}" class="bb-ann-home-all">Toutes les annonces →</a>
+        </div>
+
+        {% if announcements|length > 0 %}
+            <div class="bb-ann-grid">
+                {% for announcement in announcements %}
+                    {{ include('announcement/_card.html.twig', { announcement: announcement }) }}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bb-ann-home-info">
+                <div>
+                    <h3>Faites connaître votre offre</h3>
+                    <p>Recrutement, appel d'offres, bourse, formation ou événement : publiez votre annonce sur {{ site_settings().siteName }}. Paiement en ligne, validation par la rédaction sous 48 h.</p>
+                </div>
+                <a href="{{ path('app_announcement_submit') }}" class="bb-btn-primary">Publier une annonce</a>
+            </div>
+        {% endif %}
+    </div>
+</section>

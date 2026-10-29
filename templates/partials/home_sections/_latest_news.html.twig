@@ -1,5 +1,5 @@
 {# Attend : actu (list<Article>), gradientPalette (list<string>, dégradés de secours sans cover). #}
-<section id="actu" class="bb-actu-layout" style="max-width:1240px;margin:64px auto 0;padding:0 24px;display:flex;gap:60px">
+<section id="actu" class="bb-actu-layout" style="max-width:var(--bb-container);margin:64px auto 0;padding:0 24px;display:flex;gap:60px">
     <div class="bb-actu-sidebar" style="flex:0 0 34%">
         <div class="bb-actu-sticky" style="position:sticky;top:150px;z-index:1">
             <span style="display:inline-block;background:#CF3732;color:#fff;font-weight:800;font-size:11.5px;letter-spacing:.5px;padding:7px 16px;border-radius:999px;text-transform:uppercase">Actualités</span>
@@ -10,23 +10,15 @@
         </div>
     </div>
 
-    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:48px" data-controller="impression-tracker" data-impression-tracker-context-value="home_latest_news">
+    <div class="bb-grid-2" style="flex:1;min-width:0;gap:32px;align-content:start" data-controller="impression-tracker" data-impression-tracker-context-value="home_latest_news">
         {% if actu|length > 0 %}
             {% for article in actu %}
                 {% set gradient = gradientPalette[loop.index0 % 4] %}
-                <a href="{{ path('app_article_show', { slug: article.slug }) }}" class="bb-card" data-impression-tracker-target="card" data-article-id="{{ article.id }}" style="text-decoration:none;display:block">
-                    <div style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/9">
-                        <div class="bb-zoom" style="position:absolute;inset:0;{% if article.coverImage %}background:url('{{ article.coverImage }}') center/cover{% else %}background:{{ gradient }}{% endif %}"></div>
-                        {% if article.category %}<span style="position:absolute;top:14px;left:14px;background:{{ article.category.color }};color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.4px;padding:5px 10px;border-radius:6px;text-transform:uppercase">{{ article.category.name }}</span>{% endif %}
-                    </div>
-                    <h3 class="bb-h" style="font-family:'Archivo';font-weight:800;font-size:20px;line-height:1.25;color:#14160F;margin-top:18px">{{ article.title }}</h3>
-                    {% if article.chapo %}<p style="color:#51544a;font-size:14px;line-height:1.7;margin-top:10px">{{ article.chapo|excerpt(170) }}</p>{% endif %}
-                    <div style="color:#8a8a7c;font-size:12px;font-weight:600;margin-top:12px">{{ article.publishedAt|time_ago }}</div>
-                </a>
+                {{ include('partials/_article_card.html.twig', { article: article, gradient: gradient }) }}
             {% endfor %}
-            <a href="#" style="text-decoration:none;text-align:center;background:#fff;border:1px solid #e3e0d4;color:#14160F;font-weight:800;font-size:14.5px;padding:15px;border-radius:12px">Voir toutes les actualités →</a>
+            <a href="#" style="grid-column:1/-1;text-decoration:none;text-align:center;background:#fff;border:1px solid #e3e0d4;color:#14160F;font-weight:800;font-size:14.5px;padding:15px;border-radius:12px">Voir toutes les actualités →</a>
         {% else %}
-            <p class="bb-empty">Aucun article publié pour le moment.</p>
+            <p class="bb-empty" style="grid-column:1/-1">Aucun article publié pour le moment.</p>
         {% endif %}
     </div>
 </section>

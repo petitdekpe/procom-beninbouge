@@ -1,0 +1,52 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Messages{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Messages « Nous joindre »</h1>
+    </div>
+
+    <div class="bo-toolbar">
+        <div class="bo-filters">
+            <a href="{{ path('admin_contact_message_index') }}" class="bo-pill {{ unreadOnly ? 'active' : '' }}">Non lus{% if unreadCount > 0 %} ({{ unreadCount }}){% endif %}</a>
+            <a href="{{ path('admin_contact_message_index', { filter: 'all' }) }}" class="bo-pill {{ not unreadOnly ? 'active' : '' }}">Tous</a>
+        </div>
+    </div>
+
+    <div class="bo-card">
+        {% if messages|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr><th>Expéditeur</th><th>Objet</th><th>Message</th><th>Date</th><th style="text-align:right">Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for message in messages %}
+                        <tr{% if not message.read %} style="background:#fffbea"{% endif %}>
+                            <td style="font-weight:700;white-space:nowrap">
+                                {{ message.fullName }}
+                                <div class="bo-muted" style="font-weight:400;font-size:11.5px"><a href="tel:{{ message.phone }}">{{ message.phone }}</a></div>
+                                {% if message.email %}<div class="bo-muted" style="font-weight:400;font-size:11.5px"><a href="mailto:{{ message.email }}">{{ message.email }}</a></div>{% endif %}
+                            </td>
+                            <td class="bo-muted" style="white-space:nowrap">{{ message.subject.label }}</td>
+                            <td style="max-width:420px;white-space:pre-line">{{ message.message }}</td>
+                            <td class="bo-muted" style="white-space:nowrap">{{ message.createdAt|date('d/m/Y H:i') }}</td>
+                            <td style="text-align:right;white-space:nowrap">
+                                <form method="post" action="{{ path('admin_contact_message_toggle_read', { id: message.id, filter: unreadOnly ? null : 'all' }) }}" style="display:inline">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn {{ message.read ? 'bo-btn-muted' : 'bo-btn-accent' }}">{{ message.read ? 'Marquer non lu' : 'Marquer lu' }}</button>
+                                </form>
+                                <form method="post" action="{{ path('admin_contact_message_delete', { id: message.id, filter: unreadOnly ? null : 'all' }) }}" style="display:inline" onsubmit="return confirm('Supprimer définitivement ce message ?');">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-danger">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">{{ unreadOnly ? 'Aucun message non lu.' : 'Aucun message reçu pour le moment.' }}</p>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Annonce {{ announcement.reference }}{% endblock %}
+
+{% block admin_body %}
+    {% set status = announcement.status.value %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">{{ announcement.title }}</h1>
+        <a href="{{ path('admin_announcement_index') }}" class="bo-btn bo-btn-muted">← Retour à la liste</a>
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:20px;align-items:start">
+        <div class="bo-card" style="padding:24px">
+            <p class="bo-muted" style="margin:0 0 6px">{{ announcement.reference }} · {{ announcement.category.label }} · {{ announcement.organization }}</p>
+            {% if announcement.location or announcement.deadline %}
+                <p class="bo-muted" style="margin:0 0 16px">
+                    {{ announcement.location }}{% if announcement.location and announcement.deadline %} · {% endif %}
+                    {% if announcement.deadline %}Date limite : {{ announcement.deadline|date('d/m/Y') }}{% endif %}
+                </p>
+            {% endif %}
+            {% if announcement.image %}
+                <img src="{{ announcement.image }}" alt="" style="max-width:100%;max-height:360px;border-radius:10px;display:block;margin-bottom:16px">
+            {% endif %}
+            <div style="white-space:pre-line;line-height:1.65">{{ announcement.description }}</div>
+            {% if announcement.externalUrl %}
+                <p style="margin-top:16px"><strong>Lien :</strong> <a href="{{ announcement.externalUrl }}" target="_blank" rel="noopener nofollow">{{ announcement.externalUrl }}</a></p>
+            {% endif %}
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:20px">
+            <div class="bo-card" style="padding:20px">
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 12px">Statut</h2>
+                <p style="font-weight:800;margin:0 0 6px">
+                    {% if announcement.online %}En ligne{% elseif announcement.expired %}Expirée{% else %}{{ announcement.status.label }}{% endif %}
+                </p>
+                {% if status == 'pending_review' %}
+                    <p style="margin:0;color:{{ announcement.reviewOverdue ? '#b91c1c' : 'inherit' }}">À valider avant le {{ announcement.reviewDeadline|date('d/m/Y à H:i') }}{% if announcement.reviewOverdue %} (délai dépassé){% endif %}</p>
+                {% elseif announcement.startsAt %}
+                    <p class="bo-muted" style="margin:0">Du {{ announcement.startsAt|date('d/m/Y H:i') }} au {{ announcement.endsAt|date('d/m/Y H:i') }}</p>
+                {% endif %}
+                {% if announcement.reviewedAt %}
+                    <p class="bo-muted" style="margin:6px 0 0">Traitée le {{ announcement.reviewedAt|date('d/m/Y H:i') }}{% if announcement.reviewedBy %} par {{ announcement.reviewedBy.userIdentifier }}{% endif %}</p>
+                {% endif %}
+                {% if status == 'rejected' %}
+                    <p style="margin:10px 0 0"><strong>Motif :</strong> {{ announcement.rejectionReason }}</p>
+                {% endif %}
+                {% if announcement.online %}
+                    <p style="margin:10px 0 0"><a href="{{ path('app_announcement_show', { reference: announcement.reference }) }}" target="_blank" rel="noopener">Voir l'annonce publiée</a></p>
+                {% endif %}
+            </div>
+
+            <div class="bo-card" style="padding:20px">
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 12px">Formule et paiement</h2>
+                <p style="margin:0 0 4px">{{ announcement.durationDays }} jours · page Annonces{{ announcement.withHomeCard ? ' · carte accueil' }}{{ announcement.withPopup ? ' · pop-up accueil' }}</p>
+                <p style="margin:0 0 4px;font-weight:800">{{ announcement.amount|format_number }} FCFA</p>
+                <p class="bo-muted" style="margin:0">
+                    {% if announcement.paidAt %}Payée le {{ announcement.paidAt|date('d/m/Y H:i') }}{% else %}Non payée{% endif %}
+                    {% if announcement.transactionReference %} · transaction FedaPay n° {{ announcement.transactionReference }}{% endif %}
+                </p>
+            </div>
+
+            <div class="bo-card" style="padding:20px">
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 12px">Contact annonceur</h2>
+                <p style="margin:0 0 4px;font-weight:700">{{ announcement.contactName }}</p>
+                <p style="margin:0 0 4px"><a href="mailto:{{ announcement.contactEmail }}">{{ announcement.contactEmail }}</a></p>
+                <p style="margin:0 0 4px"><a href="tel:{{ announcement.contactPhone|replace({' ': ''}) }}">{{ announcement.contactPhone }}</a></p>
+                <p class="bo-muted" style="margin:0">{{ announcement.showContact ? 'Coordonnées affichées sur l\'annonce' : 'Coordonnées non affichées' }}</p>
+            </div>
+
+            {% if status == 'pending_review' %}
+                <div class="bo-card" style="padding:20px">
+                    <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 12px">Décision</h2>
+                    <form method="post" action="{{ path('admin_announcement_approve', { id: announcement.id }) }}" onsubmit="return confirm('Valider et mettre en ligne cette annonce pour {{ announcement.durationDays }} jours ?');" style="margin-bottom:16px">
+                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                        <button type="submit" class="bo-btn bo-btn-accent" style="width:100%">Valider et mettre en ligne</button>
+                    </form>
+                    <form method="post" action="{{ path('admin_announcement_reject', { id: announcement.id }) }}">
+                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                        <label for="reject-reason" style="display:block;font-weight:700;font-size:13px;margin-bottom:6px">Motif du refus (visible par l'annonceur)</label>
+                        <textarea id="reject-reason" name="reason" rows="3" required maxlength="1000" style="width:100%;margin-bottom:10px"></textarea>
+                        <button type="submit" class="bo-btn bo-btn-danger" style="width:100%">Refuser l'annonce</button>
+                    </form>
+                    <p class="bo-muted" style="margin:12px 0 0;font-size:12px">En cas de refus, le remboursement éventuel se fait depuis le tableau de bord FedaPay.</p>
+                </div>
+            {% elseif announcement.online %}
+                <div class="bo-card" style="padding:20px">
+                    <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 12px">Retirer l'annonce</h2>
+                    <form method="post" action="{{ path('admin_announcement_reject', { id: announcement.id }) }}">
+                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                        <label for="withdraw-reason" style="display:block;font-weight:700;font-size:13px;margin-bottom:6px">Motif du retrait (visible par l'annonceur)</label>
+                        <textarea id="withdraw-reason" name="reason" rows="3" required maxlength="1000" style="width:100%;margin-bottom:10px"></textarea>
+                        <button type="submit" class="bo-btn bo-btn-danger" style="width:100%" onclick="return confirm('Retirer cette annonce du site ?');">Retirer du site</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

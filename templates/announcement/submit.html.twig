@@ -1,0 +1,133 @@
+{% extends 'base.html.twig' %}
+
+{# Formulaire public « Publier une annonce » (App\Controller\AnnouncementController::submit),
+   suivi du paiement FedaPay. Le récapitulatif de prix est une estimation
+   calculée en JS (assets/controllers/announcement_price_controller.js) avec
+   les tarifs de l'admin ; le montant facturé est recalculé côté serveur. #}
+{% form_theme form 'form/bb_public_theme.html.twig' %}
+
+{% set settings = site_settings() %}
+
+{% block title %}Publier une annonce | {{ settings.siteName }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    {{ include('partials/_seo_meta.html.twig', {
+        ogTitle: 'Publier une annonce | ' ~ settings.siteName,
+        metaDescription: "Publiez une offre d'emploi, un appel d'offres, une bourse ou un événement sur " ~ settings.siteName ~ '. Paiement en ligne sécurisé, validation sous 48 h.',
+        canonicalUrl: url('app_announcement_submit'),
+    }) }}
+{% endblock %}
+
+{% block body %}
+<div class="bb-ann-page">
+
+    {{ include('partials/_header.html.twig') }}
+
+    <section class="bb-ann-hero bb-ann-hero--compact">
+        <div class="bb-about-inner">
+            <nav class="bb-breadcrumb" aria-label="Fil d'Ariane">
+                <a href="{{ path('app_home') }}">Accueil</a>
+                <span aria-hidden="true">/</span>
+                <a href="{{ path('app_announcement_index') }}">Annonces & Opportunités</a>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page">Publier une annonce</span>
+            </nav>
+            <div class="bb-section-head">
+                <h1 class="bb-section-title">Publier une annonce</h1>
+                <p class="bb-section-lead">Remplissez le formulaire, choisissez la durée et les options d'affichage, puis réglez en ligne. Votre annonce est relue par la rédaction et mise en ligne sous 48 h.</p>
+            </div>
+            <ol class="bb-ann-steps">
+                <li><span>1</span> Vous décrivez votre annonce</li>
+                <li><span>2</span> Vous payez en ligne (FedaPay)</li>
+                <li><span>3</span> La rédaction valide sous 48 h</li>
+                <li><span>4</span> L'annonce est en ligne pour la durée choisie</li>
+            </ol>
+        </div>
+    </section>
+
+    <section class="bb-about-section bb-ann-form-section">
+        <div class="bb-about-inner">
+            {{ form_start(form, { attr: { class: 'bb-ann-form', novalidate: 'novalidate', 'data-controller': 'announcement-price', 'data-announcement-price-rates-value': rates|json_encode } }) }}
+                {% if not form.vars.valid %}
+                    <div class="bb-alert bb-alert-error" role="alert">L'annonce n'a pas pu être enregistrée : vérifiez les champs signalés.</div>
+                {% endif %}
+                {{ form_errors(form) }}
+
+                <div class="bb-ann-form-main">
+                    <fieldset class="bb-ann-fieldset">
+                        <legend>Votre annonce</legend>
+                        {{ form_row(form.category) }}
+                        {{ form_row(form.title) }}
+                        {{ form_row(form.organization) }}
+                        <div class="bb-ann-form-2cols">
+                            {{ form_row(form.location) }}
+                            {{ form_row(form.deadline) }}
+                        </div>
+                        {{ form_row(form.description) }}
+                        {{ form_row(form.externalUrl) }}
+                        {{ form_row(form.imageFile) }}
+                    </fieldset>
+
+                    <fieldset class="bb-ann-fieldset">
+                        <legend>Contact</legend>
+                        <p class="bb-field-help">Ces coordonnées servent à la rédaction pour vous joindre au sujet de l'annonce.</p>
+                        {{ form_row(form.contactName) }}
+                        <div class="bb-ann-form-2cols">
+                            {{ form_row(form.contactEmail) }}
+                            {{ form_row(form.contactPhone) }}
+                        </div>
+                        {{ form_row(form.showContact) }}
+                    </fieldset>
+
+                    <fieldset class="bb-ann-fieldset">
+                        <legend>Affichage</legend>
+                        {{ form_row(form.durationDays, { attr: { 'data-announcement-price-target': 'days', 'data-action': 'input->announcement-price#update' } }) }}
+                        <div class="bb-ann-options">
+                            <div class="bb-ann-option is-included">
+                                <strong>Page Annonces & Opportunités</strong>
+                                <span>Toujours inclus · {{ rates.page|format_number }} FCFA / jour</span>
+                            </div>
+                            <label class="bb-ann-option">
+                                {{ form_widget(form.withHomeCard, { attr: { 'data-announcement-price-target': 'homeCard', 'data-action': 'change->announcement-price#update' } }) }}
+                                <span>
+                                    <strong>Carte sur la page d'accueil</strong>
+                                    <span>Votre annonce dans la section « Annonces & Opportunités » de l'accueil · + {{ rates.homeCard|format_number }} FCFA / jour</span>
+                                </span>
+                            </label>
+                            <label class="bb-ann-option">
+                                {{ form_widget(form.withPopup, { attr: { 'data-announcement-price-target': 'popup', 'data-action': 'change->announcement-price#update' } }) }}
+                                <span>
+                                    <strong>Pop-up sur la page d'accueil</strong>
+                                    <span>Une fenêtre présentant votre annonce à l'ouverture de l'accueil · + {{ rates.popup|format_number }} FCFA / jour</span>
+                                </span>
+                            </label>
+                        </div>
+                        {{ form_row(form.acceptTerms) }}
+                    </fieldset>
+                </div>
+
+                <aside class="bb-ann-summary" aria-live="polite">
+                    <h2>Récapitulatif</h2>
+                    <dl>
+                        <div><dt>Durée</dt><dd data-announcement-price-target="daysLabel">{{ form.durationDays.vars.value ?: rates.minDays }} jours</dd></div>
+                        <div><dt>Tarif journalier</dt><dd data-announcement-price-target="daily">{{ rates.page|format_number }} FCFA</dd></div>
+                    </dl>
+                    <p class="bb-ann-summary-total">
+                        <span>Total</span>
+                        <strong data-announcement-price-target="total">{{ (rates.page * rates.minDays)|format_number }} FCFA</strong>
+                    </p>
+                    <p class="bb-ann-summary-note">Montant définitif confirmé sur la page de paiement FedaPay (Mobile Money ou carte bancaire).</p>
+                    <button type="submit" class="bb-btn-primary bb-ann-submit">Continuer vers le paiement</button>
+                    <p class="bb-ann-summary-note">L'affichage commence à la validation de l'annonce par la rédaction, sous 48 h après le paiement.</p>
+                </aside>
+            {{ form_end(form) }}
+        </div>
+    </section>
+
+    {{ include('partials/_footer.html.twig') }}
+
+</div>
+{% endblock %}

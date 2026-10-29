@@ -10,4 +10,6 @@ enum HomeSectionType: string
     case Videos = 'videos';
     case Podcasts = 'podcasts';
     case CategoryHighlight = 'category_highlight';
+    case Contact = 'contact';
+    case Announcements = 'announcements';
 }

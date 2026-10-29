@@ -1,0 +1,38 @@
+{# Pagination publique réutilisable. Attend : page (int, courante), pageCount (int),
+   route (string) ; optionnel : routeParams (paramètres conservés, ex. filtre), anchor.
+   La page 1 n'a pas de paramètre « page » (URL canonique propre).
+   Styles : .bb-pagination dans assets/styles/app.css. #}
+{% if pageCount > 1 %}
+    {% set routeParams = routeParams|default({}) %}
+    {% set anchor = anchor is defined and anchor ? '#' ~ anchor : '' %}
+    {% set window = 1 %}
+    <nav class="bb-pagination" aria-label="Pagination">
+        {% if page > 1 %}
+            <a href="{{ path(route, page - 1 > 1 ? routeParams|merge({ page: page - 1 }) : routeParams) ~ anchor }}" class="bb-page-link" rel="prev" aria-label="Page précédente">‹ Précédent</a>
+        {% else %}
+            <span class="bb-page-link is-disabled" aria-hidden="true">‹ Précédent</span>
+        {% endif %}
+
+        <ul class="bb-page-list">
+            {% for p in 1..pageCount %}
+                {% if p == 1 or p == pageCount or (p >= page - window and p <= page + window) %}
+                    <li>
+                        {% if p == page %}
+                            <span class="bb-page-link is-current" aria-current="page">{{ p }}</span>
+                        {% else %}
+                            <a href="{{ path(route, p > 1 ? routeParams|merge({ page: p }) : routeParams) ~ anchor }}" class="bb-page-link" aria-label="Page {{ p }}">{{ p }}</a>
+                        {% endif %}
+                    </li>
+                {% elseif p == page - window - 1 or p == page + window + 1 %}
+                    <li><span class="bb-page-gap" aria-hidden="true">…</span></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+
+        {% if page < pageCount %}
+            <a href="{{ path(route, routeParams|merge({ page: page + 1 })) ~ anchor }}" class="bb-page-link" rel="next" aria-label="Page suivante">Suivant ›</a>
+        {% else %}
+            <span class="bb-page-link is-disabled" aria-hidden="true">Suivant ›</span>
+        {% endif %}
+    </nav>
+{% endif %}

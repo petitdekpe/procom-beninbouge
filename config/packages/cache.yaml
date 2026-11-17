@@ -14,11 +14,14 @@ framework:
         # APCu (not recommended with heavy random-write workloads as memory fragmentation can cause perf issues)
         #app: cache.adapter.apcu
 
-        # Dedicated Redis-backed pool used to cache the Article/Category
-        # listing queries (see App\State\CachedArticleCollectionProvider
-        # and App\State\CachedCategoryCollectionProvider).
+        # Dedicated pool used to cache the Article/Category listing queries
+        # (see App\State\CachedArticleCollectionProvider and
+        # App\State\CachedCategoryCollectionProvider). Filesystem-backed so it
+        # works without any extra service: a Redis outage/absence used to make
+        # every admin write (save, trash, category edit) fail with a 500 when
+        # it called $listingsCache->clear(). To go back to Redis, set
+        # adapter: cache.adapter.redis and provider: '%env(REDIS_URL)%'.
         pools:
             cache.listings:
-                adapter: cache.adapter.redis
-                provider: '%env(REDIS_URL)%'
+                adapter: cache.adapter.filesystem
                 default_lifetime: 60

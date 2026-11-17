@@ -1,4 +1,7 @@
-{{ form_start(form, { attr: { class: 'bo-wizard' } }) }}
+{# Le conteneur .bo-wizard est un <div> : l'en-tête et le panneau workflow (qui contiennent
+   leurs propres <form>) doivent rester HORS du <form> de l'article, car les formulaires
+   imbriqués sont invalides en HTML et cassent la soumission (Enregistrer, upload d'image…). #}
+<div class="bo-wizard">
     <div class="bo-wizard-head">
         <div>
             <p class="bo-wizard-title">{{ heading }}</p>
@@ -17,6 +20,7 @@
         {% include 'admin/article/_workflow_panel.html.twig' %}
     {% endif %}
 
+    {{ form_start(form, { attr: { enctype: 'multipart/form-data' } }) }}
     <div class="bo-step">
         <div class="bo-form-row">{{ form_row(form.title) }}</div>
         <div class="bo-form-row">{{ form_row(form.slug) }}</div>
@@ -40,14 +44,8 @@
                 <p style="margin:0 0 8px">Cet article est attribué à un autre auteur : il est en attente de validation par un administrateur (statut demandé : {{ article.requestedStatus.value == 'published' ? 'Publié' : 'Programmé' }}) et reste invisible sur le site jusque-là.</p>
                 {% if is_granted('ROLE_ADMIN') %}
                     <div style="display:flex;gap:8px;margin-top:6px">
-                        <form method="post" action="{{ path('admin_validation_article_approve', { id: article.id }) }}">
-                            <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
-                            <button type="submit" class="bo-btn bo-btn-accent">Valider</button>
-                        </form>
-                        <form method="post" action="{{ path('admin_validation_article_reject', { id: article.id }) }}" onsubmit="return confirm('Rejeter cet article ?');">
-                            <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
-                            <button type="submit" class="bo-btn bo-btn-muted">Rejeter</button>
-                        </form>
+                        <button type="submit" form="bo-approve-form" class="bo-btn bo-btn-accent">Valider</button>
+                        <button type="submit" form="bo-reject-form" class="bo-btn bo-btn-muted">Rejeter</button>
                     </div>
                 {% endif %}
             </div>
@@ -68,4 +66,14 @@
             <button type="submit" class="bo-btn bo-btn-accent" data-step-submit>Enregistrer</button>
         </div>
     </div>
-{{ form_end(form) }}
+    {{ form_end(form) }}
+
+    {% if article.pendingApproval and is_granted('ROLE_ADMIN') %}
+        <form id="bo-approve-form" method="post" action="{{ path('admin_validation_article_approve', { id: article.id }) }}">
+            <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+        </form>
+        <form id="bo-reject-form" method="post" action="{{ path('admin_validation_article_reject', { id: article.id }) }}" onsubmit="return confirm('Rejeter cet article ?');">
+            <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+        </form>
+    {% endif %}
+</div>

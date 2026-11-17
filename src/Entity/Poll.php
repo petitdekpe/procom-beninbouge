@@ -38,7 +38,7 @@ class Poll
     private ?string $question = null;
 
     #[ORM\ManyToOne(targetEntity: Article::class)]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Article $article = null;
 
     #[ORM\Column(nullable: true)]

@@ -1,5 +1,5 @@
 {# Attend : category (App\Entity\Category), articles (list<Article>), gradientPalette (list<string>). #}
-<section id="rubrique-{{ category.slug }}" style="max-width:var(--bb-container);margin:64px auto 0;padding:0 24px">
+<section id="rubrique-{{ category.slug }}" style="max-width:var(--bb-container);margin:64px auto 0;padding:0 var(--bb-gutter)">
     <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:30px">
         <div>
             <span style="display:inline-block;background:{{ category.color }};color:#fff;font-weight:800;font-size:11.5px;letter-spacing:.5px;padding:7px 16px;border-radius:999px;text-transform:uppercase">{{ category.name }}</span>

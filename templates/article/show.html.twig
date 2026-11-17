@@ -72,7 +72,7 @@
     </article>
 
     {% if article.coverImage %}
-        <div style="max-width:1100px;margin:28px auto 0;padding:0 24px">
+        <div style="max-width:1100px;margin:28px auto 0;padding:0 var(--bb-gutter)">
             <div style="border-radius:16px;overflow:hidden;box-shadow:0 20px 50px -28px rgba(11,92,44,.35)">
                 <img src="{{ article.coverImage }}" alt="{{ article.title }}" style="width:100%;display:block;max-height:480px;object-fit:cover">
             </div>
@@ -162,7 +162,7 @@
 
     {# ===== À LIRE AUSSI ===== #}
     {% if related|length > 0 %}
-        <section style="max-width:var(--bb-container);margin:0 auto;padding:48px 24px 10px">
+        <section style="max-width:var(--bb-container);margin:0 auto;padding:48px var(--bb-gutter) 10px">
             <div style="display:flex;align-items:center;gap:13px;margin-bottom:22px">
                 <span style="width:5px;height:26px;background:#2B6B43;border-radius:3px"></span>
                 <h2 style="font-family:'Archivo';font-weight:900;font-size:24px;color:#14160F;letter-spacing:-.3px">À lire aussi</h2>

@@ -86,7 +86,7 @@ class Media
      * validateTypeSpecificFields().
      */
     #[ORM\ManyToOne(targetEntity: Article::class)]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Article $article = null;
 
     #[ORM\ManyToOne(targetEntity: Gallery::class)]

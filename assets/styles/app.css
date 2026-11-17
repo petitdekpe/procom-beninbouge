@@ -27,7 +27,11 @@
     /* Largeur des conteneurs de page (header, sections, footer), large
        comme sur beninroots.bj pour que les cards articles gardent leur
        ligne auteur/date/durée/vues sur une seule ligne. */
-    --bb-container: 1920px;
+    --bb-container: 1680px;
+
+    /* Marge latérale fluide : respire sur grand écran, reste serrée sur mobile.
+       Utilisée par tous les conteneurs de page (header, sections, footer). */
+    --bb-gutter: clamp(20px, 4.5vw, 88px);
 
     /* Typographie */
     --bb-font-display: 'Anton', system-ui, sans-serif;
@@ -250,7 +254,7 @@ a {
 .bb-header-inner {
     max-width: var(--bb-container);
     margin: 0 auto;
-    padding: 16px 24px;
+    padding: 16px var(--bb-gutter);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -468,7 +472,7 @@ a {
     max-width: var(--bb-container);
     height: 100%;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 var(--bb-gutter);
     display: flex;
     align-items: center;
 }
@@ -495,7 +499,7 @@ a {
 .bb-hero-title {
     margin-bottom: 16px;
     font-family: var(--bb-font-heading);
-    font-size: clamp(32px, 6vw, 60px);
+    font-size: clamp(22px, 2.6vw, 36px);
     font-weight: 800;
     line-height: 1.08;
     display: -webkit-box;
@@ -506,7 +510,7 @@ a {
 
 .bb-hero-text {
     margin-bottom: 32px;
-    font-size: clamp(18px, 2.2vw, 24px);
+    font-size: clamp(14px, 1.25vw, 17px);
     line-height: 1.45;
     color: rgba(255, 255, 255, .92);
     display: -webkit-box;
@@ -820,7 +824,7 @@ a {
 .bb-vtheque-inner {
     max-width: var(--bb-container);
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 var(--bb-gutter);
 }
 
 .bb-vtheque-head {
@@ -1146,7 +1150,7 @@ a {
 .bb-contact-inner {
     max-width: var(--bb-container);
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 var(--bb-gutter);
 }
 
 .bb-contact-card {
@@ -1321,7 +1325,7 @@ a {
 .bb-footer-inner {
     max-width: var(--bb-container);
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 var(--bb-gutter);
 }
 
 .bb-footer-grid {
@@ -1527,7 +1531,7 @@ a {
 .bb-about-inner {
     max-width: var(--bb-container);
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 var(--bb-gutter);
 }
 
 .bb-about-hero {

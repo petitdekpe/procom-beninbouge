@@ -47,7 +47,7 @@ class Reaction
     private ?ReactionType $type = null;
 
     #[ORM\ManyToOne(targetEntity: Article::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull]
     #[Groups(['reaction:read', 'reaction:create'])]
     private ?Article $article = null;

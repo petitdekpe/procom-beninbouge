@@ -35,7 +35,7 @@ class ArticleShare
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Article::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull]
     private ?Article $article = null;
 

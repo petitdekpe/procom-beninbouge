@@ -63,7 +63,7 @@ class Comment
     private CommentStatus $status = CommentStatus::Pending;
 
     #[ORM\ManyToOne(targetEntity: Article::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull]
     #[Groups(['comment:read', 'comment:create'])]
     private ?Article $article = null;

@@ -73,7 +73,7 @@ class AdSlot
 
     // Pour le type sponsored_content : l'article publi-reportage affiché.
     #[ORM\ManyToOne(targetEntity: Article::class)]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Article $article = null;
 
     #[ORM\Column]

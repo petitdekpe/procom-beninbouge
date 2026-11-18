@@ -1,0 +1,885 @@
+/*
+ * Page d'accueil (charte 2026, V2) — templates/home/index.html.twig et
+ * templates/partials/home_sections/*.
+ */
+
+/* ---------- La une (mosaïque) ---------- */
+.bb-une {
+    padding-top: clamp(24px, 3vw, 44px);
+    padding-bottom: clamp(48px, 6vw, 80px);
+}
+
+.bb-une-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-auto-rows: 196px;
+    gap: 16px;
+}
+
+.bb-une-main {
+    position: relative;
+    grid-column: 1 / 7;
+    grid-row: 1 / 4;
+    display: block;
+    overflow: hidden;
+    border-radius: var(--bb-r-lg);
+    color: var(--bb-white);
+    isolation: isolate;
+}
+
+.bb-une-main-media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+}
+
+.bb-une-main-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .6s cubic-bezier(.2, .7, .2, 1);
+}
+
+.bb-une-main:hover .bb-une-main-media img {
+    transform: scale(1.04);
+}
+
+.bb-une-main-text {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: clamp(22px, 2.6vw, 36px);
+    padding-top: 96px;
+    background: var(--bb-scrim);
+}
+
+.bb-une-main-title {
+    font-size: clamp(28px, 2.8vw, 44px);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+}
+
+.bb-une-main-lead {
+    max-width: 640px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #B9C2BC;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.bb-une-second {
+    grid-column: 7 / 10;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 26px;
+    overflow: hidden;
+    border-radius: var(--bb-r-lg);
+    background: var(--bb-forest);
+    color: var(--bb-white);
+}
+
+.bb-une-second-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.bb-une-second-title {
+    font-size: clamp(30px, 2.8vw, 44px);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 5;
+    overflow: hidden;
+}
+
+.bb-une-pill {
+    align-self: flex-start;
+    padding: 10px 16px;
+    border-radius: var(--bb-r-pill);
+    background: var(--bb-black);
+    color: var(--bb-white);
+    font-size: 14px;
+    font-weight: 700;
+    transition: transform .15s ease;
+}
+
+.bb-une-second:hover .bb-une-pill {
+    transform: translateX(4px);
+}
+
+.bb-une-third {
+    grid-column: 7 / 10;
+    grid-row: 3 / 4;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 22px 26px;
+    border: 2px solid var(--bb-outline-border);
+    border-radius: var(--bb-r-lg);
+    background: var(--bb-outline-bg);
+    color: var(--bb-outline-ink);
+}
+
+.bb-une-third .bb-chip {
+    background: var(--bb-black);
+    color: var(--bb-white);
+}
+
+.bb-une-third-title {
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+}
+
+.bb-une-third:hover .bb-une-third-title {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.bb-une-mostread {
+    grid-column: 10 / 13;
+    grid-row: 1 / 3;
+}
+
+.bb-une-jobs {
+    grid-column: 10 / 13;
+    grid-row: 3 / 4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 26px;
+    border-radius: var(--bb-r-lg);
+    background: var(--bb-gold);
+    color: var(--bb-black);
+}
+
+.bb-une-jobs-text {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bb-une-jobs-kicker {
+    color: var(--bb-black);
+}
+
+.bb-une-jobs-title {
+    font-size: clamp(30px, 2.6vw, 40px);
+    line-height: 1;
+}
+
+.bb-round-arrow {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--bb-black);
+    color: var(--bb-gold);
+    transition: transform .15s ease;
+}
+
+.bb-une-jobs:hover .bb-round-arrow {
+    transform: translateX(4px);
+}
+
+/* Moins de 3 articles ou pas de « plus lus » : les tuiles s'étirent. */
+.bb-une-grid.is-count-1 .bb-une-main {
+    grid-column: 1 / 10;
+}
+
+.bb-une-grid.is-count-2 .bb-une-second {
+    grid-row: 1 / 4;
+}
+
+.bb-une-grid:not(.has-mostread) .bb-une-jobs {
+    grid-row: 1 / 4;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+}
+
+/* ---------- Les plus lus ---------- */
+.bb-mostread {
+    display: flex;
+    flex-direction: column;
+    padding: 24px 26px;
+    overflow: hidden;
+    border-radius: var(--bb-r-lg);
+    background: var(--bb-strong-bg);
+    color: var(--bb-strong-ink);
+}
+
+.bb-mostread-title {
+    margin-bottom: 4px;
+    font-size: 36px;
+    color: var(--bb-gold);
+}
+
+.bb-mostread-list {
+    list-style: none;
+}
+
+.bb-mostread-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 11px 0;
+    border-top: 1px solid var(--bb-strong-line);
+}
+
+.bb-mostread-rank {
+    flex: none;
+    width: 28px;
+    font-size: 56px;
+    line-height: 1;
+}
+
+.bb-mostread-list li:first-child .bb-mostread-rank {
+    color: var(--bb-tomato);
+}
+
+.bb-mostread-text {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.bb-mostread-item:hover .bb-mostread-text {
+    color: var(--bb-gold);
+}
+
+/* Version pleine largeur (section « Articles populaires » seule). */
+.bb-mostread--wide {
+    padding: clamp(24px, 3vw, 40px);
+}
+
+.bb-mostread--wide .bb-mostread-title {
+    margin-bottom: 16px;
+    font-size: clamp(32px, 3.4vw, 48px);
+}
+
+.bb-mostread--wide .bb-mostread-list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0 28px;
+}
+
+.bb-mostread--wide .bb-mostread-rank {
+    font-size: 56px;
+    width: 36px;
+}
+
+/* ---------- Section vidéo (bleu pétrole) ---------- */
+.bb-vrail {
+    padding-block: clamp(56px, 6vw, 80px);
+    background: var(--bb-petrol);
+    color: var(--bb-white);
+}
+
+.bb-vrail-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 36px;
+}
+
+.bb-vrail-head .bb-mega {
+    font-size: clamp(44px, 6.6vw, 96px);
+    line-height: .9;
+}
+
+.bb-vrail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.bb-vrail-list {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+    list-style: none;
+}
+
+.bb-vrail-card {
+    position: relative;
+    display: block;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #1C4A5C;
+    color: var(--bb-white);
+    isolation: isolate;
+}
+
+.bb-vrail-card.is-first {
+    box-shadow: inset 0 0 0 3px var(--bb-gold);
+}
+
+.bb-vrail-media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+}
+
+.bb-vrail-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .5s ease;
+}
+
+.bb-vrail-card:hover .bb-vrail-media img {
+    transform: scale(1.05);
+}
+
+.bb-vrail-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(8, 30, 39, .92) 0%, rgba(8, 30, 39, .2) 55%, rgba(8, 30, 39, 0) 100%);
+}
+
+.bb-vrail-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+}
+
+.bb-vrail-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--bb-gold);
+    color: var(--bb-black);
+    transform: translate(-50%, -50%);
+    transition: transform .2s ease;
+}
+
+.bb-vrail-play svg {
+    margin-left: 3px;
+}
+
+.bb-vrail-card:hover .bb-vrail-play {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.bb-vrail-title {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+}
+
+/* ---------- Le fil + Explorer ---------- */
+.bb-fil-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: clamp(40px, 5vw, 72px);
+}
+
+.bb-fil-heading {
+    margin-bottom: 20px;
+}
+
+.bb-fil {
+    list-style: none;
+    border-bottom: 1px solid var(--bb-line);
+}
+
+.bb-fil-item {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) 132px;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--bb-line);
+}
+
+.bb-fil-time {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--bb-tomato);
+}
+
+.bb-fil-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.bb-fil-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--bb-green-text);
+}
+
+.bb-fil-title {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+}
+
+.bb-fil-item:hover .bb-fil-title {
+    color: var(--bb-hover);
+}
+
+.bb-fil-thumb {
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--bb-r-md);
+}
+
+.bb-fil-thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bb-explore {
+    align-self: start;
+    position: sticky;
+    top: 112px;
+}
+
+.bb-explore-list {
+    margin-top: 12px;
+    list-style: none;
+    border-bottom: 1px solid var(--bb-line);
+}
+
+.bb-explore-link {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 0;
+    border-top: 1px solid var(--bb-line);
+    font-size: clamp(32px, 3.6vw, 56px);
+    line-height: 1;
+    transition: padding .2s ease, color .2s ease;
+}
+
+.bb-explore-arrow {
+    color: var(--bb-cat, var(--bb-forest));
+    transition: transform .2s ease;
+}
+
+.bb-explore-link:hover {
+    padding-left: 16px;
+}
+
+.bb-explore-link:hover .bb-explore-arrow {
+    transform: translateX(-8px);
+}
+
+/* ---------- Ça recrute (aplat jaune) ---------- */
+.bb-jobs {
+    margin-block: calc(var(--bb-section) * .6);
+    padding-block: clamp(56px, 7vw, 88px);
+    background: var(--bb-gold);
+    color: var(--bb-black);
+}
+
+.bb-jobs-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px 40px;
+}
+
+.bb-jobs-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 420px;
+}
+
+.bb-jobs-intro p {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.bb-jobs-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+}
+
+.bb-jobs-all {
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.bb-jobs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 40px;
+    list-style: none;
+}
+
+.bb-job-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+    padding: 26px;
+    border-radius: 20px;
+    background: var(--bb-black);
+    color: var(--bb-white);
+    transition: transform .15s ease;
+}
+
+.bb-job-card:hover {
+    transform: translateY(-3px);
+}
+
+.bb-job-card-title {
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.bb-job-card-org {
+    font-size: 14px;
+    color: #B9C2BC;
+}
+
+.bb-job-card-deadline {
+    margin-top: auto;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--bb-gold);
+}
+
+/* Le pied de page suit de près l'aplat jaune s'il termine la page. */
+.bb-jobs:last-child {
+    margin-bottom: 0;
+}
+
+/* ---------- Podcast + WhatsApp ---------- */
+.bb-listen {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+}
+
+.bb-listen.has-both {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+}
+
+.bb-podcast {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: clamp(28px, 3vw, 40px);
+    border-radius: var(--bb-r-lg);
+    background: var(--bb-tomato);
+    color: var(--bb-white);
+}
+
+.bb-podcast-kicker {
+    color: var(--bb-white);
+}
+
+.bb-podcast-title {
+    font-size: clamp(34px, 3.8vw, 56px);
+}
+
+.bb-wave {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 56px;
+}
+
+.bb-wave span {
+    width: 6px;
+    border-radius: 3px;
+    background: var(--bb-white);
+}
+
+.bb-wave span:nth-child(n + 11) {
+    background: var(--bb-gold);
+}
+
+.bb-podcast-audio {
+    width: 100%;
+    max-width: 520px;
+    height: 44px;
+    border-radius: var(--bb-r-pill);
+}
+
+.bb-podcast-more {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    border-top: 1px solid rgba(255, 255, 255, .35);
+}
+
+.bb-podcast-more li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, .35);
+    font-weight: 700;
+}
+
+.bb-podcast-more a {
+    flex: none;
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.bb-whatsapp {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 18px;
+    padding: clamp(28px, 3vw, 40px);
+    border-radius: var(--bb-r-lg);
+    background: var(--bb-green-light);
+    color: var(--bb-black);
+}
+
+.bb-whatsapp-title {
+    font-size: clamp(34px, 3.6vw, 52px);
+}
+
+.bb-whatsapp p {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.bb-whatsapp .bb-btn {
+    align-self: flex-start;
+}
+
+/* ---------- Rubrique mise en avant ---------- */
+.bb-sec-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px 24px;
+    margin-bottom: 28px;
+}
+
+.bb-sec-head .bb-kicker {
+    margin-bottom: 8px;
+}
+
+.bb-rubrique-arrow {
+    color: var(--bb-cat, var(--bb-forest));
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+    .bb-une-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: auto;
+    }
+
+    .bb-une-grid > * {
+        grid-column: auto !important;
+        grid-row: auto !important;
+    }
+
+    .bb-une-main {
+        grid-column: 1 / -1 !important;
+        min-height: 480px;
+    }
+
+    .bb-une-second,
+    .bb-une-mostread {
+        min-height: 300px;
+    }
+
+    .bb-une-third,
+    .bb-une-jobs {
+        min-height: 170px;
+    }
+
+    .bb-une-grid:not(.has-mostread) .bb-une-jobs {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .bb-vrail-list {
+        grid-template-columns: repeat(5, minmax(200px, 1fr));
+        margin-inline: calc(var(--bb-gutter) * -1);
+        padding-inline: var(--bb-gutter);
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+    }
+
+    .bb-vrail-list li {
+        scroll-snap-align: start;
+    }
+
+    .bb-fil-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .bb-explore {
+        position: static;
+    }
+
+    .bb-jobs-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .bb-mostread--wide .bb-mostread-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .bb-listen.has-both {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .bb-une {
+        padding-top: 16px;
+    }
+
+    .bb-une-grid {
+        gap: 10px;
+    }
+
+    .bb-une-main {
+        min-height: 460px;
+        border-radius: 22px;
+    }
+
+    .bb-une-main-title {
+        font-size: 34px;
+    }
+
+    /* Mobile : vert et jaune côte à côte, puis les plus lus, puis le 3e article. */
+    .bb-une-second {
+        order: 1;
+        min-height: 200px;
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .bb-une-second-title {
+        font-size: 22px;
+        -webkit-line-clamp: 4;
+    }
+
+    .bb-une-second .bb-une-pill {
+        display: none;
+    }
+
+    .bb-une-jobs {
+        order: 2;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        min-height: 200px;
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .bb-une-grid:not(:has(.bb-une-second)) .bb-une-jobs,
+    .bb-une-third,
+    .bb-une-mostread {
+        grid-column: 1 / -1 !important;
+    }
+
+    .bb-une-mostread {
+        order: 3;
+        min-height: 0;
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .bb-une-third {
+        order: 4;
+        min-height: 0;
+        border-radius: 18px;
+    }
+
+    .bb-round-arrow {
+        width: 44px;
+        height: 44px;
+    }
+
+    .bb-fil-item {
+        grid-template-columns: 48px minmax(0, 1fr) 88px;
+        gap: 12px;
+        padding: 14px 0;
+    }
+
+    .bb-fil-title {
+        font-size: 16px;
+    }
+
+    .bb-mostread--wide .bb-mostread-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

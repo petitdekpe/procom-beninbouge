@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,10 +11,30 @@
         {% else %}
             <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         {% endif %}
-        {# Poppins : police des cards articles (.bb-article-card), présentes sur la plupart des pages publiques. #}
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+        {% block theme_head %}
+            {# Thème clair/sombre (charte 2026) : suit le réglage de l'appareil,
+               sauf si le lecteur a choisi avec le bouton du header (mémorisé
+               dans localStorage, voir assets/controllers/theme_controller.js).
+               Exécuté avant le premier rendu pour éviter un flash du mauvais thème. #}
+            <meta name="color-scheme" content="light dark">
+            <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+            <meta name="theme-color" content="#111B14" media="(prefers-color-scheme: dark)">
+            <script>
+                try {
+                    var bbTheme = localStorage.getItem('bb-theme');
+                    if (bbTheme === 'light' || bbTheme === 'dark') {
+                        document.documentElement.setAttribute('data-theme', bbTheme);
+                    }
+                } catch (e) {}
+            </script>
+            {# Polices de la charte, hébergées avec le site (assets/fonts/,
+               déclarées dans assets/styles/tokens.css). Les deux plus utilisées
+               sont préchargées pour éviter le saut de police au premier affichage. #}
+            <link rel="preload" href="{{ asset('fonts/mouzambik-regular.woff2') }}" as="font" type="font/woff2" crossorigin>
+            <link rel="preload" href="{{ asset('fonts/tt-commons-regular.woff2') }}" as="font" type="font/woff2" crossorigin>
+        {% endblock %}
+
         {% block stylesheets %}
         {% endblock %}
 
@@ -29,7 +49,10 @@
         <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
         {% endif %}
     </head>
-    <body>
+    {# .bb-site porte la charte publique (couleurs, thème sombre, typo). Elle
+       est sur <body> et non <html> : Turbo remplace <body> à chaque visite
+       mais garde <html>, et l'admin (qui étend ce gabarit) ne doit pas en hériter. #}
+    <body{% block body_attributes %} class="bb-site"{% endblock %}>
         {% block body %}{% endblock %}
     </body>
 </html>

@@ -1,56 +1,64 @@
-{# Attend : slides (list<Article>, peut être vide).
-   Calqué sur la section « accueil » de beninroots.bj : plein écran, fondu
-   enchaîné entre les diapositives, voile dégradé de gauche à droite, texte
-   centré verticalement, puces en bas (la puce active s'allonge). Rotation
-   toutes les 10 s, stoppée dès que le lecteur choisit une diapositive ;
-   balayage tactile sur mobile. Voir
-   assets/controllers/hero_slider_controller.js et .bb-hero* dans
-   assets/styles/app.css. #}
-<section id="accueil" class="bb-hero" {% if slides|length > 1 %}data-controller="hero-slider" data-action="touchstart->hero-slider#touchStart:passive touchmove->hero-slider#touchMove:passive touchend->hero-slider#touchEnd"{% endif %}>
-    {% if slides|length > 0 %}
-        {% for featured in slides %}
-            <div class="bb-hero-slide{{ loop.first ? ' is-active' }}" {% if slides|length > 1 %}data-hero-slider-target="slide"{% endif %} {% if not loop.first %}aria-hidden="true" inert{% endif %}>
-                <div class="bb-hero-bg" {% if featured.coverImage %}style="background-image:url('{{ featured.coverImage }}')"{% endif %}></div>
-                <div class="bb-hero-inner">
-                    <div class="bb-hero-content">
-                        {% if featured.category %}
-                            <a href="{{ path('app_category_show', { slug: featured.category.slug }) }}" class="bb-hero-badge">{{ featured.category.name }}</a>
-                        {% endif %}
-                        {% if loop.first %}
-                            <h1 class="bb-hero-title">{{ featured.title }}</h1>
-                        {% else %}
-                            <h2 class="bb-hero-title">{{ featured.title }}</h2>
-                        {% endif %}
-                        {% if featured.chapo %}
-                            <p class="bb-hero-text">{{ featured.chapo|striptags }}</p>
-                        {% endif %}
-                        <div class="bb-hero-actions">
-                            <a href="{{ path('app_article_show', { slug: featured.slug }) }}" class="bb-hero-button">Lire l'article</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
+{# « La une » (section « Slider principal » de l'admin), en mosaïque au lieu
+   d'un carrousel plein écran : un grand article, deux moyens, les plus lus
+   et la tuile « Focus emploi », soit 5 à 7 contenus visibles sans défiler.
+   Attend : une (list<Article>, 3 au plus), mostRead (list<Article>),
+   jobsCount (int, annonces en ligne). Rien n'est affiché sans article.
+   Styles : .bb-une* dans assets/styles/home.css. #}
+{% if une|length > 0 %}
+    {% set main = une|first %}
+    {% set second = une[1] ?? null %}
+    {% set third = une[2] ?? null %}
+    <section class="bb-container bb-une" aria-labelledby="une-title">
+        <h2 id="une-title" class="bb-sr-only">À la une</h2>
+        <div class="bb-une-grid is-count-{{ une|length }}{{ mostRead|length > 0 ? ' has-mostread' }}" data-controller="impression-tracker" data-impression-tracker-context-value="home_une">
 
-        {% if slides|length > 1 %}
-            <div class="bb-hero-dots">
-                {% for s in slides %}
-                    <button type="button" class="bb-hero-dot{{ loop.first ? ' is-active' }}" data-hero-slider-target="dot" data-action="hero-slider#goTo" data-hero-slider-index-param="{{ loop.index0 }}" aria-label="Aller à la diapositive {{ loop.index }}"{% if loop.first %} aria-current="true"{% endif %}></button>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% else %}
-        <div class="bb-hero-slide is-active">
-            <div class="bb-hero-bg"></div>
-            <div class="bb-hero-inner">
-                <div class="bb-hero-content">
-                    <h1 class="bb-hero-title">Le Bénin qui bouge, raconté au quotidien</h1>
-                    <p class="bb-hero-text">Politique, économie, culture et initiatives locales : l'actualité béninoise vérifiée et racontée depuis le terrain.</p>
-                    <div class="bb-hero-actions">
-                        <a href="{{ path('app_home') }}#actu" class="bb-hero-button">Lire les dernières actus</a>
-                    </div>
+            <a href="{{ path('app_article_show', { slug: main.slug }) }}" class="bb-une-main" data-impression-tracker-target="card" data-article-id="{{ main.id }}">
+                <div class="bb-une-main-media bb-placeholder"{% if main.category %} style="--bb-cat:{{ main.category.color }}"{% endif %}>
+                    {% if main.coverImage %}<img src="{{ main.coverImage }}" alt="" fetchpriority="high">{% endif %}
                 </div>
-            </div>
+                <div class="bb-une-main-text">
+                    {% if main.category %}<span class="bb-chip bb-chip--tomato">{{ main.category.name }}</span>{% endif %}
+                    <h3 class="bb-display bb-une-main-title">{{ main.title }}</h3>
+                    <p class="bb-une-main-lead">{{ main.content|reading_time }} min de lecture</p>
+                </div>
+            </a>
+
+            {% if second %}
+                <a href="{{ path('app_article_show', { slug: second.slug }) }}" class="bb-une-second" data-impression-tracker-target="card" data-article-id="{{ second.id }}">
+                    {% if second.category %}<span class="bb-chip bb-chip--black-gold">{{ second.category.name }}</span>{% endif %}
+                    <div class="bb-une-second-body">
+                        <h3 class="bb-display bb-une-second-title">{{ second.title }}</h3>
+                        <span class="bb-une-pill">Lire l'article <span aria-hidden="true">→</span></span>
+                    </div>
+                </a>
+            {% endif %}
+
+            {% if third %}
+                <a href="{{ path('app_article_show', { slug: third.slug }) }}" class="bb-une-third" data-impression-tracker-target="card" data-article-id="{{ third.id }}">
+                    {% if third.category %}<span class="bb-chip">{{ third.category.name }}</span>{% endif %}
+                    <h3 class="bb-une-third-title">{{ third.title }}</h3>
+                </a>
+            {% endif %}
+
+            {% if mostRead|length > 0 %}
+                {{ include('partials/home_sections/_most_read.html.twig', { items: mostRead, extraClass: 'bb-une-mostread' }) }}
+            {% endif %}
+
+            <a href="{{ jobsCount > 0 ? path('app_announcement_index') : path('app_announcement_submit') }}" class="bb-une-jobs">
+                <span class="bb-une-jobs-text">
+                    <span class="bb-kicker bb-une-jobs-kicker">Focus emploi</span>
+                    <span class="bb-display bb-une-jobs-title">
+                        {%- if jobsCount > 0 -%}
+                            {{ jobsCount }} annonce{{ jobsCount > 1 ? 's' }} en ligne
+                        {%- else -%}
+                            Publiez votre offre
+                        {%- endif -%}
+                    </span>
+                </span>
+                <span class="bb-round-arrow" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </span>
+            </a>
         </div>
-    {% endif %}
-</section>
+    </section>
+{% endif %}

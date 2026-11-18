@@ -8,12 +8,6 @@
 {% block title %}{{ homeSettings.siteName }} | L'actualité du Bénin qui bouge{% endblock %}
 
 {% block stylesheets %}
-    {# Règles partagées (resets, .bb-card/.bb-h, etc.) vivent désormais dans
-       assets/styles/app.css, chargé globalement via assets/app.js — voir le
-       bloc javascripts de base.html.twig. #}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     {{ include('partials/_seo_meta.html.twig', {
         ogTitle: homeSettings.siteName ~ ' | L\'actualité du Bénin qui bouge',
         metaDescription: homeDescription,
@@ -30,7 +24,7 @@
                     '@type': 'Organization',
                     'name': homeSettings.siteName,
                     'url': homeUrl,
-                    'logo': homeSettings.logoUrl ? absolute_url(homeSettings.logoUrl) : null,
+                    'logo': homeSettings.logoUrl ? absolute_url(homeSettings.logoUrl) : absolute_url(asset('images/logo-benin-bouge-noir.png')),
                     'sameAs': homeSameAs,
                 },
             ],
@@ -39,40 +33,48 @@
 {% endblock %}
 
 {% block body %}
-{% set gradientPalette = [
-    'linear-gradient(140deg,#0E3F51,#2B6B43)',
-    'linear-gradient(140deg,#CF3732,#a3140d)',
-    'linear-gradient(140deg,#3a3f33,#14160F)',
-    'linear-gradient(140deg,#3A8556,#1C4A2E)',
-] %}
-
-{# La page d'accueil est entièrement pilotée par homeSections (ordre +
-   activation configurés dans /admin/home-sections) — voir
-   App\Controller\HomeController et App\Entity\HomeSection. Chaque type de
-   section a son partial dans templates/partials/home_sections/. #}
-<div style="background:var(--bb-bg);color:#14160F;font-family:'Manrope',sans-serif" data-controller="video-modal">
+{# Accueil (charte 2026, V2). L'ordre et l'activation des sections restent
+   pilotés par /admin/home-sections (App\Controller\HomeController,
+   App\Entity\HomeSection) ; chaque type a son partial dans
+   templates/partials/home_sections/. Une section sans contenu n'est pas
+   affichée, et un article n'apparaît qu'une fois sur la page. #}
+{% set enabledTypes = homeSections|map(s => s.type.value) %}
+{% set uneEnabled = 'hero_slider' in enabledTypes %}
+<div data-controller="video-modal">
 
     {{ include('partials/_header.html.twig') }}
 
-    {% for section in homeSections %}
-        {% if section.type.value == 'hero_slider' %}
-            {{ include('partials/home_sections/_hero_slider.html.twig', { slides: heroSlides }) }}
-        {% elseif section.type.value == 'latest_news' %}
-            {{ include('partials/home_sections/_latest_news.html.twig', { actu: actu, gradientPalette: gradientPalette }) }}
-        {% elseif section.type.value == 'popular_articles' %}
-            {{ include('partials/home_sections/_popular_articles.html.twig', { popular: popularArticles, gradientPalette: gradientPalette }) }}
-        {% elseif section.type.value == 'videos' %}
-            {{ include('partials/home_sections/_videos.html.twig', { videos: videos, gradientPalette: gradientPalette }) }}
-        {% elseif section.type.value == 'podcasts' %}
-            {{ include('partials/home_sections/_podcasts.html.twig', { podcasts: podcasts }) }}
-        {% elseif section.type.value == 'announcements' %}
-            {{ include('partials/home_sections/_announcements.html.twig', { announcements: homeAnnouncements }) }}
-        {% elseif section.type.value == 'contact' %}
-            {{ include('partials/home_sections/_contact.html.twig') }}
-        {% elseif section.type.value == 'category_highlight' and section.category %}
-            {{ include('partials/home_sections/_category_highlight.html.twig', { category: section.category, articles: categoryHighlightArticles[section.id]|default([]), gradientPalette: gradientPalette }) }}
+    <main id="contenu">
+        <h1 class="bb-sr-only">{{ homeSettings.siteName }}, l'actualité du Bénin qui bouge</h1>
+
+        {{ include('partials/_ticker.html.twig', { items: ticker }) }}
+
+        {% for section in homeSections %}
+            {% if section.type.value == 'hero_slider' %}
+                {{ include('partials/home_sections/_hero_slider.html.twig', { une: une, mostRead: mostRead, jobsCount: onlineAnnouncementsCount }) }}
+            {% elseif section.type.value == 'latest_news' %}
+                {{ include('partials/home_sections/_latest_news.html.twig', { fil: fil }) }}
+            {% elseif section.type.value == 'popular_articles' and not uneEnabled %}
+                {# Avec « La une », les plus lus sont déjà dans sa grille. #}
+                {{ include('partials/home_sections/_popular_articles.html.twig', { popular: mostRead }) }}
+            {% elseif section.type.value == 'videos' %}
+                {{ include('partials/home_sections/_videos.html.twig', { videos: videos }) }}
+            {% elseif section.type.value == 'podcasts' %}
+                {{ include('partials/home_sections/_podcasts.html.twig', { podcasts: podcasts }) }}
+            {% elseif section.type.value == 'announcements' %}
+                {{ include('partials/home_sections/_announcements.html.twig', { announcements: homeAnnouncements, jobsCount: onlineAnnouncementsCount }) }}
+            {% elseif section.type.value == 'contact' %}
+                {{ include('partials/home_sections/_contact.html.twig') }}
+            {% elseif section.type.value == 'category_highlight' and section.category %}
+                {{ include('partials/home_sections/_category_highlight.html.twig', { category: section.category, articles: categoryHighlightArticles[section.id]|default([]) }) }}
+            {% endif %}
+        {% endfor %}
+
+        {# La carte WhatsApp vit avec les podcasts ; sans section podcasts, elle s'affiche seule. #}
+        {% if 'podcasts' not in enabledTypes and homeSettings.whatsappUrl %}
+            {{ include('partials/home_sections/_podcasts.html.twig', { podcasts: [] }) }}
         {% endif %}
-    {% endfor %}
+    </main>
 
     {{ include('partials/_video_modal.html.twig') }}
 

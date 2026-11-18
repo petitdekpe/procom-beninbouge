@@ -12,8 +12,19 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * Homepage (charte 2026, V2): the order and visibility of the sections still
+ * come from /admin/home-sections. Each article appears only once on the
+ * page — the "Une" grid first, then the most-read list, then "Le fil" —
+ * so every query excludes the ids already picked above it.
+ */
 final class HomeController extends AbstractController
 {
+    private const UNE_SIZE = 3;
+    private const MOST_READ_SIZE = 4;
+    private const FIL_SIZE = 6;
+    private const TICKER_SIZE = 6;
+
     public function __construct(
         private ArticleRepository $articleRepository,
         private MediaRepository $mediaRepository,
@@ -27,27 +38,28 @@ final class HomeController extends AbstractController
     {
         $homeSections = $this->homeSectionRepository->findEnabledOrdered();
         $enabledTypes = array_map(static fn ($section) => $section->getType(), $homeSections);
+        $isEnabled = static fn (HomeSectionType $type): bool => \in_array($type, $enabledTypes, true);
 
-        $heroSlides = \in_array(HomeSectionType::HeroSlider, $enabledTypes, true)
-            ? $this->articleRepository->findFeaturedPublished(5)
+        $shownIds = [];
+        $remember = static function (array $articles) use (&$shownIds): array {
+            foreach ($articles as $article) {
+                $shownIds[] = $article->getId();
+            }
+
+            return $articles;
+        };
+
+        // « La une » (ex-slider) : 3 articles à la une + les plus lus dans la même grille.
+        $une = $isEnabled(HomeSectionType::HeroSlider)
+            ? $remember($this->articleRepository->findFeaturedPublished(self::UNE_SIZE))
             : [];
 
-        $excludedIds = array_map(static fn ($article) => $article->getId(), $heroSlides);
-
-        $actu = \in_array(HomeSectionType::LatestNews, $enabledTypes, true)
-            ? $this->articleRepository->findLatestPublished(6, $excludedIds)
+        $mostRead = $isEnabled(HomeSectionType::HeroSlider) || $isEnabled(HomeSectionType::PopularArticles)
+            ? $remember($this->articleRepository->findMostViewedPublished(self::MOST_READ_SIZE, $shownIds))
             : [];
 
-        $popularArticles = \in_array(HomeSectionType::PopularArticles, $enabledTypes, true)
-            ? $this->articleRepository->findMostViewedPublished(3)
-            : [];
-
-        $videos = \in_array(HomeSectionType::Videos, $enabledTypes, true)
-            ? $this->mediaRepository->findLatestPublishedByType(MediaType::Video, 6)
-            : [];
-
-        $podcasts = \in_array(HomeSectionType::Podcasts, $enabledTypes, true)
-            ? $this->mediaRepository->findLatestPublishedByType(MediaType::Audio, 6)
+        $fil = $isEnabled(HomeSectionType::LatestNews)
+            ? $remember($this->articleRepository->findLatestPublished(self::FIL_SIZE, $shownIds))
             : [];
 
         $categoryHighlightArticles = [];
@@ -57,21 +69,32 @@ final class HomeController extends AbstractController
             }
         }
 
-        $homeAnnouncements = \in_array(HomeSectionType::Announcements, $enabledTypes, true)
-            ? $this->announcementRepository->findOnlineForHomeCard(3)
+        $videos = $isEnabled(HomeSectionType::Videos)
+            ? array_values(array_filter(
+                $this->mediaRepository->findLatestPublishedByType(MediaType::Video, 10),
+                static fn ($media) => null !== $media->getYoutubeEmbedSrc(),
+            ))
+            : [];
+
+        $podcasts = $isEnabled(HomeSectionType::Podcasts)
+            ? $this->mediaRepository->findLatestPublishedByType(MediaType::Audio, 3)
             : [];
 
         return $this->render('home/index.html.twig', [
-            'homeAnnouncements' => $homeAnnouncements,
+            'homeSections' => $homeSections,
+            'ticker' => $this->articleRepository->findTickerPublished(self::TICKER_SIZE),
+            'une' => $une,
+            'mostRead' => $mostRead,
+            'fil' => $fil,
+            'categoryHighlightArticles' => $categoryHighlightArticles,
+            'videos' => \array_slice($videos, 0, 5),
+            'podcasts' => $podcasts,
+            'homeAnnouncements' => $isEnabled(HomeSectionType::Announcements)
+                ? $this->announcementRepository->findOnlineForHomeCard(3)
+                : [],
+            'onlineAnnouncementsCount' => $this->announcementRepository->countOnline(),
             // Pop-up payant : indépendant des sections, affiché dès qu'une annonce l'a acheté.
             'popupAnnouncement' => $this->announcementRepository->findRandomOnlinePopup(),
-            'homeSections' => $homeSections,
-            'heroSlides' => $heroSlides,
-            'actu' => $actu,
-            'popularArticles' => $popularArticles,
-            'videos' => $videos,
-            'podcasts' => $podcasts,
-            'categoryHighlightArticles' => $categoryHighlightArticles,
         ]);
     }
 }

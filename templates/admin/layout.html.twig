@@ -2,6 +2,11 @@
 
 {% block title %}{% block admin_title %}Backoffice{% endblock %} | {{ site_settings().siteName }}{% endblock %}
 
+{# Le back-office garde son propre style : ni la charte publique (.bb-site),
+   ni le thème sombre, ni les polices du site public. #}
+{% block theme_head %}{% endblock %}
+{% block body_attributes %}{% endblock %}
+
 {% block stylesheets %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

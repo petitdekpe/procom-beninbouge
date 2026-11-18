@@ -20,4 +20,19 @@ class CategoryRepository extends ServiceEntityRepository
     {
         return $this->findOneBy(['slug' => $slug]);
     }
+
+    /**
+     * Top-level rubriques (no parent), alphabetical — the public header
+     * navigation and the homepage "Explorer" list (App\Twig\AppExtension::navCategories).
+     *
+     * @return list<Category>
+     */
+    public function findTopLevel(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.parent IS NULL')
+            ->orderBy('c.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

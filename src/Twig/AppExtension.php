@@ -3,6 +3,7 @@
 namespace App\Twig;
 
 use App\Entity\Article;
+use App\Entity\Category;
 use App\Entity\Enum\HomeSectionType;
 use App\Entity\Enum\MediaLicense;
 use App\Entity\Enum\ProjectProgress;
@@ -10,6 +11,7 @@ use App\Entity\Enum\ProjectType;
 use App\Entity\Page;
 use App\Entity\SiteSettings;
 use App\Repository\ArticleViewRepository;
+use App\Repository\CategoryRepository;
 use App\Repository\PageRepository;
 use App\Repository\SiteSettingsRepository;
 use Symfony\Contracts\Service\ResetInterface;
@@ -24,10 +26,14 @@ final class AppExtension extends AbstractExtension implements ResetInterface
     /** @var array<int, int>|null view counts keyed by article id, loaded once per request */
     private ?array $viewCounts = null;
 
+    /** @var list<Category>|null top-level rubriques, loaded once per request (header + homepage) */
+    private ?array $navCategories = null;
+
     public function __construct(
         private readonly PageRepository $pageRepository,
         private readonly SiteSettingsRepository $siteSettingsRepository,
         private readonly ArticleViewRepository $articleViewRepository,
+        private readonly CategoryRepository $categoryRepository,
     ) {
     }
 
@@ -80,7 +86,20 @@ final class AppExtension extends AbstractExtension implements ResetInterface
             new TwigFunction('static_pages', [$this, 'staticPages']),
             new TwigFunction('site_settings', [$this, 'siteSettings']),
             new TwigFunction('article_views', [$this, 'articleViews']),
+            new TwigFunction('nav_categories', [$this, 'navCategories']),
         ];
+    }
+
+    /**
+     * Top-level rubriques for the public header navigation (and the
+     * homepage "Explorer" list): the menu follows the categories managed
+     * in the admin instead of a hard-coded list.
+     *
+     * @return list<Category>
+     */
+    public function navCategories(): array
+    {
+        return $this->navCategories ??= $this->categoryRepository->findTopLevel();
     }
 
     /**
@@ -163,6 +182,7 @@ final class AppExtension extends AbstractExtension implements ResetInterface
     public function reset(): void
     {
         $this->viewCounts = null;
+        $this->navCategories = null;
     }
 
     public function timeAgo(?\DateTimeInterface $date): string

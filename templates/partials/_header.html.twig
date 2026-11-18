@@ -1,56 +1,80 @@
+{# ===== EN-TÊTE (charte 2026, V2) =====
+   Logo officiel (version noire en thème clair, blanche en sombre), menu en
+   pilule construit à partir des rubriques gérées dans l'admin
+   (nav_categories(), les 4 premières ici, toutes dans le tiroir), bouton de
+   thème clair/sombre et appel à publier une annonce. Sous 1180 px le menu
+   passe dans le tiroir latéral (assets/controllers/nav_toggle_controller.js).
+   Styles : .bb-header*, .bb-nav*, .bb-drawer* dans assets/styles/layout.css. #}
 {% set settings = site_settings() %}
-{# ===== MAIN HEADER =====
-   Calqué sur le header de beninroots.bj : barre blanche collante, logo à
-   gauche, liens à droite, tiroir latéral sous 768px — voir
-   assets/controllers/nav_toggle_controller.js et .bb-header* dans
-   assets/styles/app.css. #}
+{% set categories = nav_categories() %}
 {% set currentRoute = app.request.attributes.get('_route') ?? '' %}
-{% set navItems = [
-    { label: 'Accueil', href: path('app_home'), active: currentRoute == 'app_home' },
-    { label: 'Actualité', href: path('app_home') ~ '#actu', active: currentRoute in ['app_article_show', 'app_category_show', 'app_tag_show'] },
+{% set activeCategorySlug = null %}
+{% if currentRoute == 'app_category_show' and category is defined and category %}
+    {% set activeCategorySlug = category.parent ? category.parent.slug : category.slug %}
+{% elseif currentRoute == 'app_article_show' and article is defined and article.category %}
+    {% set activeCategorySlug = article.category.parent ? article.category.parent.slug : article.category.slug %}
+{% endif %}
+{% set primaryCategories = categories|slice(0, 4) %}
+{% set extraItems = [
     { label: 'Dossiers', href: path('app_dossier_index'), active: currentRoute starts with 'app_dossier' },
     { label: 'Vidéos', href: path('app_videos'), active: currentRoute == 'app_videos' },
     { label: 'Annonces', href: path('app_announcement_index'), active: currentRoute starts with 'app_announcement' },
-    { label: 'À propos', href: path('app_about'), active: currentRoute == 'app_about' },
-    { label: 'Nous joindre', href: path('app_home') ~ '#contact', active: false },
 ] %}
 <header class="bb-header" data-controller="nav-toggle" data-action="keydown.esc@window->nav-toggle#close">
-    <div class="bb-header-inner">
-        <a href="{{ path('app_home') }}" class="bb-header-logo">
-            {% if settings.logoUrl %}
-                <img src="{{ settings.logoUrl }}" alt="{{ settings.siteName }}">
-            {% else %}
-                <span>{{ settings.siteName }}</span>
-            {% endif %}
+    <div class="bb-container bb-header-inner">
+        <a href="{{ path('app_home') }}" class="bb-logo" aria-label="{{ settings.siteName }}, accueil">
+            <img class="bb-logo-img bb-logo-img--light" src="{{ asset('images/logo-benin-bouge-noir.png') }}" alt="" width="800" height="302">
+            <img class="bb-logo-img bb-logo-img--dark" src="{{ asset('images/logo-benin-bouge-blanc.png') }}" alt="" width="800" height="302">
         </a>
 
-        <nav class="bb-header-nav" aria-label="Navigation principale">
-            {% for item in navItems %}
-                <a href="{{ item.href }}" class="bb-header-link{{ item.active ? ' is-active' }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
+        <nav class="bb-nav" aria-label="Navigation principale">
+            <a href="{{ path('app_home') }}" class="bb-nav-link{{ currentRoute == 'app_home' ? ' is-active' }}"{% if currentRoute == 'app_home' %} aria-current="page"{% endif %}>Accueil</a>
+            {% for cat in primaryCategories %}
+                {% set isActive = activeCategorySlug == cat.slug %}
+                <a href="{{ path('app_category_show', { slug: cat.slug }) }}" class="bb-nav-link{{ isActive ? ' is-active' }}"{% if isActive %} aria-current="page"{% endif %}>{{ cat.name }}</a>
+            {% endfor %}
+            {% for item in extraItems %}
+                <a href="{{ item.href }}" class="bb-nav-link{{ item.active ? ' is-active' }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
             {% endfor %}
         </nav>
 
-        <button type="button" class="bb-menu-toggle" data-action="nav-toggle#open" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="bb-drawer" data-nav-toggle-target="button">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
-        </button>
+        <div class="bb-header-actions">
+            <button type="button" class="bb-icon-btn bb-theme-toggle" data-controller="theme" data-action="theme#toggle" aria-label="Activer le thème sombre" title="Thème clair / sombre">
+                <svg class="bb-theme-icon bb-theme-icon--moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+                <svg class="bb-theme-icon bb-theme-icon--sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            </button>
+            <a href="{{ path('app_announcement_submit') }}" class="bb-btn bb-btn--cta bb-header-cta">Publier une annonce</a>
+            <button type="button" class="bb-icon-btn bb-menu-toggle" data-action="nav-toggle#open" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="bb-drawer" data-nav-toggle-target="button">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg>
+            </button>
+        </div>
     </div>
 
     <div class="bb-drawer-overlay" data-nav-toggle-target="overlay" data-action="click->nav-toggle#close" hidden></div>
     <div class="bb-drawer" id="bb-drawer" role="dialog" aria-modal="true" aria-label="Menu" data-nav-toggle-target="drawer" hidden>
-        <button type="button" class="bb-drawer-close" data-action="nav-toggle#close" aria-label="Fermer le menu">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <button type="button" class="bb-icon-btn bb-drawer-close" data-action="nav-toggle#close" aria-label="Fermer le menu">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
         <nav class="bb-drawer-nav" aria-label="Navigation mobile">
-            {% for item in navItems %}
+            <a href="{{ path('app_home') }}" class="bb-drawer-link{{ currentRoute == 'app_home' ? ' is-active' }}" data-action="nav-toggle#close">Accueil</a>
+            {% if categories|length > 0 %}
+                <p class="bb-kicker bb-drawer-label">Rubriques</p>
+                {% for cat in categories %}
+                    <a href="{{ path('app_category_show', { slug: cat.slug }) }}" class="bb-drawer-link{{ activeCategorySlug == cat.slug ? ' is-active' }}" style="--bb-cat:{{ cat.color }}" data-action="nav-toggle#close"><span class="bb-dot" aria-hidden="true"></span>{{ cat.name }}</a>
+                {% endfor %}
+                <p class="bb-kicker bb-drawer-label">Bénin Bouge</p>
+            {% endif %}
+            {% for item in extraItems %}
                 <a href="{{ item.href }}" class="bb-drawer-link{{ item.active ? ' is-active' }}" data-action="nav-toggle#close">{{ item.label }}</a>
             {% endfor %}
+            <a href="{{ path('app_about') }}" class="bb-drawer-link{{ currentRoute == 'app_about' ? ' is-active' }}" data-action="nav-toggle#close">À propos</a>
+            <a href="{{ path('app_home') }}#contact" class="bb-drawer-link" data-action="nav-toggle#close">Nous joindre</a>
         </nav>
-        {% if settings.whatsappUrl %}
-            <div class="bb-drawer-footer">
-                <a href="{{ settings.whatsappUrl }}" target="_blank" rel="noopener" class="bb-drawer-whatsapp">
-                    <img src="{{ asset('assets/icons/logo-whatsapp.svg') }}" alt="" width="16" height="16"> Canal WhatsApp
-                </a>
-            </div>
-        {% endif %}
+        <div class="bb-drawer-footer">
+            <a href="{{ path('app_announcement_submit') }}" class="bb-btn bb-btn--cta bb-btn--block" data-action="nav-toggle#close">Publier une annonce</a>
+            {% if settings.whatsappUrl %}
+                <a href="{{ settings.whatsappUrl }}" target="_blank" rel="noopener" class="bb-btn bb-btn--ghost bb-btn--block">Chaîne WhatsApp</a>
+            {% endif %}
+        </div>
     </div>
 </header>

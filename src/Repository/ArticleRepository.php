@@ -109,17 +109,41 @@ class ArticleRepository extends ServiceEntityRepository
      * Unviewed articles (0 rows in article_view) are still included, via
      * the left join, so a freshly published article isn't excluded outright.
      *
+     * @param list<int> $excludedIds articles already shown elsewhere on the page
+     *
      * @return list<Article>
      */
-    public function findMostViewedPublished(int $limit): array
+    public function findMostViewedPublished(int $limit, array $excludedIds = []): array
     {
-        return $this->createQueryBuilder('a')
+        $qb = $this->createQueryBuilder('a')
             ->addSelect('COUNT(v.id) AS HIDDEN viewsCount')
             ->leftJoin(ArticleView::class, 'v', 'WITH', 'v.article = a')
             ->andWhere('a.status = :status')
             ->setParameter('status', ArticleStatus::Published)
             ->groupBy('a.id')
             ->orderBy('viewsCount', 'DESC')
+            ->addOrderBy('a.publishedAt', 'DESC')
+            ->setMaxResults($limit);
+
+        if ([] !== $excludedIds) {
+            $qb->andWhere('a.id NOT IN (:excludedIds)')->setParameter('excludedIds', $excludedIds);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Titles for the homepage "En continu" ticker: articles pinned in the
+     * admin ("Épinglé (bandeau alerte)") first, then the most recent ones.
+     *
+     * @return list<Article>
+     */
+    public function findTickerPublished(int $limit): array
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.status = :status')
+            ->setParameter('status', ArticleStatus::Published)
+            ->orderBy('a.pinned', 'DESC')
             ->addOrderBy('a.publishedAt', 'DESC')
             ->setMaxResults($limit)
             ->getQuery()

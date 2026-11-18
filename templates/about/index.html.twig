@@ -4,7 +4,7 @@
    mission et vision, valeurs, formats, puis ce qui vient de la base
    (chiffres clés, équipe) et un appel à nous joindre.
    Données : App\Controller\AboutController. Styles : .bb-about* et
-   .bb-section-* dans assets/styles/app.css. #}
+   .bb-section-* dans assets/styles/pages.css. #}
 
 {% set settings = site_settings() %}
 {% set aboutUrl = url('app_about') %}
@@ -14,9 +14,6 @@
 {% block title %}À propos | {{ settings.siteName }}{% endblock %}
 
 {% block stylesheets %}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     {{ include('partials/_seo_meta.html.twig', {
         ogTitle: 'À propos | ' ~ settings.siteName,
         metaDescription: aboutDescription,

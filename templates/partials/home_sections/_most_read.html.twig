@@ -1,0 +1,18 @@
+{# Bloc « Les plus lus » : numéros géants (le premier en rouge tomate),
+   titres en gras, sur fond noir (clair) ou bleu pétrole (sombre).
+   Utilisé dans « La une » et seul (section « Articles populaires »).
+   Attend : items (list<Article>). Optionnel : extraClass.
+   Styles : .bb-mostread* dans assets/styles/home.css. #}
+<section class="bb-mostread {{ extraClass|default('') }}" aria-labelledby="mostread-title-{{ extraClass|default('solo') }}">
+    <h2 id="mostread-title-{{ extraClass|default('solo') }}" class="bb-display bb-mostread-title">Les plus lus</h2>
+    <ol class="bb-mostread-list">
+        {% for article in items %}
+            <li>
+                <a href="{{ path('app_article_show', { slug: article.slug }) }}" class="bb-mostread-item" data-impression-tracker-target="card" data-article-id="{{ article.id }}">
+                    <span class="bb-display bb-mostread-rank" aria-hidden="true">{{ loop.index }}</span>
+                    <span class="bb-mostread-text">{{ article.title }}</span>
+                </a>
+            </li>
+        {% endfor %}
+    </ol>
+</section>

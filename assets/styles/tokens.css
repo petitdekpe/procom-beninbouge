@@ -1,0 +1,223 @@
+/*
+ * Bénin Bouge — tokens de la charte graphique 2026 (V2).
+ *
+ * Deux thèmes, mêmes couleurs de marque :
+ *   - clair  : fond blanc, texte noir-marque (#111B14) ;
+ *   - sombre : fond noir-marque, blocs en bleu pétrole (#0E3F51).
+ * Le thème suit le réglage de l'appareil, sauf choix explicite du lecteur
+ * (attribut data-theme posé sur <html> par templates/base.html.twig et
+ * assets/controllers/theme_controller.js).
+ *
+ * Les tokens de thème vivent sur body.bb-site (et pas :root) : l'admin
+ * étend le même gabarit sans la classe et reste donc en clair. Ils sont
+ * aussi déclarés sur :root, en clair, pour les rares classes publiques
+ * réutilisées dans l'admin (.bb-article-body dans l'historique).
+ */
+
+/*
+ * Polices de la charte, hébergées avec le site (assets/fonts/, versionnées
+ * par AssetMapper) : Mouzambik pour les titres, TT Commons pour le texte,
+ * converties en WOFF2 depuis les fichiers fournis. Seules les graisses
+ * réellement utilisées sont embarquées ; l'italique du texte courant est
+ * simulé par le navigateur.
+ */
+@font-face {
+    font-family: "Mouzambik";
+    src: url("../fonts/mouzambik-regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "TT Commons";
+    src: url("../fonts/tt-commons-regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "TT Commons";
+    src: url("../fonts/tt-commons-medium.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "TT Commons";
+    src: url("../fonts/tt-commons-semibold.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "TT Commons";
+    src: url("../fonts/tt-commons-bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "TT Commons";
+    src: url("../fonts/tt-commons-extrabold.woff2") format("woff2");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root,
+body.bb-site {
+    /* Couleurs de marque, identiques dans les deux thèmes */
+    --bb-forest: #3A8556;
+    --bb-green-mid: #7DA873;
+    --bb-green-light: #A7CC9C;
+    --bb-tomato: #CF3732;
+    --bb-gold: #F7CA46;
+    --bb-petrol: #0E3F51;
+    --bb-black: #111B14;
+    --bb-white: #FFFFFF;
+    --bb-cream: #F3F2EE;
+
+    /* Thème clair */
+    --bb-surface: #FFFFFF;
+    --bb-surface-2: #F3F2EE;
+    --bb-raised: #FFFFFF;
+    --bb-ink: #111B14;
+    --bb-ink-muted: #4B5550;
+    --bb-label: #4B5550;
+    --bb-line: #DAD8D0;
+    --bb-placeholder: #E7E6E0;
+    --bb-green-text: #2C6A44;
+    --bb-hover: #2C6A44;
+    --bb-focus: #2C6A44;
+    --bb-strong-bg: #111B14;
+    --bb-strong-ink: #FFFFFF;
+    --bb-strong-line: #2E4A3A;
+    --bb-cta-bg: #111B14;
+    --bb-cta-ink: #F7CA46;
+    --bb-nav-bg: #F3F2EE;
+    --bb-nav-active-bg: #111B14;
+    --bb-nav-active-ink: #FFFFFF;
+    --bb-outline-bg: #FFFFFF;
+    --bb-outline-ink: #111B14;
+    --bb-outline-border: #111B14;
+    --bb-input-bg: #FFFFFF;
+    --bb-danger: #B42318;
+    --bb-danger-bg: #FDECEA;
+    --bb-success: #1F6B3D;
+    --bb-success-bg: #E8F4EC;
+    --bb-shadow: 0 1px 2px rgba(17, 27, 20, .06), 0 12px 32px -18px rgba(17, 27, 20, .28);
+    --bb-footer-rule: 2px solid #111B14;
+    --bb-scrim: linear-gradient(0deg, rgba(17, 27, 20, .95) 0%, rgba(17, 27, 20, .72) 50%, rgba(17, 27, 20, 0) 100%);
+
+    /* Mise en page */
+    --bb-container: 1440px;
+    --bb-gutter: clamp(16px, 4vw, 56px);
+    --bb-section: clamp(56px, 7vw, 96px);
+    --bb-r-sm: 4px;
+    --bb-r-md: 12px;
+    --bb-r-lg: 24px;
+    --bb-r-pill: 999px;
+
+    /* Typographie de la charte (voir les @font-face ci-dessus) */
+    --bb-font-display: "Mouzambik", Impact, "Arial Narrow", sans-serif;
+    --bb-font-body: "TT Commons", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    /* Alias des anciennes variables, pour le contenu saisi en admin
+       (styles en ligne) qui les référencerait encore. */
+    --bb-green: var(--bb-forest);
+    --bb-green-dark: var(--bb-green-text);
+    --bb-navy: var(--bb-petrol);
+    --bb-red: var(--bb-tomato);
+    --bb-bg: var(--bb-surface);
+    --bb-bg-alt: var(--bb-surface-2);
+    --bb-muted: var(--bb-ink-muted);
+    --bb-border: var(--bb-line);
+    --bb-charcoal: var(--bb-ink-muted);
+}
+
+/* Thème sombre : réglage de l'appareil, sauf choix « clair » du lecteur… */
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) body.bb-site {
+        --bb-surface: #111B14;
+        --bb-surface-2: #0E3F51;
+        --bb-raised: #17251C;
+        --bb-ink: #F3F2EE;
+        --bb-ink-muted: #B9C2BC;
+        --bb-label: #9AA59E;
+        --bb-line: #2E4A3A;
+        --bb-placeholder: #1D2C22;
+        --bb-green-text: #A7CC9C;
+        --bb-hover: #F7CA46;
+        --bb-focus: #F7CA46;
+        --bb-strong-bg: #0E3F51;
+        --bb-strong-ink: #F3F2EE;
+        --bb-strong-line: #2E5466;
+        --bb-cta-bg: #F7CA46;
+        --bb-cta-ink: #111B14;
+        --bb-nav-bg: #0E3F51;
+        --bb-nav-active-bg: #F3F2EE;
+        --bb-nav-active-ink: #111B14;
+        --bb-outline-bg: #F3F2EE;
+        --bb-outline-ink: #111B14;
+        --bb-outline-border: #F3F2EE;
+        --bb-input-bg: #17251C;
+        --bb-danger: #FFB4A9;
+        --bb-danger-bg: rgba(207, 55, 50, .18);
+        --bb-success: #A7CC9C;
+        --bb-success-bg: rgba(58, 133, 86, .2);
+        --bb-shadow: 0 12px 32px -18px rgba(0, 0, 0, .6);
+        --bb-footer-rule: 1px solid #2E4A3A;
+        color-scheme: dark;
+    }
+
+    html:not([data-theme="light"]):has(> body.bb-site) {
+        background: #111B14;
+    }
+}
+
+/* …ou choix « sombre » explicite. */
+html[data-theme="dark"] body.bb-site {
+    --bb-surface: #111B14;
+    --bb-surface-2: #0E3F51;
+    --bb-raised: #17251C;
+    --bb-ink: #F3F2EE;
+    --bb-ink-muted: #B9C2BC;
+    --bb-label: #9AA59E;
+    --bb-line: #2E4A3A;
+    --bb-placeholder: #1D2C22;
+    --bb-green-text: #A7CC9C;
+    --bb-hover: #F7CA46;
+    --bb-focus: #F7CA46;
+    --bb-strong-bg: #0E3F51;
+    --bb-strong-ink: #F3F2EE;
+    --bb-strong-line: #2E5466;
+    --bb-cta-bg: #F7CA46;
+    --bb-cta-ink: #111B14;
+    --bb-nav-bg: #0E3F51;
+    --bb-nav-active-bg: #F3F2EE;
+    --bb-nav-active-ink: #111B14;
+    --bb-outline-bg: #F3F2EE;
+    --bb-outline-ink: #111B14;
+    --bb-outline-border: #F3F2EE;
+    --bb-input-bg: #17251C;
+    --bb-danger: #FFB4A9;
+    --bb-danger-bg: rgba(207, 55, 50, .18);
+    --bb-success: #A7CC9C;
+    --bb-success-bg: rgba(58, 133, 86, .2);
+    --bb-shadow: 0 12px 32px -18px rgba(0, 0, 0, .6);
+    --bb-footer-rule: 1px solid #2E4A3A;
+    color-scheme: dark;
+}
+
+html[data-theme="dark"]:has(> body.bb-site) {
+    background: #111B14;
+}
+
+html[data-theme="light"] body.bb-site {
+    color-scheme: light;
+}

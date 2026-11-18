@@ -1,10 +1,13 @@
 import './stimulus_bootstrap.js';
 /*
- * Welcome to your app's main JavaScript file!
- *
- * This file will be included onto the page via the importmap() Twig function,
- * which should already be in your base.html.twig.
+ * Point d'entrée JavaScript, inclus sur chaque page via importmap('app')
+ * (templates/base.html.twig). Les feuilles de style de la charte 2026 sont
+ * importées ici, dans l'ordre : tokens (couleurs, thèmes clair/sombre),
+ * base, ossature (header, footer), accueil, contenus, pages de service.
  */
-import './styles/app.css';
-
-console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
+import './styles/tokens.css';
+import './styles/base.css';
+import './styles/layout.css';
+import './styles/home.css';
+import './styles/content.css';
+import './styles/pages.css';

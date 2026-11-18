@@ -1,0 +1,24 @@
+{# Bandeau « En continu » de l'accueil : bande diagonale verte de la charte,
+   titres défilants (articles épinglés d'abord, puis les plus récents).
+   La liste est doublée pour boucler sans saut ; la copie est masquée aux
+   lecteurs d'écran. Défilement en pause au survol et au focus, coupé si le
+   lecteur réduit les animations. Attend : items (list<Article>).
+   Styles : .bb-ticker* dans assets/styles/layout.css. #}
+{% if items|length > 0 %}
+    <section class="bb-ticker" aria-label="En continu">
+        <div class="bb-ticker-band">
+            <span class="bb-ticker-label">En continu</span>
+            <div class="bb-ticker-viewport">
+                <div class="bb-ticker-track">
+                    {% for copy in 1..2 %}
+                        <ul class="bb-ticker-list"{% if copy == 2 %} aria-hidden="true"{% endif %}>
+                            {% for article in items %}
+                                <li><a href="{{ path('app_article_show', { slug: article.slug }) }}"{% if copy == 2 %} tabindex="-1"{% endif %}>{{ article.title }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endif %}

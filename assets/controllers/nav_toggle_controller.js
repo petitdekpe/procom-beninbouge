@@ -4,7 +4,7 @@ import { Controller } from '@hotwired/stimulus';
  * Mobile nav drawer (templates/partials/_header.html.twig), modelled on the
  * beninroots.bj side sheet: slides in from the right over a dark overlay,
  * closes on overlay click, Escape, the close button or any link. Below 768px
- * only — see the .bb-drawer* rules in assets/styles/app.css.
+ * only — see the .bb-drawer* rules in assets/styles/layout.css.
  */
 export default class extends Controller {
     static targets = ['drawer', 'overlay', 'button'];

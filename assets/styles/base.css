@@ -1,0 +1,361 @@
+/*
+ * Base commune du site public : remise à zéro, typographie, conteneur,
+ * boutons, pastilles et utilitaires. Tout ce qui touche à l'apparence est
+ * limité à .bb-site pour ne pas modifier le back-office, qui charge aussi
+ * cette feuille via importmap('app').
+ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+img {
+    max-width: 100%;
+}
+
+body.bb-site {
+    background: var(--bb-surface);
+    color: var(--bb-ink);
+    font-family: var(--bb-font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background-color .25s ease, color .25s ease;
+}
+
+/* :where() garde ces règles de base à la spécificité d'un simple sélecteur
+   de balise : n'importe quelle classe de composant (.bb-btn--cta…) les
+   remplace, au lieu d'hériter de la couleur du texte. */
+:where(.bb-site) a {
+    color: inherit;
+    text-decoration: none;
+}
+
+:where(.bb-site) button {
+    font: inherit;
+    color: inherit;
+}
+
+.bb-site ::selection {
+    background: var(--bb-gold);
+    color: var(--bb-black);
+}
+
+.bb-site :focus-visible {
+    outline: 3px solid var(--bb-focus);
+    outline-offset: 3px;
+}
+
+.bb-site main {
+    display: block;
+}
+
+/* Conteneur de page : largeur maximale et marge latérale fluide. */
+.bb-container {
+    width: 100%;
+    max-width: var(--bb-container);
+    margin-inline: auto;
+    padding-inline: var(--bb-gutter);
+}
+
+.bb-section {
+    padding-block: var(--bb-section);
+}
+
+.bb-section--tight {
+    padding-block: calc(var(--bb-section) * .6);
+}
+
+/* Titres : police d'affichage de la charte (Mouzambik), en capitales. */
+.bb-display {
+    font-family: var(--bb-font-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: .95;
+    letter-spacing: .005em;
+    text-wrap: balance;
+}
+
+.bb-h1 {
+    font-size: clamp(36px, 5vw, 64px);
+}
+
+.bb-h2 {
+    font-size: clamp(32px, 4vw, 56px);
+}
+
+.bb-mega {
+    font-size: clamp(48px, 8vw, 120px);
+    line-height: .88;
+}
+
+.bb-accent-forest {
+    color: var(--bb-forest);
+}
+
+.bb-accent-mid {
+    color: var(--bb-green-mid);
+}
+
+/* Libellé / kicker : petites capitales espacées. */
+.bb-kicker {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--bb-label);
+}
+
+.bb-lead {
+    font-size: clamp(17px, 1.6vw, 20px);
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--bb-ink-muted);
+}
+
+/* Pastilles (rubriques, badges). */
+.bb-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 6px 11px;
+    border-radius: var(--bb-r-pill);
+    background: var(--bb-strong-bg);
+    color: var(--bb-strong-ink);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.bb-chip--black {
+    background: var(--bb-black);
+    color: var(--bb-white);
+}
+
+.bb-chip--black-gold {
+    background: var(--bb-black);
+    color: var(--bb-gold);
+}
+
+.bb-chip--tomato {
+    background: var(--bb-tomato);
+    color: var(--bb-white);
+}
+
+.bb-chip--gold {
+    background: var(--bb-gold);
+    color: var(--bb-black);
+}
+
+.bb-chip--light {
+    background: var(--bb-green-light);
+    color: var(--bb-black);
+}
+
+.bb-chip--white {
+    background: var(--bb-white);
+    color: var(--bb-black);
+}
+
+/* Puce de couleur de la rubrique devant le nom. */
+.bb-dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bb-cat, var(--bb-forest));
+}
+
+/* Boutons pilule. */
+.bb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 13px 22px;
+    border: 1px solid transparent;
+    border-radius: var(--bb-r-pill);
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.2;
+    text-align: center;
+    cursor: pointer;
+    transition: transform .15s ease, background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.bb-btn:hover {
+    transform: translateY(-1px);
+}
+
+.bb-btn--cta {
+    background: var(--bb-cta-bg);
+    color: var(--bb-cta-ink);
+}
+
+.bb-btn--black {
+    background: var(--bb-black);
+    color: var(--bb-white);
+}
+
+.bb-btn--black-gold {
+    background: var(--bb-black);
+    color: var(--bb-gold);
+}
+
+.bb-btn--gold {
+    background: var(--bb-gold);
+    color: var(--bb-black);
+}
+
+.bb-btn--forest {
+    background: var(--bb-forest);
+    color: var(--bb-white);
+}
+
+.bb-btn--ghost {
+    border-color: currentColor;
+    background: transparent;
+}
+
+.bb-btn--ghost:hover {
+    background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.bb-btn--block {
+    width: 100%;
+}
+
+/* Lien fléché « Voir tout → ». */
+.bb-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 800;
+    color: var(--bb-green-text);
+}
+
+.bb-more:hover {
+    color: var(--bb-hover);
+}
+
+/* Grilles responsives génériques. */
+.bb-grid-2,
+.bb-grid-3,
+.bb-grid-4 {
+    display: grid;
+    gap: clamp(16px, 2vw, 28px);
+}
+
+.bb-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.bb-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.bb-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1023px) {
+    .bb-grid-3,
+    .bb-grid-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .bb-grid-2,
+    .bb-grid-3,
+    .bb-grid-4 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* État vide (pages de liste ; jamais affiché sur l'accueil). */
+.bb-empty {
+    padding: 32px;
+    border: 2px dashed var(--bb-line);
+    border-radius: var(--bb-r-lg);
+    color: var(--bb-ink-muted);
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Fil d'Ariane. */
+.bb-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--bb-ink-muted);
+}
+
+.bb-breadcrumb a:hover {
+    color: var(--bb-hover);
+}
+
+.bb-breadcrumb [aria-current] {
+    color: var(--bb-ink);
+}
+
+.bb-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Champ piège anti-spam : hors écran, jamais visible ni annoncé. */
+.bb-hp {
+    position: absolute !important;
+    left: -10000px !important;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* Visuel de remplacement quand un contenu n'a pas d'image. */
+.bb-placeholder {
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--bb-cat, var(--bb-forest)) 55%, var(--bb-black)), var(--bb-black));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bb-site *,
+    .bb-site *::before,
+    .bb-site *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+}

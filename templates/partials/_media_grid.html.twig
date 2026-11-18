@@ -1,0 +1,20 @@
+{# Grille compacte des médias liés à une rubrique ou un mot-clé.
+   Attend : media (list<Media>). Styles : .bb-media* dans assets/styles/content.css. #}
+{% set typeLabels = { image: 'Photo', video: 'Vidéo', audio: 'Audio', pdf: 'PDF', infographic: 'Infographie' } %}
+<section class="bb-container bb-section--tight" aria-labelledby="media-title">
+    <h2 id="media-title" class="bb-display bb-media-heading">Médias</h2>
+    <ul class="bb-grid-4 bb-media-grid">
+        {% for item in media %}
+            {% set mediaLink = item.article ? path('app_article_show', { slug: item.article.slug }) : (item.imageUrl ?: item.youtubeEmbedUrl ?: item.audioUrl ?: item.documentUrl) %}
+            <li>
+                <a href="{{ mediaLink ?: '#' }}" class="bb-media-card"{% if not item.article %} target="_blank" rel="noopener"{% endif %}>
+                    <span class="bb-media-thumb bb-placeholder">
+                        {% if item.effectiveThumbnail or item.imageUrl %}<img src="{{ item.effectiveThumbnail ?: item.imageUrl }}" alt="" loading="lazy">{% endif %}
+                        <span class="bb-chip bb-chip--black bb-media-type">{{ typeLabels[item.type.value] ?? item.type.value }}</span>
+                    </span>
+                    <span class="bb-media-title">{{ item.title ?: 'Sans titre' }}</span>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</section>

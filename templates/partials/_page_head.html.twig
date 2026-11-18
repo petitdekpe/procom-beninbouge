@@ -1,0 +1,29 @@
+{# En-tête des pages de liste (rubrique, mot-clé, dossiers, vidéos, pages) :
+   fil d'Ariane, libellé, grand titre en police d'affichage, chapeau.
+   Attend : title. Optionnels : crumbs (list<{label, href?}>, après
+   « Accueil »), kicker, accent (suite du titre en vert), lead, meta,
+   color (couleur de la rubrique pour la puce).
+   Styles : .bb-phead* dans assets/styles/content.css. #}
+<header class="bb-container bb-phead"{% if color is defined and color %} style="--bb-cat:{{ color }}"{% endif %}>
+    <nav class="bb-breadcrumb" aria-label="Fil d'Ariane">
+        <a href="{{ path('app_home') }}">Accueil</a>
+        {% for crumb in crumbs|default([]) %}
+            <span aria-hidden="true">/</span>
+            {% if crumb.href is defined and crumb.href %}
+                <a href="{{ crumb.href }}">{{ crumb.label }}</a>
+            {% else %}
+                <span aria-current="page">{{ crumb.label }}</span>
+            {% endif %}
+        {% endfor %}
+    </nav>
+    {% if kicker is defined and kicker %}
+        <span class="bb-kicker bb-phead-kicker"><span class="bb-dot" aria-hidden="true"></span>{{ kicker }}</span>
+    {% endif %}
+    <h1 class="bb-display bb-phead-title">{{ title }}{% if accent is defined and accent %} <span class="bb-accent-forest">{{ accent }}</span>{% endif %}</h1>
+    {% if lead is defined and lead %}
+        <p class="bb-lead bb-phead-lead">{{ lead }}</p>
+    {% endif %}
+    {% if meta is defined and meta %}
+        <p class="bb-phead-meta">{{ meta }}</p>
+    {% endif %}
+</header>

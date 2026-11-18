@@ -1,14 +1,19 @@
-{# Attend les variables : media (App\Entity\Media), gradient (dégradé de secours si pas de miniature). #}
+{# Carte vidéo (page /videos) : vignette 16:9 arrondie avec bouton lecture
+   jaune, titre, description, rubrique et date. S'ouvre dans le lecteur en
+   surimpression (contrôleur video-modal posé sur la page).
+   Attend : media (App\Entity\Media). Styles : .bb-vcard* dans assets/styles/content.css. #}
+{% set title = media.title ?: (media.article ? media.article.title : 'Vidéo Bénin Bouge') %}
 <a href="{{ media.youtubeEmbedSrc ?: '#' }}"
+   class="bb-vcard"
    data-action="video-modal#open"
-   data-video-modal-url-param="{{ media.youtubeEmbedSrc }}"
-   class="bb-card bb-vid" style="text-decoration:none;display:block">
-    <div style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/9">
-        <div class="bb-zoom" style="position:absolute;inset:0;{% if media.effectiveThumbnail %}background:url('{{ media.effectiveThumbnail }}') center/cover{% else %}background:{{ gradient }}{% endif %}"></div>
-        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(7,10,6,.45),transparent 55%)"></div>
-        <div class="bb-play" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:rgba(207,55,50,.92);display:grid;place-items:center;color:#fff;font-size:18px">▶</div>
-    </div>
-    <h3 class="bb-h" style="font-family:'Archivo';font-weight:800;font-size:16px;line-height:1.25;color:#14160F;margin-top:14px">{{ media.title ?: (media.article ? media.article.title : 'Vidéo Bénin Bouge') }}</h3>
-    {% if media.description %}<p class="bb-vid-desc">{{ media.description|excerpt(260) }}</p>{% endif %}
-    <div style="color:#8a8a7c;font-size:12px;font-weight:600;margin-top:8px">{% if media.article and media.article.category %}{{ media.article.category.name }} · {% endif %}{{ media.createdAt|time_ago }}</div>
+   data-video-modal-url-param="{{ media.youtubeEmbedSrc }}">
+    <span class="bb-vcard-media bb-placeholder" style="--bb-cat:#0E3F51">
+        {% if media.effectiveThumbnail %}<img src="{{ media.effectiveThumbnail }}" alt="" loading="lazy">{% endif %}
+        <span class="bb-vrail-play" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11.04-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14Z"/></svg>
+        </span>
+    </span>
+    <span class="bb-vcard-title">{{ title }}</span>
+    {% if media.description %}<span class="bb-vcard-desc">{{ media.description|excerpt(220) }}</span>{% endif %}
+    <span class="bb-vcard-meta">{% if media.article and media.article.category %}{{ media.article.category.name }} · {% endif %}{{ media.createdAt|time_ago }}</span>
 </a>

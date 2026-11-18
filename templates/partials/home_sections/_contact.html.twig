@@ -3,7 +3,7 @@
    avec nom, téléphone avec indicatif, e-mail facultatif, objet et message.
    Envoi vers App\Controller\ContactController::submit, qui renvoie ici
    (#contact) avec un message de succès, ou les erreurs et la saisie
-   précédente. Styles : .bb-contact* dans assets/styles/app.css. #}
+   précédente. Styles : .bb-contact* dans assets/styles/pages.css. #}
 {% set contactSuccess = app.flashes('contact_success')|first %}
 {% set contactError = app.flashes('contact_error')|first %}
 {# Lus une seule fois dans une variable : « app.flashes(…) ?: {} » appellerait
@@ -17,13 +17,10 @@
 {% set selectedCode = old.countryCode|default(constant('App\\Contact\\CountryCallingCodes::DEFAULT')) %}
 <section id="contact" class="bb-contact">
     <div class="bb-contact-inner">
-        <div class="bb-section-head">
-            <span class="bb-section-badge">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
-                Joignez-nous
-            </span>
-            <h2 class="bb-section-title">Contactez-nous</h2>
-            <p class="bb-section-lead">Pour tous renseignements ou suggestions, veuillez nous écrire en remplissant le formulaire ci-dessous.</p>
+        <div class="bb-contact-head">
+            <span class="bb-kicker">Nous joindre</span>
+            <h2 class="bb-display bb-h2">Écrivez à la rédaction.</h2>
+            <p class="bb-lead">Une information, une suggestion, un partenariat : remplissez le formulaire ci-dessous.</p>
         </div>
 
         <div class="bb-contact-card">

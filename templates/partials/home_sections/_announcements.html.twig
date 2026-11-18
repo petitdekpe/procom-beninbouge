@@ -1,30 +1,46 @@
-{# Section d'accueil « Annonces & Opportunités » : les annonces en ligne ayant
-   acheté l'option « carte sur l'accueil » (3 au plus). Sans annonce, une
-   carte d'information invite à publier. Attend : announcements (list<Announcement>). #}
-<section id="annonces" class="bb-ann-home">
-    <div class="bb-about-inner">
-        <div class="bb-ann-home-head">
-            <div>
-                <span class="bb-section-badge">Annonces & Opportunités</span>
-                <h2 class="bb-ann-home-title">Emplois, appels d'offres, bourses et événements</h2>
+{# « Ça recrute au Bénin. » (section « Annonces & Opportunités ») : grand
+   aplat jaune de la charte, appel à publier, et les annonces en ligne ayant
+   acheté l'option « carte sur l'accueil » (3 au plus) en cartes noires.
+   Toujours affichée : c'est l'appel à publier qui compte, même sans carte.
+   Attend : announcements (list<Announcement>), jobsCount (int).
+   Styles : .bb-jobs*, .bb-job-card* dans assets/styles/home.css. #}
+{% set chipByCategory = {
+    'emploi': 'bb-chip--light',
+    'appel-offres': 'bb-chip--white',
+    'bourse-formation': 'bb-chip--tomato',
+    'evenement': 'bb-chip--gold',
+    'annonce': 'bb-chip--white',
+} %}
+<section id="annonces" class="bb-jobs" aria-labelledby="jobs-title">
+    <div class="bb-container">
+        <div class="bb-jobs-head">
+            <h2 id="jobs-title" class="bb-display bb-mega">Ça recrute<br>au Bénin.</h2>
+            <div class="bb-jobs-intro">
+                <p>Emplois, appels d'offres, bourses, formations, événements : publiez votre annonce sur {{ site_settings().siteName }}, validée par la rédaction sous 48 h.</p>
+                <div class="bb-jobs-actions">
+                    <a href="{{ path('app_announcement_submit') }}" class="bb-btn bb-btn--black-gold">Publier une annonce <span aria-hidden="true">→</span></a>
+                    {% if jobsCount > 0 %}
+                        <a href="{{ path('app_announcement_index') }}" class="bb-jobs-all">Voir les {{ jobsCount }} annonce{{ jobsCount > 1 ? 's' }} en ligne <span aria-hidden="true">→</span></a>
+                    {% endif %}
+                </div>
             </div>
-            <a href="{{ path('app_announcement_index') }}" class="bb-ann-home-all">Toutes les annonces →</a>
         </div>
 
         {% if announcements|length > 0 %}
-            <div class="bb-ann-grid">
+            <ul class="bb-jobs-grid">
                 {% for announcement in announcements %}
-                    {{ include('announcement/_card.html.twig', { announcement: announcement }) }}
+                    <li>
+                        <a href="{{ path('app_announcement_show', { reference: announcement.reference }) }}" class="bb-job-card">
+                            <span class="bb-chip {{ chipByCategory[announcement.category.value] ?? 'bb-chip--white' }}">{{ announcement.category.label }}</span>
+                            <strong class="bb-job-card-title">{{ announcement.title }}</strong>
+                            <span class="bb-job-card-org">{{ announcement.organization }}{% if announcement.location %} · {{ announcement.location }}{% endif %}</span>
+                            {% if announcement.deadline %}
+                                <span class="bb-job-card-deadline">Jusqu'au {{ announcement.deadline|french_date_short }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
                 {% endfor %}
-            </div>
-        {% else %}
-            <div class="bb-ann-home-info">
-                <div>
-                    <h3>Faites connaître votre offre</h3>
-                    <p>Recrutement, appel d'offres, bourse, formation ou événement : publiez votre annonce sur {{ site_settings().siteName }}. Paiement en ligne, validation par la rédaction sous 48 h.</p>
-                </div>
-                <a href="{{ path('app_announcement_submit') }}" class="bb-btn-primary">Publier une annonce</a>
-            </div>
+            </ul>
         {% endif %}
     </div>
 </section>

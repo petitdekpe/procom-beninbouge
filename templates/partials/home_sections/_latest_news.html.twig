@@ -1,24 +1,61 @@
-{# Attend : actu (list<Article>), gradientPalette (list<string>, dégradés de secours sans cover). #}
-<section id="actu" class="bb-actu-layout" style="max-width:var(--bb-container);margin:64px auto 0;padding:0 var(--bb-gutter);display:flex;gap:60px">
-    <div class="bb-actu-sidebar" style="flex:0 0 34%">
-        <div class="bb-actu-sticky" style="position:sticky;top:150px;z-index:1">
-            <span style="display:inline-block;background:#CF3732;color:#fff;font-weight:800;font-size:11.5px;letter-spacing:.5px;padding:7px 16px;border-radius:999px;text-transform:uppercase">Actualités</span>
-            <h2 style="font-family:'Archivo';font-weight:900;font-size:38px;color:#14160F;line-height:1.05;margin-top:18px;letter-spacing:-.5px">
-                Les dernières<br><em style="font-style:italic;color:#2B6B43">actualités</em>
-            </h2>
-            <p style="color:#51544a;font-size:14.5px;line-height:1.7;margin-top:18px;max-width:340px">Chaque jour, Bénin Bouge suit l'actualité politique, économique et culturelle du pays, vérifiée et racontée depuis le terrain.</p>
-        </div>
-    </div>
+{# « Le fil » (section « Dernières actualités ») : heure, rubrique, titre et
+   vignette, et à côté la liste « Explorer » des rubriques (gérées dans
+   l'admin) avec la flèche dans leur couleur. Attend : fil (list<Article>).
+   Rien n'est affiché sans article. Styles : .bb-fil*, .bb-explore* dans
+   assets/styles/home.css. #}
+{% if fil|length > 0 %}
+    {% set today = 'now'|date('Y-m-d') %}
+    {% set yesterday = '-1 day'|date('Y-m-d') %}
+    <section id="actu" class="bb-container bb-section bb-fil-section" aria-labelledby="fil-title">
+        <div class="bb-fil-grid">
+            <div>
+                <h2 id="fil-title" class="bb-display bb-h2 bb-fil-heading">Le fil</h2>
+                <ol class="bb-fil" data-controller="impression-tracker" data-impression-tracker-context-value="home_latest_news">
+                    {% for article in fil %}
+                        {% set day = article.publishedAt ? article.publishedAt|date('Y-m-d') : null %}
+                        <li>
+                            <a href="{{ path('app_article_show', { slug: article.slug }) }}" class="bb-fil-item" data-impression-tracker-target="card" data-article-id="{{ article.id }}">
+                                {% if article.publishedAt %}
+                                    <time class="bb-fil-time" datetime="{{ article.publishedAt|date('c') }}">
+                                        {%- if day == today -%}{{ article.publishedAt|date('H:i') }}
+                                        {%- elseif day == yesterday -%}Hier
+                                        {%- else -%}{{ article.publishedAt|date('d/m') }}{%- endif -%}
+                                    </time>
+                                {% else %}
+                                    <span class="bb-fil-time"></span>
+                                {% endif %}
+                                <div class="bb-fil-body">
+                                    {% if article.category %}
+                                        <span class="bb-fil-kicker" style="--bb-cat:{{ article.category.color }}"><span class="bb-dot" aria-hidden="true"></span>{{ article.category.name }}</span>
+                                    {% endif %}
+                                    <h3 class="bb-fil-title">{{ article.title }}</h3>
+                                </div>
+                                <span class="bb-fil-thumb bb-placeholder"{% if article.category %} style="--bb-cat:{{ article.category.color }}"{% endif %}>
+                                    {% if article.coverImage %}<img src="{{ article.coverImage }}" alt="" loading="lazy">{% endif %}
+                                </span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ol>
+            </div>
 
-    <div class="bb-grid-2" style="flex:1;min-width:0;gap:32px;align-content:start" data-controller="impression-tracker" data-impression-tracker-context-value="home_latest_news">
-        {% if actu|length > 0 %}
-            {% for article in actu %}
-                {% set gradient = gradientPalette[loop.index0 % 4] %}
-                {{ include('partials/_article_card.html.twig', { article: article, gradient: gradient }) }}
-            {% endfor %}
-            <a href="#" style="grid-column:1/-1;text-decoration:none;text-align:center;background:#fff;border:1px solid #e3e0d4;color:#14160F;font-weight:800;font-size:14.5px;padding:15px;border-radius:12px">Voir toutes les actualités →</a>
-        {% else %}
-            <p class="bb-empty" style="grid-column:1/-1">Aucun article publié pour le moment.</p>
-        {% endif %}
-    </div>
-</section>
+            {% set exploreCategories = nav_categories()|slice(0, 6) %}
+            <nav class="bb-explore" aria-labelledby="explore-title">
+                <h2 id="explore-title" class="bb-kicker">Explorer</h2>
+                <ul class="bb-explore-list">
+                    {% for cat in exploreCategories %}
+                        <li>
+                            <a href="{{ path('app_category_show', { slug: cat.slug }) }}" class="bb-display bb-explore-link" style="--bb-cat:{{ cat.color }}">{{ cat.name }} <span class="bb-explore-arrow" aria-hidden="true">→</span></a>
+                        </li>
+                    {% endfor %}
+                    <li>
+                        <a href="{{ path('app_announcement_index') }}" class="bb-display bb-explore-link" style="--bb-cat:var(--bb-gold)">Focus emploi <span class="bb-explore-arrow" aria-hidden="true">→</span></a>
+                    </li>
+                    <li>
+                        <a href="{{ path('app_dossier_index') }}" class="bb-display bb-explore-link" style="--bb-cat:var(--bb-tomato)">Dossiers <span class="bb-explore-arrow" aria-hidden="true">→</span></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </section>
+{% endif %}

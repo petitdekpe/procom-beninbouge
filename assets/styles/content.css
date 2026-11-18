@@ -423,17 +423,23 @@
     margin-top: clamp(24px, 3vw, 40px);
 }
 
+/* Couverture affichée entière à son ratio naturel, jamais recadrée :
+   pleine largeur en paysage, centrée et limitée en hauteur en portrait
+   (1024 × 1200…). Le cadre épouse l'image pour arrondir ses coins. */
 .bb-article-cover-frame {
-    position: relative;
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
     overflow: hidden;
     border-radius: var(--bb-r-lg);
 }
 
 .bb-article-cover img {
     display: block;
-    width: 100%;
-    max-height: 620px;
-    object-fit: cover;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: min(82vh, 760px);
 }
 
 /* Colonne de lecture. */

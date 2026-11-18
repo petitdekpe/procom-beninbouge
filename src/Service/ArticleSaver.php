@@ -59,7 +59,7 @@ final class ArticleSaver
         }
 
         if (!$article->getMetaDescription()) {
-            $source = $article->getChapo() ?: $article->getContent();
+            $source = $article->getContent();
             if ($source) {
                 $article->setMetaDescription($this->seo->metaDescription($source));
             }

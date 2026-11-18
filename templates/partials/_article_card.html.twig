@@ -11,7 +11,7 @@
 <a href="{{ path('app_article_show', { slug: article.slug }) }}" class="bb-card-a" data-impression-tracker-target="card" data-article-id="{{ article.id }}">
     <div class="bb-card-a-media bb-placeholder"{% if article.category %} style="--bb-cat:{{ article.category.color }}"{% endif %}>
         {% if article.coverImage %}
-            <img src="{{ article.coverImage }}" alt="" loading="lazy">
+            <img src="{{ article.coverImage }}" alt="" loading="lazy" data-controller="cover-fit">
         {% endif %}
         {% if article.category %}
             <span class="bb-chip bb-chip--black bb-card-a-chip"><span class="bb-dot" aria-hidden="true"></span>{{ article.category.name }}</span>

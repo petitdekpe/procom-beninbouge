@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% set articleUrl = url('app_article_show', { slug: article.slug }) %}
-{% set metaDescription = (article.metaDescription ?: article.chapo)|excerpt(180) %}
+{% set metaDescription = (article.metaDescription ?: article.content)|excerpt(180) %}
 
 {% block title %}{{ article.metaTitle ?: article.title }} | {{ site_settings().siteName }}{% endblock %}
 
@@ -86,7 +86,9 @@
 
             {% if article.coverImage %}
                 <figure class="bb-container bb-article-cover">
-                    <img src="{{ article.coverImage }}" alt="" fetchpriority="high">
+                    <div class="bb-article-cover-frame">
+                        <img src="{{ article.coverImage }}" alt="" fetchpriority="high" data-controller="cover-fit">
+                    </div>
                 </figure>
             {% endif %}
 

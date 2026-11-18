@@ -31,7 +31,7 @@
                                     <h3 class="bb-fil-title">{{ article.title }}</h3>
                                 </div>
                                 <span class="bb-fil-thumb bb-placeholder"{% if article.category %} style="--bb-cat:{{ article.category.color }}"{% endif %}>
-                                    {% if article.coverImage %}<img src="{{ article.coverImage }}" alt="" loading="lazy">{% endif %}
+                                    {% if article.coverImage %}<img src="{{ article.coverImage }}" alt="" loading="lazy" data-controller="cover-fit">{% endif %}
                                 </span>
                             </a>
                         </li>

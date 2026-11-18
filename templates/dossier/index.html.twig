@@ -33,7 +33,7 @@
                         <li>
                             <a href="{{ path('app_dossier_show', { slug: dossier.slug }) }}" class="bb-card-a">
                                 <span class="bb-card-a-media bb-placeholder" style="--bb-cat:#0E3F51">
-                                    {% if dossier.coverImage %}<img src="{{ dossier.coverImage }}" alt="" loading="lazy">{% endif %}
+                                    {% if dossier.coverImage %}<img src="{{ dossier.coverImage }}" alt="" loading="lazy" data-controller="cover-fit">{% endif %}
                                     <span class="bb-chip bb-chip--gold bb-card-a-chip">{{ count }} article{{ count > 1 ? 's' }}</span>
                                 </span>
                                 <div class="bb-card-a-body">

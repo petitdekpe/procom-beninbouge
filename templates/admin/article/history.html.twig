@@ -35,7 +35,7 @@
                             </td>
                             <td style="text-align:right;white-space:nowrap">
                                 {% if not loop.first %}
-                                    <form method="post" action="{{ path('admin_article_restore_revision', { id: article.id, revisionId: revision.id }) }}" style="display:inline" onsubmit="return confirm('Restaurer le titre, le chapô et le contenu de cette version ? Le statut de publication actuel sera conservé.');">
+                                    <form method="post" action="{{ path('admin_article_restore_revision', { id: article.id, revisionId: revision.id }) }}" style="display:inline" onsubmit="return confirm('Restaurer le titre et le contenu de cette version ? Le statut de publication actuel sera conservé.');">
                                         <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
                                         <button type="submit" class="bo-btn bo-btn-muted">↩ Restaurer</button>
                                     </form>

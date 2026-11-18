@@ -44,15 +44,6 @@ final class ArticleAdminType extends AbstractType
                 'required' => false,
                 'help' => 'Laissé vide : généré automatiquement à partir du titre.',
             ])
-            ->add('chapo', TextareaType::class, [
-                'label' => 'Chapô',
-                'required' => false,
-                'attr' => [
-                    'rows' => 4,
-                    'data-controller' => 'rich-text',
-                    'data-rich-text-upload-url-value' => '/admin/editor/upload-image',
-                ],
-            ])
             ->add('content', TextareaType::class, [
                 'label' => 'Contenu',
                 'attr' => [

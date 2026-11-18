@@ -14,7 +14,7 @@
 
             <a href="{{ path('app_article_show', { slug: main.slug }) }}" class="bb-une-main" data-impression-tracker-target="card" data-article-id="{{ main.id }}">
                 <div class="bb-une-main-media bb-placeholder"{% if main.category %} style="--bb-cat:{{ main.category.color }}"{% endif %}>
-                    {% if main.coverImage %}<img src="{{ main.coverImage }}" alt="" fetchpriority="high">{% endif %}
+                    {% if main.coverImage %}<img src="{{ main.coverImage }}" alt="" fetchpriority="high" data-controller="cover-fit">{% endif %}
                 </div>
                 <div class="bb-une-main-text">
                     {% if main.category %}<span class="bb-chip bb-chip--tomato">{{ main.category.name }}</span>{% endif %}
@@ -25,7 +25,12 @@
 
             {% if second %}
                 <a href="{{ path('app_article_show', { slug: second.slug }) }}" class="bb-une-second" data-impression-tracker-target="card" data-article-id="{{ second.id }}">
-                    {% if second.category %}<span class="bb-chip bb-chip--black-gold">{{ second.category.name }}</span>{% endif %}
+                    {% if second.category or second.coverImage %}
+                        <div class="bb-une-second-top">
+                            {% if second.category %}<span class="bb-chip bb-chip--black-gold">{{ second.category.name }}</span>{% endif %}
+                            {% if second.coverImage %}<span class="bb-une-second-thumb"><img src="{{ second.coverImage }}" alt="" loading="lazy" data-controller="cover-fit"></span>{% endif %}
+                        </div>
+                    {% endif %}
                     <div class="bb-une-second-body">
                         <h3 class="bb-display bb-une-second-title">{{ second.title }}</h3>
                         <span class="bb-une-pill">Lire l'article <span aria-hidden="true">→</span></span>

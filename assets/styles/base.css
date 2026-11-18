@@ -339,6 +339,26 @@ body.bb-site {
     overflow: hidden;
 }
 
+/* Couverture plus haute que son cadre (portrait 1024 × 1200…) : affichée
+   entière sur un fond flou tiré d'elle-même. Classe posée par
+   assets/controllers/cover_fit_controller.js sur le cadre de l'image. */
+.bb-fit-contain {
+    overflow: hidden;
+}
+
+.bb-fit-contain::before {
+    content: "";
+    position: absolute;
+    inset: -30px;
+    background: var(--bb-fit-src) center / cover no-repeat;
+    filter: blur(24px) brightness(.75);
+}
+
+.bb-fit-contain > img[data-controller~="cover-fit"] {
+    position: relative;
+    object-fit: contain;
+}
+
 /* Visuel de remplacement quand un contenu n'a pas d'image. */
 .bb-placeholder {
     background:

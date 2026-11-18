@@ -518,7 +518,7 @@ class Article implements SoftDeletableInterface
             '@context' => 'https://schema.org',
             '@type' => 'Article',
             'headline' => $this->title,
-            'description' => $this->chapo,
+            'description' => $this->metaDescription,
             'image' => $this->coverImage,
             'datePublished' => $this->publishedAt?->format(\DateTimeInterface::ATOM),
             'dateModified' => $this->updatedAt?->format(\DateTimeInterface::ATOM),

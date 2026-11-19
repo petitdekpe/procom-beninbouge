@@ -24,9 +24,12 @@
             {% if announcement.image %}
                 <img src="{{ announcement.image }}" alt="" style="max-width:100%;max-height:360px;border-radius:10px;display:block;margin-bottom:16px">
             {% endif %}
-            <div style="white-space:pre-line;line-height:1.65">{{ announcement.description }}</div>
+            <div class="bo-rich-preview" style="line-height:1.65">{{ announcement.description|rich_text }}</div>
             {% if announcement.externalUrl %}
                 <p style="margin-top:16px"><strong>Lien :</strong> <a href="{{ announcement.externalUrl }}" target="_blank" rel="noopener nofollow">{{ announcement.externalUrl }}</a></p>
+            {% endif %}
+            {% if announcement.document %}
+                <p style="margin-top:8px"><strong>Document :</strong> <a href="{{ announcement.document }}" target="_blank" rel="noopener">Télécharger ({{ announcement.documentType ?: 'fichier' }})</a></p>
             {% endif %}
         </div>
 
@@ -64,9 +67,13 @@
 
             <div class="bo-card" style="padding:20px">
                 <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 12px">Contact annonceur</h2>
-                <p style="margin:0 0 4px;font-weight:700">{{ announcement.contactName }}</p>
-                <p style="margin:0 0 4px"><a href="mailto:{{ announcement.contactEmail }}">{{ announcement.contactEmail }}</a></p>
-                <p style="margin:0 0 4px"><a href="tel:{{ announcement.contactPhone|replace({' ': ''}) }}">{{ announcement.contactPhone }}</a></p>
+                {% if announcement.hasContactDetails %}
+                    {% if announcement.contactName %}<p style="margin:0 0 4px;font-weight:700">{{ announcement.contactName }}</p>{% endif %}
+                    {% if announcement.contactEmail %}<p style="margin:0 0 4px"><a href="mailto:{{ announcement.contactEmail }}">{{ announcement.contactEmail }}</a></p>{% endif %}
+                    {% if announcement.contactPhone %}<p style="margin:0 0 4px"><a href="tel:{{ announcement.contactPhone|replace({' ': ''}) }}">{{ announcement.contactPhone }}</a></p>{% endif %}
+                {% else %}
+                    <p class="bo-muted" style="margin:0 0 4px">Aucune coordonnée renseignée.</p>
+                {% endif %}
                 <p class="bo-muted" style="margin:0">{{ announcement.showContact ? 'Coordonnées affichées sur l\'annonce' : 'Coordonnées non affichées' }}</p>
             </div>
 

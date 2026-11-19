@@ -12,6 +12,7 @@ use App\Repository\AnnouncementRepository;
 use App\Repository\SiteSettingsRepository;
 use App\Service\ActivityLogger;
 use App\Service\AnnouncementPricing;
+use App\Service\DocumentUploader;
 use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -49,6 +50,8 @@ final class AnnouncementController extends AbstractController
         private AnnouncementRepository $announcementRepository,
         private EntityManagerInterface $entityManager,
         private ActivityLogger $activityLogger,
+        private ImageUploader $imageUploader,
+        private DocumentUploader $documentUploader,
     ) {
     }
 
@@ -95,12 +98,11 @@ final class AnnouncementController extends AbstractController
      * mise en ligne dès l'enregistrement (Announcement::publishByStaff()).
      */
     #[Route('/nouvelle', name: 'admin_announcement_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, AnnouncementPricing $pricing, ImageUploader $imageUploader): Response
+    public function new(Request $request, AnnouncementPricing $pricing): Response
     {
         $user = $this->reviewer();
         $announcement = (new Announcement())
             ->setDurationDays(max($pricing->minDays(), 30))
-            ->setContactEmail($user->getEmail())
             ->setShowContact(false);
 
         $form = $this->createForm(AnnouncementSubmissionType::class, $announcement, [
@@ -111,7 +113,7 @@ final class AnnouncementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->storeImage($form, $announcement, $imageUploader);
+            $this->storeUploads($form, $announcement);
 
             if ($form->isValid()) {
                 $announcement->publishByStaff($user, new \DateTimeImmutable());
@@ -137,7 +139,7 @@ final class AnnouncementController extends AbstractController
      * suit la nouvelle durée (Announcement::setDurationDays()).
      */
     #[Route('/{id}/modifier', name: 'admin_announcement_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
-    public function edit(Request $request, Announcement $announcement, ImageUploader $imageUploader): Response
+    public function edit(Request $request, Announcement $announcement): Response
     {
         $form = $this->createForm(AnnouncementSubmissionType::class, $announcement, [
             'min_days' => 1,
@@ -151,12 +153,17 @@ final class AnnouncementController extends AbstractController
                 'required' => false,
             ]);
         }
+        if ($announcement->getDocument()) {
+            $form->add('removeDocument', CheckboxType::class, [
+                'label' => 'Retirer le document actuel',
+                'mapped' => false,
+                'required' => false,
+            ]);
+        }
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!$this->storeImage($form, $announcement, $imageUploader) && $form->has('removeImage') && true === $form->get('removeImage')->getData()) {
-                $announcement->setImage(null);
-            }
+            $this->storeUploads($form, $announcement);
 
             if ($form->isValid()) {
                 $this->entityManager->flush();
@@ -222,27 +229,30 @@ final class AnnouncementController extends AbstractController
     }
 
     /**
-     * Enregistre l'image téléversée, s'il y en a une. Une erreur de
-     * conversion devient une erreur du champ, ce qui rend le formulaire invalide.
-     *
-     * @return bool true si une nouvelle image a été enregistrée
+     * Enregistre l'image et le document téléversés, ou retire ceux dont la
+     * case « Retirer » est cochée (modification) quand rien ne les remplace.
+     * Une erreur d'enregistrement devient une erreur du champ, ce qui rend
+     * le formulaire invalide.
      */
-    private function storeImage(FormInterface $form, Announcement $announcement, ImageUploader $imageUploader): bool
+    private function storeUploads(FormInterface $form, Announcement $announcement): void
     {
-        $image = $form->get('imageFile')->getData();
-        if (!$image instanceof UploadedFile) {
-            return false;
+        $uploads = [
+            'imageFile' => ['removeImage', fn (UploadedFile $file) => $announcement->setImage($this->imageUploader->upload($file)), fn () => $announcement->setImage(null)],
+            'documentFile' => ['removeDocument', fn (UploadedFile $file) => $announcement->setDocument($this->documentUploader->upload($file)), fn () => $announcement->setDocument(null)],
+        ];
+
+        foreach ($uploads as $field => [$removeField, $store, $remove]) {
+            $file = $form->get($field)->getData();
+            if ($file instanceof UploadedFile) {
+                try {
+                    $store($file);
+                } catch (FileException $e) {
+                    $form->get($field)->addError(new FormError($e->getMessage()));
+                }
+            } elseif ($form->has($removeField) && true === $form->get($removeField)->getData()) {
+                $remove();
+            }
         }
-
-        try {
-            $announcement->setImage($imageUploader->upload($image));
-        } catch (FileException $e) {
-            $form->get('imageFile')->addError(new FormError($e->getMessage()));
-
-            return false;
-        }
-
-        return true;
     }
 
     private function reviewer(): User

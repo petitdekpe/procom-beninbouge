@@ -9,6 +9,7 @@ use App\Form\AnnouncementSubmissionType;
 use App\Repository\AnnouncementRepository;
 use App\Service\AnnouncementPayment;
 use App\Service\AnnouncementPricing;
+use App\Service\DocumentUploader;
 use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -34,6 +35,7 @@ final class AnnouncementController extends AbstractController
         private AnnouncementPricing $pricing,
         private AnnouncementPayment $payment,
         private ImageUploader $imageUploader,
+        private DocumentUploader $documentUploader,
         private EntityManagerInterface $entityManager,
         private LoggerInterface $logger,
     ) {
@@ -81,6 +83,10 @@ final class AnnouncementController extends AbstractController
             $image = $form->get('imageFile')->getData();
             if ($image instanceof UploadedFile) {
                 $announcement->setImage($this->imageUploader->upload($image));
+            }
+            $document = $form->get('documentFile')->getData();
+            if ($document instanceof UploadedFile) {
+                $announcement->setDocument($this->documentUploader->upload($document));
             }
 
             // Montant toujours recalculé côté serveur, jamais repris du formulaire.

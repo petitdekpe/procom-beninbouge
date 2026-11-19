@@ -981,10 +981,71 @@
     border-radius: var(--bb-r-lg);
 }
 
+/* Texte brut (retours à la ligne en <br>) ou HTML de l'éditeur riche, via le filtre rich_text. */
 .bb-ann-detail-body {
     font-size: 17px;
     line-height: 1.7;
-    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.bb-ann-detail-body > * + * {
+    margin-top: .9em;
+}
+
+.bb-ann-detail-body h2,
+.bb-ann-detail-body h3 {
+    margin-top: 1.4em;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.bb-ann-detail-body h2 {
+    font-size: 24px;
+}
+
+.bb-ann-detail-body h3 {
+    font-size: 20px;
+}
+
+.bb-ann-detail-body ul,
+.bb-ann-detail-body ol {
+    padding-left: 1.4em;
+}
+
+.bb-ann-detail-body ul {
+    list-style: disc;
+}
+
+.bb-ann-detail-body ol {
+    list-style: decimal;
+}
+
+.bb-ann-detail-body li + li {
+    margin-top: .3em;
+}
+
+.bb-ann-detail-body blockquote {
+    padding-left: 18px;
+    border-left: 4px solid var(--bb-gold);
+    font-style: italic;
+}
+
+.bb-ann-detail-body a {
+    color: var(--bb-green-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.bb-ann-detail-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--bb-r-md);
+}
+
+.bb-ann-detail-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .bb-ann-detail-contact {
@@ -1006,7 +1067,7 @@
     line-height: 1.8;
 }
 
-.bb-ann-detail-contact a:not(.bb-btn-primary) {
+.bb-ann-detail-contact a:not(.bb-btn-primary, .bb-btn-secondary) {
     color: var(--bb-green-text);
     text-decoration: underline;
     text-underline-offset: 3px;

@@ -1,5 +1,5 @@
 {# Formulaire d'annonce de la rédaction (création et modification).
-   Attend : form, heading, submitLabel, intro (texte d'aide), currentImage (URL ou null). #}
+   Attend : form, heading, submitLabel, intro (texte d'aide), currentImage et currentDocument (URL ou null). #}
 {{ form_start(form, { attr: { class: 'bo-wizard', enctype: 'multipart/form-data' } }) }}
     <div class="bo-wizard-head">
         <div>
@@ -24,17 +24,26 @@
         <div class="bo-form-row">{{ form_row(form.deadline) }}</div>
         <div class="bo-form-row">{{ form_row(form.description) }}</div>
         <div class="bo-form-row">{{ form_row(form.externalUrl) }}</div>
+        {% if currentDocument %}
+            <div class="bo-form-row">
+                <p style="margin:0 0 4px;font-weight:700">Document actuel</p>
+                <a href="{{ currentDocument }}" target="_blank" rel="noopener">Ouvrir le document</a>
+            </div>
+        {% endif %}
+        <div class="bo-form-row">{{ form_row(form.documentFile) }}</div>
+        {% if form.removeDocument is defined %}<div class="bo-form-row">{{ form_row(form.removeDocument) }}</div>{% endif %}
         {% if currentImage %}
-        <div class="bo-form-row">
-            <p style="margin:0 0 8px;font-weight:700">Image actuelle</p>
-            <img src="{{ currentImage }}" alt="" style="display:block;max-width:220px;max-height:220px;border-radius:10px">
-        </div>
-    {% endif %}
-    <div class="bo-form-row">{{ form_row(form.imageFile) }}</div>
-    {% if form.removeImage is defined %}<div class="bo-form-row">{{ form_row(form.removeImage) }}</div>{% endif %}
+            <div class="bo-form-row">
+                <p style="margin:0 0 8px;font-weight:700">Image actuelle</p>
+                <img src="{{ currentImage }}" alt="" style="display:block;max-width:220px;max-height:220px;border-radius:10px">
+            </div>
+        {% endif %}
+        <div class="bo-form-row">{{ form_row(form.imageFile) }}</div>
+        {% if form.removeImage is defined %}<div class="bo-form-row">{{ form_row(form.removeImage) }}</div>{% endif %}
     </div>
 
     <div class="bo-step">
+        <p class="bo-muted" style="margin:0 0 16px">Coordonnées facultatives : laissez vide si l'annonce renvoie vers un lien ou un document.</p>
         <div class="bo-form-row">{{ form_row(form.contactName) }}</div>
         <div class="bo-form-row">{{ form_row(form.contactEmail) }}</div>
         <div class="bo-form-row">{{ form_row(form.contactPhone) }}</div>

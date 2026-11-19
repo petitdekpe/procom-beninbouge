@@ -62,7 +62,10 @@ class Announcement
 
     #[ORM\Column(type: 'text')]
     #[Assert\NotBlank(message: 'La description est requise.')]
-    #[Assert\Length(min: 30, max: 3000, minMessage: 'La description doit contenir au moins 30 caractères.', maxMessage: 'La description ne peut pas dépasser 3000 caractères.')]
+    // Texte brut (dépôt public) ou HTML de l'éditeur riche (admin), toujours
+    // nettoyé à l'affichage par le filtre rich_text. La limite haute laisse
+    // de la place au balisage ; le formulaire public garde sa limite de 3000.
+    #[Assert\Length(min: 30, max: 12000, minMessage: 'La description doit contenir au moins 30 caractères.', maxMessage: 'La description est trop longue.')]
     private ?string $description = null;
 
     #[ORM\Column(length: 120, nullable: true)]
@@ -82,19 +85,22 @@ class Announcement
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
-    #[ORM\Column(length: 100)]
-    #[Assert\NotBlank(message: 'Le nom du contact est requis.')]
+    /** Document joint, PDF ou Word (App\Service\DocumentUploader). */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $document = null;
+
+    // Coordonnées obligatoires pour le dépôt public (contrainte NotBlank
+    // ajoutée par AnnouncementSubmissionType), facultatives pour la rédaction.
+    #[ORM\Column(length: 100, nullable: true)]
     #[Assert\Length(max: 100)]
     private ?string $contactName = null;
 
-    #[ORM\Column(length: 180)]
-    #[Assert\NotBlank(message: "L'e-mail du contact est requis.")]
+    #[ORM\Column(length: 180, nullable: true)]
     #[Assert\Email(message: "L'adresse e-mail est invalide.")]
     #[Assert\Length(max: 180)]
     private ?string $contactEmail = null;
 
-    #[ORM\Column(length: 20)]
-    #[Assert\NotBlank(message: 'Le téléphone du contact est requis.')]
+    #[ORM\Column(length: 20, nullable: true)]
     #[Assert\Regex(pattern: '/^\+?[0-9 ]{8,20}$/', message: 'Le numéro de téléphone est invalide.')]
     private ?string $contactPhone = null;
 
@@ -353,6 +359,31 @@ class Announcement
         $this->image = $image;
 
         return $this;
+    }
+
+    public function getDocument(): ?string
+    {
+        return $this->document;
+    }
+
+    public function setDocument(?string $document): static
+    {
+        $this->document = $document;
+
+        return $this;
+    }
+
+    /** Extension du document joint en majuscules (PDF, DOCX…), pour le bouton de téléchargement. */
+    public function getDocumentType(): ?string
+    {
+        $extension = null === $this->document ? '' : strtoupper(pathinfo($this->document, \PATHINFO_EXTENSION));
+
+        return '' === $extension ? null : $extension;
+    }
+
+    public function hasContactDetails(): bool
+    {
+        return null !== $this->contactName || null !== $this->contactEmail || null !== $this->contactPhone;
     }
 
     public function getContactName(): ?string

@@ -11,6 +11,7 @@
                 ? "La durée compte depuis la mise en ligne du " ~ announcement.startsAt|date('d/m/Y') ~ " : la modifier déplace la fin de diffusion. Le statut et le paiement ne changent pas."
                 : "Le statut et le paiement ne changent pas : l'annonce reste dans sa file actuelle.",
             currentImage: announcement.image,
+            currentDocument: announcement.document,
         } %}
     </div>
 {% endblock %}

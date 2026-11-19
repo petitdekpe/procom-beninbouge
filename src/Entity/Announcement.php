@@ -408,9 +408,17 @@ class Announcement
         return $this->durationDays;
     }
 
+    /**
+     * Sur une annonce déjà publiée (modification dans l'admin), la fin de
+     * diffusion suit la nouvelle durée, toujours comptée depuis la mise en
+     * ligne : allonger une annonce expirée la remet en ligne.
+     */
     public function setDurationDays(int $durationDays): static
     {
         $this->durationDays = $durationDays;
+        if (null !== $this->startsAt) {
+            $this->endsAt = $this->startsAt->modify(sprintf('+%d days', $durationDays));
+        }
 
         return $this;
     }

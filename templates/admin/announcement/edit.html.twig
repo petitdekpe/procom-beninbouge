@@ -1,0 +1,16 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Modifier l'annonce {{ announcement.reference }}{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-card" style="padding:28px">
+        {% include 'admin/announcement/_form.html.twig' with {
+            heading: "Modifier l'annonce " ~ announcement.reference,
+            submitLabel: 'Enregistrer',
+            intro: announcement.startsAt
+                ? "La durée compte depuis la mise en ligne du " ~ announcement.startsAt|date('d/m/Y') ~ " : la modifier déplace la fin de diffusion. Le statut et le paiement ne changent pas."
+                : "Le statut et le paiement ne changent pas : l'annonce reste dans sa file actuelle.",
+            currentImage: announcement.image,
+        } %}
+    </div>
+{% endblock %}

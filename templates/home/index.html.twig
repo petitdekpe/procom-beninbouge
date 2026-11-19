@@ -51,7 +51,7 @@
 
         {% for section in homeSections %}
             {% if section.type.value == 'hero_slider' %}
-                {{ include('partials/home_sections/_hero_slider.html.twig', { une: une, mostRead: mostRead, jobsCount: onlineAnnouncementsCount }) }}
+                {{ include('partials/home_sections/_hero_slider.html.twig', { une: une, mostRead: mostRead, jobsCount: onlineAnnouncementsCount, jobsAnnouncement: jobsAnnouncement }) }}
             {% elseif section.type.value == 'latest_news' %}
                 {{ include('partials/home_sections/_latest_news.html.twig', { fil: fil }) }}
             {% elseif section.type.value == 'popular_articles' and not uneEnabled %}

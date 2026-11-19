@@ -93,6 +93,7 @@ final class HomeController extends AbstractController
                 ? $this->announcementRepository->findOnlineForHomeCard(3)
                 : [],
             'onlineAnnouncementsCount' => $this->announcementRepository->countOnline(),
+            'jobsAnnouncement' => $une ? $this->announcementRepository->findLatestOnlineWithImage() : null,
             // Pop-up payant : indépendant des sections, affiché dès qu'une annonce l'a acheté.
             'popupAnnouncement' => $this->announcementRepository->findRandomOnlinePopup(),
         ]);

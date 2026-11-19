@@ -15,7 +15,9 @@ use App\Service\AnnouncementPricing;
 use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -109,14 +111,7 @@ final class AnnouncementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $image = $form->get('imageFile')->getData();
-            try {
-                if ($image instanceof UploadedFile) {
-                    $announcement->setImage($imageUploader->upload($image));
-                }
-            } catch (FileException $e) {
-                $form->get('imageFile')->addError(new FormError($e->getMessage()));
-            }
+            $this->storeImage($form, $announcement, $imageUploader);
 
             if ($form->isValid()) {
                 $announcement->publishByStaff($user, new \DateTimeImmutable());
@@ -132,6 +127,49 @@ final class AnnouncementController extends AbstractController
 
         return $this->render('admin/announcement/new.html.twig', [
             'form' => $form,
+        ], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+    }
+
+    /**
+     * Correction d'une annonce, payée ou de la rédaction, quel que soit son
+     * statut : le contenu, les coordonnées et la formule changent, le statut
+     * et le paiement jamais. Sur une annonce publiée, la fin de diffusion
+     * suit la nouvelle durée (Announcement::setDurationDays()).
+     */
+    #[Route('/{id}/modifier', name: 'admin_announcement_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    public function edit(Request $request, Announcement $announcement, ImageUploader $imageUploader): Response
+    {
+        $form = $this->createForm(AnnouncementSubmissionType::class, $announcement, [
+            'min_days' => 1,
+            'max_days' => max(self::STAFF_MAX_DAYS, $announcement->getDurationDays()),
+            'staff' => true,
+        ]);
+        if ($announcement->getImage()) {
+            $form->add('removeImage', CheckboxType::class, [
+                'label' => 'Retirer l\'image actuelle',
+                'mapped' => false,
+                'required' => false,
+            ]);
+        }
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if (!$this->storeImage($form, $announcement, $imageUploader) && $form->has('removeImage') && true === $form->get('removeImage')->getData()) {
+                $announcement->setImage(null);
+            }
+
+            if ($form->isValid()) {
+                $this->entityManager->flush();
+                $this->activityLogger->log(ActivityAction::Moderation, 'Announcement', $announcement->getId(), 'edited');
+                $this->addFlash('success', sprintf('Annonce %s modifiée.', $announcement->getReference()));
+
+                return $this->redirectToRoute('admin_announcement_show', ['id' => $announcement->getId()]);
+            }
+        }
+
+        return $this->render('admin/announcement/edit.html.twig', [
+            'form' => $form,
+            'announcement' => $announcement,
         ], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 
@@ -181,6 +219,30 @@ final class AnnouncementController extends AbstractController
         $this->addFlash('success', sprintf('Annonce %s refusée.', $announcement->getReference()));
 
         return $this->redirectToRoute('admin_announcement_index');
+    }
+
+    /**
+     * Enregistre l'image téléversée, s'il y en a une. Une erreur de
+     * conversion devient une erreur du champ, ce qui rend le formulaire invalide.
+     *
+     * @return bool true si une nouvelle image a été enregistrée
+     */
+    private function storeImage(FormInterface $form, Announcement $announcement, ImageUploader $imageUploader): bool
+    {
+        $image = $form->get('imageFile')->getData();
+        if (!$image instanceof UploadedFile) {
+            return false;
+        }
+
+        try {
+            $announcement->setImage($imageUploader->upload($image));
+        } catch (FileException $e) {
+            $form->get('imageFile')->addError(new FormError($e->getMessage()));
+
+            return false;
+        }
+
+        return true;
     }
 
     private function reviewer(): User

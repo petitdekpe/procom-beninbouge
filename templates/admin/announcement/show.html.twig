@@ -6,7 +6,10 @@
     {% set status = announcement.status.value %}
     <div class="bo-page-head">
         <h1 class="bo-page-title">{{ announcement.title }}</h1>
-        <a href="{{ path('admin_announcement_index') }}" class="bo-btn bo-btn-muted">← Retour à la liste</a>
+        <div style="display:flex;gap:10px">
+            <a href="{{ path('admin_announcement_index') }}" class="bo-btn bo-btn-muted">← Retour à la liste</a>
+            <a href="{{ path('admin_announcement_edit', { id: announcement.id }) }}" class="bo-btn bo-btn-accent">Modifier</a>
+        </div>
     </div>
 
     <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:20px;align-items:start">

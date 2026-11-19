@@ -969,13 +969,16 @@
     color: var(--bb-label);
 }
 
+/* Affiche entière, jamais recadrée : les visuels d'annonces sont souvent au
+   format réseaux sociaux (carré, 4:5, story) et contiennent du texte. */
 .bb-ann-detail-image {
     display: block;
-    width: 100%;
-    max-height: 520px;
-    margin-bottom: 32px;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: min(85vh, 900px);
+    margin: 0 auto 32px;
     border-radius: var(--bb-r-lg);
-    object-fit: cover;
 }
 
 .bb-ann-detail-body {
@@ -1372,10 +1375,19 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
 }
 
+/* Visuels souvent au format réseaux sociaux (carré, 4:5, story) : cadre
+   de hauteur fixe, l'image entière sur fond flou (cover_fit_controller.js). */
+.bb-ann-popup-media {
+    position: relative;
+    height: min(44vh, 340px);
+    overflow: hidden;
+    background: var(--bb-placeholder);
+}
+
 .bb-ann-popup-image {
     display: block;
     width: 100%;
-    max-height: 260px;
+    height: 100%;
     object-fit: cover;
 }
 

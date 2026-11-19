@@ -64,6 +64,18 @@ class AnnouncementRepository extends ServiceEntityRepository
     /**
      * @return list<Announcement> online announcements that bought the homepage card, newest first
      */
+    /** Dernière annonce en ligne avec un visuel : illustre la tuile « Focus emploi » de la une. */
+    public function findLatestOnlineWithImage(): ?Announcement
+    {
+        return $this->online(null)
+            ->andWhere('a.image IS NOT NULL')
+            ->orderBy('a.startsAt', 'DESC')
+            ->addOrderBy('a.id', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     public function findOnlineForHomeCard(int $limit): array
     {
         return $this->online(null)

@@ -2,7 +2,9 @@
    d'un carrousel plein écran : un grand article, deux moyens, les plus lus
    et la tuile « Focus emploi », soit 5 à 7 contenus visibles sans défiler.
    Attend : une (list<Article>, 3 au plus), mostRead (list<Article>),
-   jobsCount (int, annonces en ligne). Rien n'est affiché sans article.
+   jobsCount (int, annonces en ligne), jobsAnnouncement (Announcement|null :
+   la dernière en ligne avec un visuel, montré dans la tuile « Focus emploi »).
+   Rien n'est affiché sans article.
    Styles : .bb-une* dans assets/styles/home.css. #}
 {% if une|length > 0 %}
     {% set main = une|first %}
@@ -49,7 +51,12 @@
                 {{ include('partials/home_sections/_most_read.html.twig', { items: mostRead, extraClass: 'bb-une-mostread' }) }}
             {% endif %}
 
-            <a href="{{ jobsCount > 0 ? path('app_announcement_index') : path('app_announcement_submit') }}" class="bb-une-jobs">
+            {% set jobsArrow %}
+                <span class="bb-round-arrow" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </span>
+            {% endset %}
+            <a href="{{ jobsCount > 0 ? path('app_announcement_index') : path('app_announcement_submit') }}" class="bb-une-jobs{{ jobsAnnouncement ? ' has-media' }}">
                 <span class="bb-une-jobs-text">
                     <span class="bb-kicker bb-une-jobs-kicker">Focus emploi</span>
                     <span class="bb-display bb-une-jobs-title">
@@ -60,9 +67,14 @@
                         {%- endif -%}
                     </span>
                 </span>
-                <span class="bb-round-arrow" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
+                {% if jobsAnnouncement %}
+                    <span class="bb-une-jobs-media">
+                        <img src="{{ jobsAnnouncement.image }}" alt="" loading="lazy" data-controller="cover-fit">
+                        {{ jobsArrow }}
+                    </span>
+                {% else %}
+                    {{ jobsArrow }}
+                {% endif %}
             </a>
         </div>
     </section>

@@ -11,7 +11,7 @@
 <a href="{{ path('app_announcement_show', { reference: announcement.reference }) }}" class="bb-ann-card" style="--bb-cat:{{ categoryTone }}">
     <div class="bb-ann-card-media">
         {% if announcement.image %}
-            <img src="{{ announcement.image }}" alt="" loading="lazy">
+            <img src="{{ announcement.image }}" alt="" loading="lazy" data-controller="cover-fit">
         {% else %}
             <span class="bb-ann-card-placeholder" aria-hidden="true">{{ announcement.organization|slice(0, 1)|upper }}</span>
         {% endif %}

@@ -68,6 +68,7 @@
                             </td>
                             <td style="text-align:right;white-space:nowrap">
                                 <a href="{{ path('admin_announcement_show', { id: announcement.id }) }}" class="bo-btn {{ currentTab == 'review' ? 'bo-btn-accent' : 'bo-btn-muted' }}">{{ currentTab == 'review' ? 'Examiner' : 'Voir' }}</a>
+                                <a href="{{ path('admin_announcement_edit', { id: announcement.id }) }}" class="bo-btn bo-btn-muted">Modifier</a>
                             </td>
                         </tr>
                     {% endfor %}

@@ -236,6 +236,46 @@
     transform: translateX(4px);
 }
 
+/* Visuel de la dernière annonce en ligne, souvent au format réseaux sociaux
+   (carré, 4:5, story) : affiché entier sur fond flou (cover_fit_controller.js),
+   la flèche posée dans son coin. */
+.bb-une-jobs-media {
+    position: relative;
+    display: block;
+    flex: none;
+    align-self: stretch;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 14px;
+    background: rgba(17, 27, 20, .14);
+    box-shadow: 0 0 0 3px rgba(17, 27, 20, .18);
+}
+
+.bb-une-jobs-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bb-une-jobs-media .bb-round-arrow {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    width: 40px;
+    height: 40px;
+    box-shadow: 0 0 0 3px var(--bb-gold);
+}
+
+.bb-une-jobs.has-media .bb-une-jobs-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.bb-une-jobs.has-media .bb-une-jobs-title {
+    font-size: clamp(26px, 2.1vw, 34px);
+}
+
 /* Moins de 3 articles ou pas de « plus lus » : les tuiles s'étirent. */
 .bb-une-grid.is-count-1 .bb-une-main {
     grid-column: 1 / 10;
@@ -250,6 +290,15 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-end;
+}
+
+/* Tuile haute : le visuel occupe le haut, le texte reste en bas. */
+.bb-une-grid:not(.has-mostread) .bb-une-jobs-media {
+    order: -1;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 160px;
+    aspect-ratio: auto;
 }
 
 /* ---------- Les plus lus ---------- */
@@ -799,6 +848,19 @@
         justify-content: space-between;
     }
 
+    /* Lignes de hauteur automatique : une hauteur fixe évite que le visuel
+       prenne sa taille d'origine. */
+    .bb-une-jobs-media,
+    .bb-une-grid:not(.has-mostread) .bb-une-jobs-media {
+        order: 0;
+        flex: none;
+        align-self: center;
+        width: auto;
+        height: 132px;
+        min-height: 0;
+        aspect-ratio: 4 / 5;
+    }
+
     .bb-vrail-list {
         grid-template-columns: repeat(5, minmax(200px, 1fr));
         margin-inline: calc(var(--bb-gutter) * -1);
@@ -883,6 +945,19 @@
         min-height: 200px;
         padding: 16px;
         border-radius: 18px;
+    }
+
+    /* Tuile en colonne sur mobile : visuel en haut, pleine largeur. */
+    .bb-une-jobs-media,
+    .bb-une-grid:not(.has-mostread) .bb-une-jobs-media {
+        order: -1;
+        flex: none;
+        width: 100%;
+        height: 110px;
+        min-height: 0;
+        aspect-ratio: auto;
+        margin-bottom: 12px;
+        border-radius: 12px;
     }
 
     .bb-une-grid:not(:has(.bb-une-second)) .bb-une-jobs,

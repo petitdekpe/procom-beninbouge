@@ -214,6 +214,26 @@ class Announcement
         $this->endsAt = $at->modify(sprintf('+%d days', $this->durationDays));
     }
 
+    /**
+     * Annonce déposée par la rédaction depuis l'admin : gratuite et en ligne
+     * tout de suite, sans passer par le paiement ni la file de validation.
+     */
+    public function publishByStaff(User $author, \DateTimeImmutable $at): void
+    {
+        $this->amount = 0;
+        $this->approve($author, $at);
+    }
+
+    /**
+     * Seules les annonces de la rédaction quittent l'attente de paiement
+     * sans date de paiement (markPaid() la renseigne toujours).
+     */
+    public function isPublishedByStaff(): bool
+    {
+        return null === $this->paidAt
+            && !\in_array($this->status, [AnnouncementStatus::PendingPayment, AnnouncementStatus::PaymentFailed], true);
+    }
+
     public function reject(User $reviewer, \DateTimeImmutable $at, string $reason): void
     {
         $this->status = AnnouncementStatus::Rejected;

@@ -52,9 +52,9 @@
             <div class="bo-card" style="padding:20px">
                 <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 12px">Formule et paiement</h2>
                 <p style="margin:0 0 4px">{{ announcement.durationDays }} jours · page Annonces{{ announcement.withHomeCard ? ' · carte accueil' }}{{ announcement.withPopup ? ' · pop-up accueil' }}</p>
-                <p style="margin:0 0 4px;font-weight:800">{{ announcement.amount|format_number }} FCFA</p>
+                <p style="margin:0 0 4px;font-weight:800">{{ announcement.publishedByStaff ? 'Gratuite' : announcement.amount|format_number ~ ' FCFA' }}</p>
                 <p class="bo-muted" style="margin:0">
-                    {% if announcement.paidAt %}Payée le {{ announcement.paidAt|date('d/m/Y H:i') }}{% else %}Non payée{% endif %}
+                    {% if announcement.publishedByStaff %}Publiée par la rédaction{% elseif announcement.paidAt %}Payée le {{ announcement.paidAt|date('d/m/Y H:i') }}{% else %}Non payée{% endif %}
                     {% if announcement.transactionReference %} · transaction FedaPay n° {{ announcement.transactionReference }}{% endif %}
                 </p>
             </div>

@@ -90,25 +90,29 @@
     color: var(--bb-white);
 }
 
-/* Ligne du haut : rubrique à gauche, vignette de l'article à droite. */
+/* Ligne du haut : rubrique. */
 .bb-une-second-top {
     display: flex;
-    flex-wrap: wrap;
     align-items: flex-start;
-    justify-content: space-between;
     gap: 12px;
 }
 
+/* Image : pleine largeur, entre la rubrique et le titre, elle occupe la hauteur libre. */
 .bb-une-second-thumb {
     position: relative;
     display: block;
-    flex: none;
-    width: 128px;
-    aspect-ratio: 4 / 3;
-    margin-left: auto;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 160px;
     overflow: hidden;
-    border-radius: 14px;
+    border-radius: 16px;
     box-shadow: 0 0 0 3px rgba(17, 27, 20, .25);
+}
+
+.bb-une-second-thumb img,
+.bb-une-second-thumb.bb-fit-contain > img[data-controller~="cover-fit"] {
+    position: absolute;
+    inset: 0;
 }
 
 .bb-une-second-thumb img {
@@ -120,8 +124,10 @@
 
 .bb-une-second-body {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
     gap: 14px;
+    min-height: 0;
 }
 
 .bb-une-second-title {
@@ -865,7 +871,7 @@
     }
 
     .bb-une-second-thumb {
-        width: 64px;
+        min-height: 90px;
         border-radius: 10px;
     }
 

@@ -7,11 +7,17 @@ use App\Entity\Enum\ActivityAction;
 use App\Entity\Enum\AnnouncementStatus;
 use App\Entity\User;
 use App\Form\AnnouncementPricingType;
+use App\Form\AnnouncementSubmissionType;
 use App\Repository\AnnouncementRepository;
 use App\Repository\SiteSettingsRepository;
 use App\Service\ActivityLogger;
+use App\Service\AnnouncementPricing;
+use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -33,6 +39,9 @@ final class AnnouncementController extends AbstractController
         'rejected' => 'Refusées',
         'unpaid' => 'Non payées',
     ];
+
+    /** Durée maximale d'une annonce de la rédaction, hors grille tarifaire. */
+    private const STAFF_MAX_DAYS = 365;
 
     public function __construct(
         private AnnouncementRepository $announcementRepository,
@@ -76,6 +85,54 @@ final class AnnouncementController extends AbstractController
         return $this->render('admin/announcement/pricing.html.twig', [
             'form' => $form,
         ]);
+    }
+
+    /**
+     * Annonce déposée par la rédaction : même formulaire que le dépôt
+     * public, sans conditions à accepter ni paiement. Elle est gratuite et
+     * mise en ligne dès l'enregistrement (Announcement::publishByStaff()).
+     */
+    #[Route('/nouvelle', name: 'admin_announcement_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, AnnouncementPricing $pricing, ImageUploader $imageUploader): Response
+    {
+        $user = $this->reviewer();
+        $announcement = (new Announcement())
+            ->setDurationDays(max($pricing->minDays(), 30))
+            ->setContactEmail($user->getEmail())
+            ->setShowContact(false);
+
+        $form = $this->createForm(AnnouncementSubmissionType::class, $announcement, [
+            'min_days' => 1,
+            'max_days' => self::STAFF_MAX_DAYS,
+            'staff' => true,
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $image = $form->get('imageFile')->getData();
+            try {
+                if ($image instanceof UploadedFile) {
+                    $announcement->setImage($imageUploader->upload($image));
+                }
+            } catch (FileException $e) {
+                $form->get('imageFile')->addError(new FormError($e->getMessage()));
+            }
+
+            if ($form->isValid()) {
+                $announcement->publishByStaff($user, new \DateTimeImmutable());
+                $this->entityManager->persist($announcement);
+                $this->entityManager->flush();
+                $this->activityLogger->log(ActivityAction::Publication, 'Announcement', $announcement->getId(), 'by=staff');
+
+                $this->addFlash('success', sprintf('Annonce %s publiée : en ligne jusqu\'au %s.', $announcement->getReference(), $announcement->getEndsAt()?->format('d/m/Y à H:i')));
+
+                return $this->redirectToRoute('admin_announcement_index', ['tab' => 'online']);
+            }
+        }
+
+        return $this->render('admin/announcement/new.html.twig', [
+            'form' => $form,
+        ], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 
     #[Route('/{id}', name: 'admin_announcement_show', requirements: ['id' => '\d+'], methods: ['GET'])]

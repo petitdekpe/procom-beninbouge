@@ -26,6 +26,9 @@ use Symfony\Component\Validator\Constraints\Range;
 /**
  * Public « Publier une annonce » form (App\Controller\AnnouncementController::submit).
  * min_days / max_days come from the admin pricing settings (App\Service\AnnouncementPricing).
+ *
+ * staff: true is the admin variant (App\Controller\Admin\AnnouncementController::new):
+ * no publication terms to accept, and the duration counts from publication.
  */
 final class AnnouncementSubmissionType extends AbstractType
 {
@@ -103,7 +106,7 @@ final class AnnouncementSubmissionType extends AbstractType
             ->add('durationDays', IntegerType::class, [
                 'label' => 'Durée d\'affichage (jours)',
                 'attr' => ['min' => $options['min_days'], 'max' => $options['max_days']],
-                'help' => sprintf('De %d à %d jours, à compter de la validation de l\'annonce.', $options['min_days'], $options['max_days']),
+                'help' => sprintf('De %d à %d jours, à compter de %s.', $options['min_days'], $options['max_days'], $options['staff'] ? 'la publication' : 'la validation de l\'annonce'),
                 'constraints' => [
                     new NotNull(message: 'Indiquez une durée.'),
                     new Range(min: $options['min_days'], max: $options['max_days'], notInRangeMessage: 'La durée doit être comprise entre {{ min }} et {{ max }} jours.'),
@@ -117,6 +120,13 @@ final class AnnouncementSubmissionType extends AbstractType
                 'label' => 'Pop-up sur la page d\'accueil',
                 'required' => false,
             ])
+        ;
+
+        if ($options['staff']) {
+            return;
+        }
+
+        $builder
             ->add('acceptTerms', CheckboxType::class, [
                 'label' => 'J\'accepte que l\'annonce soit validée par la rédaction avant publication (sous 48 h) et qu\'elle puisse être refusée si elle ne respecte pas la ligne éditoriale.',
                 'mapped' => false,
@@ -131,7 +141,9 @@ final class AnnouncementSubmissionType extends AbstractType
             'data_class' => Announcement::class,
             'min_days' => 3,
             'max_days' => 60,
+            'staff' => false,
         ]);
+        $resolver->setAllowedTypes('staff', 'bool');
         $resolver->setAllowedTypes('min_days', 'int');
         $resolver->setAllowedTypes('max_days', 'int');
     }

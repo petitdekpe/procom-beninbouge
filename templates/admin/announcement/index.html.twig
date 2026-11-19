@@ -10,6 +10,7 @@
                 <a href="{{ path('admin_announcement_pricing') }}" class="bo-btn bo-btn-muted">Tarifs</a>
             {% endif %}
             <a href="{{ path('app_announcement_index') }}" target="_blank" rel="noopener" class="bo-btn bo-btn-muted">Voir la page publique</a>
+            <a href="{{ path('admin_announcement_new') }}" class="bo-btn bo-btn-accent">+ Nouvelle annonce</a>
         </div>
     </div>
 
@@ -52,7 +53,7 @@
                                 {%- if announcement.withHomeCard %} · carte{% endif -%}
                                 {%- if announcement.withPopup %} · pop-up{% endif %}
                             </td>
-                            <td class="bo-muted" style="white-space:nowrap">{{ announcement.amount|format_number }} FCFA</td>
+                            <td class="bo-muted" style="white-space:nowrap">{{ announcement.publishedByStaff ? 'Rédaction' : announcement.amount|format_number ~ ' FCFA' }}</td>
                             <td style="white-space:nowrap">
                                 {% if currentTab == 'review' %}
                                     <span style="font-weight:700;color:{{ overdue ? '#b91c1c' : 'inherit' }}">{{ announcement.reviewDeadline|date('d/m/Y H:i') }}</span>

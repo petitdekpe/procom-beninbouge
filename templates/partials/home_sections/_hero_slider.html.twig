@@ -25,13 +25,13 @@
 
             {% if second %}
                 <a href="{{ path('app_article_show', { slug: second.slug }) }}" class="bb-une-second" data-impression-tracker-target="card" data-article-id="{{ second.id }}">
-                    {% if second.category or second.coverImage %}
+                    {% if second.category %}
                         <div class="bb-une-second-top">
-                            {% if second.category %}<span class="bb-chip bb-chip--black-gold">{{ second.category.name }}</span>{% endif %}
-                            {% if second.coverImage %}<span class="bb-une-second-thumb"><img src="{{ second.coverImage }}" alt="" loading="lazy" data-controller="cover-fit"></span>{% endif %}
+                            <span class="bb-chip bb-chip--black-gold">{{ second.category.name }}</span>
                         </div>
                     {% endif %}
                     <div class="bb-une-second-body">
+                        {% if second.coverImage %}<span class="bb-une-second-thumb"><img src="{{ second.coverImage }}" alt="" loading="lazy" data-controller="cover-fit"></span>{% endif %}
                         <h3 class="bb-display bb-une-second-title">{{ second.title }}</h3>
                         <span class="bb-une-pill">Lire l'article <span aria-hidden="true">→</span></span>
                     </div>

@@ -78,8 +78,8 @@
 
     {{ include('partials/_video_modal.html.twig') }}
 
-    {% if popupAnnouncement %}
-        {{ include('partials/_announcement_popup.html.twig', { announcement: popupAnnouncement }) }}
+    {% if popupAnnouncements %}
+        {{ include('partials/_announcement_popup.html.twig', { announcements: popupAnnouncements }) }}
     {% endif %}
 
     {{ include('partials/_footer.html.twig') }}

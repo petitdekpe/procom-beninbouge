@@ -20,7 +20,7 @@
                 </div>
                 <div class="bb-une-main-text">
                     {% if main.category %}<span class="bb-chip bb-chip--tomato">{{ main.category.name }}</span>{% endif %}
-                    <h3 class="bb-display bb-une-main-title">{{ main.title }}</h3>
+                    <h3 class="bb-display bb-une-main-title" style="--len:{{ main.title|length }}">{{ main.title }}</h3>
                     <p class="bb-une-main-lead">{{ main.content|reading_time }} min de lecture</p>
                 </div>
             </a>
@@ -34,7 +34,7 @@
                     {% endif %}
                     <div class="bb-une-second-body">
                         {% if second.coverImage %}<span class="bb-une-second-thumb"><img src="{{ second.coverImage }}" alt="" loading="lazy" data-controller="cover-fit"></span>{% endif %}
-                        <h3 class="bb-display bb-une-second-title">{{ second.title }}</h3>
+                        <h3 class="bb-display bb-une-second-title" style="--len:{{ second.title|length }}">{{ second.title }}</h3>
                         <span class="bb-une-pill">Lire l'article <span aria-hidden="true">→</span></span>
                     </div>
                 </a>
@@ -43,7 +43,7 @@
             {% if third %}
                 <a href="{{ path('app_article_show', { slug: third.slug }) }}" class="bb-une-third" data-impression-tracker-target="card" data-article-id="{{ third.id }}">
                     {% if third.category %}<span class="bb-chip">{{ third.category.name }}</span>{% endif %}
-                    <h3 class="bb-une-third-title">{{ third.title }}</h3>
+                    <h3 class="bb-une-third-title" style="--len:{{ third.title|length }}">{{ third.title }}</h3>
                 </a>
             {% endif %}
 

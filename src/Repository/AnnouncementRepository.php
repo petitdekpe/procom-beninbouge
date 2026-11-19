@@ -87,18 +87,22 @@ class AnnouncementRepository extends ServiceEntityRepository
     }
 
     /**
-     * One online announcement that bought the homepage pop-up, picked at
-     * random so that several paying advertisers share the pop-up fairly.
+     * Online announcements that bought the homepage pop-up, shown as a slider.
+     * The order is shuffled on every request so that each paying advertiser
+     * gets the first slide in turn; capped so the slider stays short.
+     *
+     * @return list<Announcement>
      */
-    public function findRandomOnlinePopup(): ?Announcement
+    public function findOnlinePopups(int $limit = 5): array
     {
-        $ids = $this->online(null)
-            ->select('a.id')
+        $announcements = $this->online(null)
             ->andWhere('a.withPopup = true')
             ->getQuery()
-            ->getSingleColumnResult();
+            ->getResult();
 
-        return [] === $ids ? null : $this->find($ids[array_rand($ids)]);
+        shuffle($announcements);
+
+        return \array_slice($announcements, 0, $limit);
     }
 
     /** Annonce en ligne d'après le segment de son adresse : sa référence (ANN-…) ou son lien personnalisé. */

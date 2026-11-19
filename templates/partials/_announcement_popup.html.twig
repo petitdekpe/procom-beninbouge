@@ -1,30 +1,52 @@
-{# Pop-up d'accueil payant (option « pop-up sur l'accueil »). Une annonce tirée
-   au hasard parmi celles qui l'ont achetée (AnnouncementRepository::findRandomOnlinePopup).
-   Ouverture différée et fermeture mémorisée 24 h par annonce :
-   assets/controllers/announcement_popup_controller.js. Attend : announcement. #}
+{# Pop-up d'accueil payant (option « pop-up sur l'accueil »). Toutes les annonces
+   en ligne qui l'ont achetée défilent en slider (AnnouncementRepository::findOnlinePopups,
+   ordre mélangé à chaque visite). Ouverture différée, fermeture mémorisée 24 h
+   par annonce : assets/controllers/announcement_popup_controller.js.
+   Attend : announcements (liste). #}
 <dialog class="bb-ann-popup"
-        aria-labelledby="bb-ann-popup-title"
+        aria-label="Annonces à la une"
         data-controller="announcement-popup"
-        data-announcement-popup-key-value="{{ announcement.reference }}"
         data-action="click->announcement-popup#closeOnBackdrop close->announcement-popup#remember">
     <div class="bb-ann-popup-body">
         <button type="button" class="bb-ann-popup-close" data-action="announcement-popup#close" aria-label="Fermer">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
-        {% if announcement.image %}
-            <div class="bb-ann-popup-media">
-                <img src="{{ announcement.image }}" alt="" class="bb-ann-popup-image" data-controller="cover-fit">
+
+        <div class="bb-ann-popup-track" data-announcement-popup-target="track" data-action="scroll->announcement-popup#onScroll">
+            {% for announcement in announcements %}
+                <article class="bb-ann-popup-slide"
+                         data-announcement-popup-target="slide"
+                         data-key="{{ announcement.reference }}"
+                         {% if announcements|length > 1 %}role="group" aria-roledescription="diapositive" aria-label="{{ loop.index }} sur {{ announcements|length }}"{% endif %}>
+                    {% if announcement.image %}
+                        <div class="bb-ann-popup-media">
+                            <img src="{{ announcement.image }}" alt="" class="bb-ann-popup-image" data-controller="cover-fit">
+                        </div>
+                    {% endif %}
+                    <div class="bb-ann-popup-text">
+                        <p class="bb-ann-popup-kicker">Annonce · {{ announcement.category.label }}</p>
+                        <h2>{{ announcement.title }}</h2>
+                        <p class="bb-ann-popup-org">{{ announcement.organization }}{% if announcement.location %} · {{ announcement.location }}{% endif %}</p>
+                        <p>{{ announcement.description|excerpt(180) }}</p>
+                        <div class="bb-ann-popup-actions">
+                            <a href="{{ path('app_announcement_show', { key: announcement.publicKey }) }}" class="bb-btn-primary">Voir l'annonce</a>
+                            <button type="button" class="bb-btn-secondary" data-action="announcement-popup#close">Plus tard</button>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        {% if announcements|length > 1 %}
+            <div class="bb-ann-popup-nav" data-announcement-popup-target="nav">
+                <button type="button" class="bb-ann-popup-arrow" data-action="announcement-popup#prev" aria-label="Annonce précédente">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <div class="bb-ann-popup-dots" data-announcement-popup-target="dots"></div>
+                <button type="button" class="bb-ann-popup-arrow" data-action="announcement-popup#next" aria-label="Annonce suivante">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
             </div>
         {% endif %}
-        <div class="bb-ann-popup-text">
-            <p class="bb-ann-popup-kicker">Annonce · {{ announcement.category.label }}</p>
-            <h2 id="bb-ann-popup-title">{{ announcement.title }}</h2>
-            <p class="bb-ann-popup-org">{{ announcement.organization }}{% if announcement.location %} · {{ announcement.location }}{% endif %}</p>
-            <p>{{ announcement.description|excerpt(180) }}</p>
-            <div class="bb-ann-popup-actions">
-                <a href="{{ path('app_announcement_show', { key: announcement.publicKey }) }}" class="bb-btn-primary">Voir l'annonce</a>
-                <button type="button" class="bb-btn-secondary" data-action="announcement-popup#close">Plus tard</button>
-            </div>
-        </div>
     </div>
 </dialog>

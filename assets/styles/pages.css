@@ -1419,6 +1419,88 @@
     position: relative;
 }
 
+/* Slider : un slide par annonce, défilement horizontal avec accroche. */
+.bb-ann-popup-track {
+    display: flex;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+}
+
+.bb-ann-popup-track::-webkit-scrollbar {
+    display: none;
+}
+
+.bb-ann-popup-slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+}
+
+.bb-ann-popup-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 0 26px 20px;
+}
+
+.bb-ann-popup-nav[hidden] {
+    display: none;
+}
+
+.bb-ann-popup-arrow {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--bb-outline-border);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--bb-ink);
+    cursor: pointer;
+}
+
+.bb-ann-popup-dots {
+    display: flex;
+    gap: 4px;
+}
+
+/* Zone tactile de 24px, pastille visible de 8px. */
+.bb-ann-popup-dot {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.bb-ann-popup-dot::before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    background: var(--bb-ink-muted);
+    opacity: .4;
+    transition: opacity .15s ease, transform .15s ease;
+}
+
+.bb-ann-popup-dot.is-active::before {
+    background: var(--bb-green-text);
+    opacity: 1;
+    transform: scale(1.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bb-ann-popup-track {
+        scroll-behavior: auto;
+    }
+}
+
 .bb-ann-popup-close {
     position: absolute;
     top: 12px;

@@ -31,7 +31,32 @@ final class ArticleSaver
         #[Autowire(service: 'cache.listings')]
         private CacheItemPoolInterface $listingsCache,
         private Security $security,
+        private UnicodeStyleNormalizer $unicodeStyles,
     ) {
+    }
+
+    /**
+     * Faux gras/italiques Unicode collés depuis les réseaux sociaux : lettres
+     * ordinaires dans le titre et les champs SEO, vraie mise en forme
+     * (<strong>, <em>) dans le contenu. Avant le calcul du slug et des meta,
+     * pour qu'ils partent du texte propre.
+     */
+    public function normalizeUnicodeStyles(Article $article): bool
+    {
+        $changed = false;
+        foreach ([
+            [$article->getTitle(), $article->setTitle(...), $this->unicodeStyles->toPlain(...)],
+            [$article->getMetaTitle(), $article->setMetaTitle(...), $this->unicodeStyles->toPlain(...)],
+            [$article->getMetaDescription(), $article->setMetaDescription(...), $this->unicodeStyles->toPlain(...)],
+            [$article->getContent(), $article->setContent(...), $this->unicodeStyles->toHtml(...)],
+        ] as [$value, $set, $normalize]) {
+            if ($this->unicodeStyles->hasStyledCharacters($value)) {
+                $set($normalize($value));
+                $changed = true;
+            }
+        }
+
+        return $changed;
     }
 
     /**
@@ -46,6 +71,7 @@ final class ArticleSaver
         $wasPublished = ArticleStatus::Published === $originalStatus;
 
         $this->applyAuthorshipGate($article);
+        $this->normalizeUnicodeStyles($article);
 
         if (!$article->getSlug() && $article->getTitle()) {
             $article->setSlug($this->seo->uniqueSlug(

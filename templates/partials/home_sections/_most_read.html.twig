@@ -10,7 +10,7 @@
             <li>
                 <a href="{{ path('app_article_show', { slug: article.slug }) }}" class="bb-mostread-item" data-impression-tracker-target="card" data-article-id="{{ article.id }}">
                     <span class="bb-display bb-mostread-rank" aria-hidden="true">{{ loop.index }}</span>
-                    <span class="bb-mostread-text">{{ article.title }}</span>
+                    <span class="bb-mostread-text" style="--len:{{ article.title|length }}">{{ article.title }}</span>
                 </a>
             </li>
         {% endfor %}

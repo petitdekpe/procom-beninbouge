@@ -101,11 +101,12 @@ class AnnouncementRepository extends ServiceEntityRepository
         return [] === $ids ? null : $this->find($ids[array_rand($ids)]);
     }
 
-    public function findOnlineOneByReference(string $reference): ?Announcement
+    /** Annonce en ligne d'après le segment de son adresse : sa référence (ANN-…) ou son lien personnalisé. */
+    public function findOnlineOneByKey(string $key): ?Announcement
     {
         return $this->online(null)
-            ->andWhere('a.reference = :reference')
-            ->setParameter('reference', $reference)
+            ->andWhere(str_starts_with($key, 'ANN-') ? 'a.reference = :key' : 'a.slug = :key')
+            ->setParameter('key', $key)
             ->getQuery()
             ->getOneOrNullResult();
     }

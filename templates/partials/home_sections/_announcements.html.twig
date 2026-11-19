@@ -30,7 +30,7 @@
             <ul class="bb-jobs-grid">
                 {% for announcement in announcements %}
                     <li>
-                        <a href="{{ path('app_announcement_show', { reference: announcement.reference }) }}" class="bb-job-card">
+                        <a href="{{ path('app_announcement_show', { key: announcement.publicKey }) }}" class="bb-job-card">
                             <span class="bb-chip {{ chipByCategory[announcement.category.value] ?? 'bb-chip--white' }}">{{ announcement.category.label }}</span>
                             <strong class="bb-job-card-title">{{ announcement.title }}</strong>
                             <span class="bb-job-card-org">{{ announcement.organization }}{% if announcement.location %} · {{ announcement.location }}{% endif %}</span>

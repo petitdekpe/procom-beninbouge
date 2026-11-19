@@ -51,7 +51,9 @@
                     <p style="margin:10px 0 0"><strong>Motif :</strong> {{ announcement.rejectionReason }}</p>
                 {% endif %}
                 {% if announcement.online %}
-                    <p style="margin:10px 0 0"><a href="{{ path('app_announcement_show', { reference: announcement.reference }) }}" target="_blank" rel="noopener">Voir l'annonce publiée</a></p>
+                    {% set publicUrl = url('app_announcement_show', { key: announcement.publicKey }) %}
+                    <p style="margin:10px 0 0"><a href="{{ publicUrl }}" target="_blank" rel="noopener">Voir l'annonce publiée</a></p>
+                    <p class="bo-muted" style="margin:4px 0 0;font-size:12px;word-break:break-all">{{ publicUrl }}</p>
                 {% endif %}
             </div>
 

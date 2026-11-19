@@ -3,7 +3,7 @@
 {# Page d'une annonce en ligne. Données : App\Controller\AnnouncementController::show. #}
 
 {% set settings = site_settings() %}
-{% set pageUrl = url('app_announcement_show', { reference: announcement.reference }) %}
+{% set pageUrl = url('app_announcement_show', { key: announcement.publicKey }) %}
 
 {% block title %}{{ announcement.title }} | Annonces & Opportunités | {{ settings.siteName }}{% endblock %}
 

@@ -44,7 +44,7 @@
                 {% elseif announcement.online %}
                     <strong>Votre annonce est en ligne</strong>
                     <p>Elle est affichée jusqu'au {{ announcement.endsAt|french_date_short }} à {{ announcement.endsAt|date('H:i') }}.</p>
-                    <a href="{{ path('app_announcement_show', { reference: announcement.reference }) }}" class="bb-btn-primary">Voir mon annonce</a>
+                    <a href="{{ path('app_announcement_show', { key: announcement.publicKey }) }}" class="bb-btn-primary">Voir mon annonce</a>
                 {% elseif announcement.expired %}
                     <strong>Diffusion terminée</strong>
                     <p>Votre annonce a été affichée du {{ announcement.startsAt|french_date_short }} au {{ announcement.endsAt|french_date_short }}.</p>

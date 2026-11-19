@@ -150,11 +150,21 @@ final class AnnouncementController extends AbstractController
         return $this->redirectToPayment($announcement);
     }
 
-    #[Route('/{reference}', name: 'app_announcement_show', requirements: ['reference' => 'ANN-[A-Z0-9]{6}'], methods: ['GET'])]
-    public function show(string $reference): Response
+    /**
+     * {key} : la référence (ANN-XXXXXX) ou le lien personnalisé de l'annonce.
+     * Une annonce qui a un lien personnalisé n'a qu'une adresse : celle par
+     * référence y redirige en 301, pour les liens déjà partagés et le SEO.
+     * Priorité basse : /annonces/publier et les autres pages fixes passent avant.
+     */
+    #[Route('/{key}', name: 'app_announcement_show', requirements: ['key' => 'ANN-[A-Z0-9]{6}|[a-z0-9]+(?:-[a-z0-9]+)*'], methods: ['GET'], priority: -10)]
+    public function show(string $key): Response
     {
-        $announcement = $this->announcementRepository->findOnlineOneByReference($reference)
+        $announcement = $this->announcementRepository->findOnlineOneByKey($key)
             ?? throw $this->createNotFoundException("Cette annonce n'existe pas ou n'est plus en ligne.");
+
+        if ($announcement->getPublicKey() !== $key) {
+            return $this->redirectToRoute('app_announcement_show', ['key' => $announcement->getPublicKey()], Response::HTTP_MOVED_PERMANENTLY);
+        }
 
         return $this->render('announcement/show.html.twig', [
             'announcement' => $announcement,

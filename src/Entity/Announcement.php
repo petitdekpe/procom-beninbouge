@@ -6,6 +6,7 @@ use App\Entity\Enum\AnnouncementCategory;
 use App\Entity\Enum\AnnouncementStatus;
 use App\Repository\AnnouncementRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -28,11 +29,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: AnnouncementRepository::class)]
 #[ORM\Table(options: ['engine' => 'InnoDB'])]
 #[ORM\Index(columns: ['status', 'ends_at'], name: 'idx_announcement_status_ends')]
+#[UniqueEntity(fields: ['slug'], message: 'Ce lien est déjà utilisé par une autre annonce.', ignoreNull: true)]
 class Announcement
 {
     /** Délai de validation promis à l'annonceur. */
     public const REVIEW_DELAY_HOURS = 48;
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -41,6 +42,18 @@ class Announcement
     /** Référence lisible communiquée à l'annonceur (ex. « ANN-7K3Q9D »). */
     #[ORM\Column(length: 12, unique: true)]
     private string $reference;
+
+    /**
+     * Lien personnalisé facultatif, saisi par la rédaction : /annonces/{slug}
+     * au lieu de /annonces/{reference}. L'adresse par référence reste valable
+     * et redirige vers celle-ci (App\Controller\AnnouncementController::show).
+     */
+    #[ORM\Column(length: 120, nullable: true, unique: true)]
+    #[Assert\Length(min: 3, max: 120, minMessage: 'Le lien doit contenir au moins 3 caractères.', maxMessage: 'Le lien ne peut pas dépasser 120 caractères.')]
+    #[Assert\Regex(pattern: '/^[a-z0-9]+(?:-[a-z0-9]+)*$/', message: 'Le lien ne peut contenir que des lettres minuscules sans accent, des chiffres et des tirets.')]
+    // Segments déjà pris par d'autres pages sous /annonces/.
+    #[Assert\Regex(pattern: '/^(?:publier|paiement|suivi)$/', match: false, message: 'Ce lien est réservé par le site, choisissez-en un autre.')]
+    private ?string $slug = null;
 
     /** Jeton secret du lien de suivi /annonces/suivi/{token}. */
     #[ORM\Column(length: 64, unique: true)]
@@ -359,6 +372,24 @@ class Announcement
         $this->image = $image;
 
         return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(?string $slug): static
+    {
+        $this->slug = '' === $slug ? null : $slug;
+
+        return $this;
+    }
+
+    /** Segment de l'adresse publique : le lien personnalisé s'il existe, sinon la référence. */
+    public function getPublicKey(): string
+    {
+        return $this->slug ?? $this->reference;
     }
 
     public function getDocument(): ?string

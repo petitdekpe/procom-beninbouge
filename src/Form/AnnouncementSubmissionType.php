@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Announcement;
 use App\Entity\Enum\AnnouncementCategory;
+use App\Service\SeoMetadataGenerator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -16,6 +17,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
@@ -41,6 +44,10 @@ final class AnnouncementSubmissionType extends AbstractType
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
+
+    public function __construct(private readonly SeoMetadataGenerator $seo)
+    {
+    }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -168,6 +175,18 @@ final class AnnouncementSubmissionType extends AbstractType
         ;
 
         if ($staff) {
+            $builder->add('slug', TextType::class, [
+                'label' => 'Lien personnalisé',
+                'required' => false,
+                'attr' => ['placeholder' => 'ex. dawha-hotel', 'maxlength' => 120],
+                'help' => 'Adresse de l\'annonce : beninbouge.bj/annonces/ suivi de ce lien. Les espaces et accents sont convertis automatiquement. Laissé vide, l\'adresse utilise la référence (ANN-…), qui reste valable et redirige vers le lien personnalisé.',
+            ]);
+            // « Dawha Hôtel » devient « dawha-hotel » avant validation.
+            $builder->get('slug')->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event): void {
+                $value = trim((string) $event->getData());
+                $event->setData('' === $value ? null : $this->seo->slugify($value));
+            });
+
             return;
         }
 

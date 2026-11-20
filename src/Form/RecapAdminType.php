@@ -37,7 +37,12 @@ final class RecapAdminType extends AbstractType
                 'label' => 'Ou téléversez une vidéo',
                 'required' => false,
                 'mapped' => false,
-                'help' => 'MP4 ou WebM, 50 Mo maximum. Remplace le lien ci-dessus.',
+                'help' => 'MP4 ou WebM, 50 Mo maximum. Remplace le lien ci-dessus. La couverture est générée automatiquement depuis la vidéo.',
+                'attr' => [
+                    'accept' => 'video/mp4,video/webm,video/quicktime',
+                    'data-recap-cover-target' => 'video',
+                    'data-action' => 'change->recap-cover#videoChanged',
+                ],
                 'constraints' => [
                     new File(
                         maxSize: '50M',
@@ -58,13 +63,17 @@ final class RecapAdminType extends AbstractType
             ->add('coverImage', TextType::class, [
                 'label' => 'URL image de couverture',
                 'required' => false,
-                'help' => 'Visuel des cartes et affiche de la vidéo. Laissé vide : miniature YouTube.',
+                'help' => 'Visuel des cartes et affiche de la vidéo. Laissé vide : détectée automatiquement depuis YouTube à l\'enregistrement (pour un fichier téléversé, la carte affiche sa première image).',
             ])
             ->add('coverImageFile', FileType::class, [
                 'label' => 'Ou téléversez une image',
                 'required' => false,
                 'mapped' => false,
                 'help' => 'JPEG, PNG, WebP ou GIF, 5 Mo maximum. Remplace l\'URL ci-dessus.',
+                'attr' => [
+                    'data-recap-cover-target' => 'cover',
+                    'data-action' => 'change->recap-cover#coverChanged',
+                ],
                 'constraints' => [
                     new File(
                         maxSize: '5M',

@@ -5,7 +5,12 @@
 {% set thumb = recap.thumbnail %}
 <a href="{{ path('app_recap_show', { slug: recap.slug }) }}" class="bb-recap-card"{% if recap.category %} style="--bb-cat:{{ recap.category.color }}"{% endif %}>
     <span class="bb-recap-card-media">
-        {% if thumb %}<img src="{{ thumb }}" alt="" loading="lazy">{% endif %}
+        {% if thumb %}
+            <img src="{{ thumb }}" alt="" loading="lazy">
+        {% elseif recap.videoFileUrl %}
+            {# Fichier sans couverture : la première image de la vidéo fait office de visuel. #}
+            <video src="{{ recap.videoFileUrl }}#t=0.1" muted playsinline preload="metadata" tabindex="-1" aria-hidden="true"></video>
+        {% endif %}
     </span>
     {% if isNew|default(false) %}
         <span class="bb-chip bb-chip--tomato bb-recap-card-badge">Nouveau</span>

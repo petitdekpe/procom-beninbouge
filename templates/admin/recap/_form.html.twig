@@ -1,4 +1,9 @@
-{{ form_start(form, { attr: { class: 'bo-wizard', enctype: 'multipart/form-data' } }) }}
+{{ form_start(form, { attr: {
+    class: 'bo-wizard',
+    enctype: 'multipart/form-data',
+    'data-controller': 'recap-cover',
+    'data-recap-cover-existing-url-value': recap.videoFileUrl ?? '',
+} }) }}
     <div class="bo-wizard-head">
         <div>
             <p class="bo-wizard-title">{{ heading }}</p>
@@ -21,6 +26,11 @@
         <div class="bo-form-row">{{ form_row(form.videoFile) }}</div>
         <div class="bo-form-row">{{ form_row(form.coverImage) }}</div>
         <div class="bo-form-row">{{ form_row(form.coverImageFile) }}</div>
+        <div class="bo-form-row">
+            <button type="button" class="bo-btn bo-btn-muted" data-action="recap-cover#generate">Générer la couverture depuis la vidéo</button>
+            <p class="bo-muted" style="margin:8px 0 0;font-size:12.5px" role="status" aria-live="polite" data-recap-cover-target="status"></p>
+            <img data-recap-cover-target="preview" alt="Couverture du récap" style="margin-top:10px;width:120px;aspect-ratio:9/16;object-fit:cover;border-radius:10px;border:1px solid var(--sp-line, #ddd)"{% if recap.coverImage %} src="{{ recap.coverImage }}"{% else %} hidden{% endif %}>
+        </div>
     </div>
 
     <div class="bo-step">

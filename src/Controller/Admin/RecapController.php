@@ -7,6 +7,7 @@ use App\Entity\Recap;
 use App\Form\RecapAdminType;
 use App\Repository\RecapRepository;
 use App\Service\ImageUploader;
+use App\Service\RecapCoverResolver;
 use App\Service\SeoMetadataGenerator;
 use App\Service\VideoUploader;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,6 +34,7 @@ final class RecapController extends AbstractController
         private EntityManagerInterface $entityManager,
         private ImageUploader $imageUploader,
         private VideoUploader $videoUploader,
+        private RecapCoverResolver $coverResolver,
         private SeoMetadataGenerator $seo,
     ) {
     }
@@ -54,6 +56,7 @@ final class RecapController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $this->handleVideo($recap, $form)) {
             $this->handleCoverImageUpload($recap, $form);
+            $this->coverResolver->apply($recap);
             $this->applyDefaults($recap);
 
             $this->entityManager->persist($recap);
@@ -78,6 +81,7 @@ final class RecapController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $this->handleVideo($recap, $form)) {
             $this->handleCoverImageUpload($recap, $form);
+            $this->coverResolver->apply($recap);
             $this->applyDefaults($recap);
 
             $this->entityManager->flush();

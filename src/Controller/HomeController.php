@@ -15,9 +15,10 @@ use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Homepage (charte 2026, V2): the order and visibility of the sections still
- * come from /admin/home-sections. Each article appears only once on the
- * page — the "Une" grid first, then the most-read list, then "Le fil" —
- * so every query excludes the ids already picked above it.
+ * come from /admin/home-sections. The "Une" grid and the most-read list do
+ * not repeat each other (the most-read query excludes the "Une" ids), but
+ * "Le fil" always shows the latest published articles of the site, even if
+ * they already appear above.
  */
 final class HomeController extends AbstractController
 {
@@ -61,8 +62,10 @@ final class HomeController extends AbstractController
             ? $remember($this->articleRepository->findMostViewedPublished(self::MOST_READ_SIZE, $shownIds))
             : [];
 
+        // « Le fil » = les derniers articles publiés du site, sans exclusion :
+        // un article à la une ou parmi les plus lus peut aussi y figurer.
         $fil = $isEnabled(HomeSectionType::LatestNews)
-            ? $remember($this->articleRepository->findLatestPublished(self::FIL_SIZE, $shownIds))
+            ? $this->articleRepository->findLatestPublished(self::FIL_SIZE)
             : [];
 
         $categoryHighlightArticles = [];

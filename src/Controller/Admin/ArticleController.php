@@ -13,12 +13,9 @@ use App\Repository\ArticleRevisionRepository;
 use App\Service\ArticleSaver;
 use App\Service\EditorProfileProvisioner;
 use App\Service\ImageUploader;
-use App\Service\VideoUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,7 +32,6 @@ final class ArticleController extends AbstractController
         private ArticleSaver $articleSaver,
         private EditorProfileProvisioner $editorProfileProvisioner,
         private ImageUploader $imageUploader,
-        private VideoUploader $videoUploader,
         private EntityManagerInterface $entityManager,
     ) {
     }
@@ -70,7 +66,7 @@ final class ArticleController extends AbstractController
         $form = $this->createForm(ArticleAdminType::class, $article);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $this->handleVideo($article, $form)) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $uploadedCover = $this->handleCoverImageUpload($article, $form);
 
             $wasPublished = $this->articleSaver->applyDefaults($article);
@@ -99,7 +95,7 @@ final class ArticleController extends AbstractController
         $form = $this->createForm(ArticleAdminType::class, $article);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $this->handleVideo($article, $form)) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $uploadedCover = $this->handleCoverImageUpload($article, $form);
 
             $wasPublished = $this->articleSaver->applyDefaults($article);
@@ -234,33 +230,6 @@ final class ArticleController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_article_trash');
-    }
-
-    /**
-     * Stores an uploaded video (it takes priority over a typed link) and
-     * makes sure a Récap article ends up with one. Returns false — with an
-     * error on the form, which is then shown again — when it doesn't.
-     */
-    private function handleVideo(Article $article, FormInterface $form): bool
-    {
-        $file = $form->get('videoFile')->getData();
-        if ($file instanceof UploadedFile) {
-            try {
-                $article->setVideoUrl($this->videoUploader->upload($file));
-            } catch (FileException $e) {
-                $form->get('videoFile')->addError(new FormError($e->getMessage()));
-
-                return false;
-            }
-        }
-
-        if ($article->isRecap() && !$article->hasVideo()) {
-            $form->get('videoUrl')->addError(new FormError('Un Récap a besoin d\'une vidéo : collez un lien YouTube ou téléversez un fichier.'));
-
-            return false;
-        }
-
-        return true;
     }
 
     /**

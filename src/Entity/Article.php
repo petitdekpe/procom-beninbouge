@@ -58,7 +58,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ApiFilter(ArticleSearchFilter::class)]
 #[ApiFilter(SearchFilter::class, properties: ['category' => 'exact', 'tags' => 'exact', 'status' => 'exact', 'type' => 'exact'])]
 #[Assert\Callback(callback: 'validateSponsorship')]
-#[Assert\Callback(callback: 'validateVideo')]
 class Article implements SoftDeletableInterface
 {
     #[ORM\Id]
@@ -131,15 +130,6 @@ class Article implements SoftDeletableInterface
      */
     #[ORM\Column(length: 20, enumType: ArticleType::class)]
     private ArticleType $type = ArticleType::Editorial;
-
-    /**
-     * Vidéo d'un article de type Recap : lien YouTube (watch, youtu.be,
-     * shorts, embed) ou fichier vidéo direct (.mp4/.webm), y compris un
-     * fichier téléversé (/uploads/videos/…, voir App\Service\VideoUploader).
-     */
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Length(max: 255)]
-    private ?string $videoUrl = null;
 
     #[ORM\ManyToOne(targetEntity: Partner::class)]
     #[ORM\JoinColumn(nullable: true)]
@@ -217,15 +207,6 @@ class Article implements SoftDeletableInterface
         if (ArticleType::Sponsored === $this->type && !$this->sponsor) {
             $context->buildViolation("Un publi-reportage (type sponsored) doit référencer un annonceur (sponsor).")
                 ->atPath('sponsor')
-                ->addViolation();
-        }
-    }
-
-    public function validateVideo(ExecutionContextInterface $context): void
-    {
-        if (null !== $this->videoUrl && '' !== $this->videoUrl && !$this->hasVideo()) {
-            $context->buildViolation('La vidéo doit être un lien YouTube (vidéo ou Short) ou un fichier .mp4 / .webm.')
-                ->atPath('videoUrl')
                 ->addViolation();
         }
     }
@@ -406,89 +387,6 @@ class Article implements SoftDeletableInterface
         return ArticleType::Sponsored === $this->type;
     }
 
-    public function isRecap(): bool
-    {
-        return ArticleType::Recap === $this->type;
-    }
-
-    public function getVideoUrl(): ?string
-    {
-        return $this->videoUrl;
-    }
-
-    public function setVideoUrl(?string $videoUrl): static
-    {
-        $videoUrl = null === $videoUrl ? null : trim($videoUrl);
-        $this->videoUrl = '' === $videoUrl ? null : $videoUrl;
-
-        return $this;
-    }
-
-    /**
-     * True when videoUrl is something the public page knows how to play.
-     */
-    public function hasVideo(): bool
-    {
-        return null !== $this->getVideoYoutubeId() || null !== $this->getVideoFileUrl();
-    }
-
-    /**
-     * True when the public page should use the Récap layout (video on the
-     * left, text on the right): a Recap article with a playable video.
-     * A Recap whose video is missing falls back to the regular article page.
-     */
-    public function isRecapWithVideo(): bool
-    {
-        return $this->isRecap() && $this->hasVideo();
-    }
-
-    public function getVideoYoutubeId(): ?string
-    {
-        if (!$this->videoUrl) {
-            return null;
-        }
-
-        if (1 === preg_match('#^https?://(?:www\.|m\.)?(?:youtube(?:-nocookie)?\.com/(?:embed/|shorts/|live/|watch\?(?:[^\#]*&)?v=)|youtu\.be/)([A-Za-z0-9_-]{6,15})#i', $this->videoUrl, $matches)) {
-            return $matches[1];
-        }
-
-        return null;
-    }
-
-    /**
-     * Direct video file (uploaded, or an external .mp4/.webm link).
-     */
-    public function getVideoFileUrl(): ?string
-    {
-        if ($this->videoUrl && 1 === preg_match('#^(?:https?://|/uploads/videos/)[^\s"\'<>]+\.(?:mp4|webm|m4v|mov)(?:\?[^\s"\'<>]*)?$#i', $this->videoUrl)) {
-            return $this->videoUrl;
-        }
-
-        return null;
-    }
-
-    public function getVideoEmbedSrc(): ?string
-    {
-        $id = $this->getVideoYoutubeId();
-
-        return $id ? "https://www.youtube.com/embed/{$id}?rel=0&playsinline=1&modestbranding=1" : null;
-    }
-
-    /**
-     * Visuel de la carte / affiche du lecteur : la couverture si elle existe,
-     * sinon la miniature YouTube.
-     */
-    public function getVideoThumbnail(): ?string
-    {
-        if ($this->coverImage) {
-            return $this->coverImage;
-        }
-
-        $id = $this->getVideoYoutubeId();
-
-        return $id ? "https://img.youtube.com/vi/{$id}/hqdefault.jpg" : null;
-    }
-
     public function getSponsor(): ?Partner
     {
         return $this->sponsor;
@@ -616,26 +514,12 @@ class Article implements SoftDeletableInterface
      */
     public function getStructuredData(): array
     {
-        $video = null;
-        if ($this->isRecapWithVideo()) {
-            $video = [
-                '@type' => 'VideoObject',
-                'name' => $this->title,
-                'description' => $this->metaDescription ?: $this->title,
-                'thumbnailUrl' => $this->getVideoThumbnail(),
-                'uploadDate' => $this->publishedAt?->format(\DateTimeInterface::ATOM),
-                'embedUrl' => $this->getVideoEmbedSrc(),
-                'contentUrl' => $this->getVideoFileUrl(),
-            ];
-        }
-
         return [
             '@context' => 'https://schema.org',
             '@type' => 'Article',
             'headline' => $this->title,
             'description' => $this->metaDescription,
             'image' => $this->coverImage,
-            'video' => $video,
             'datePublished' => $this->publishedAt?->format(\DateTimeInterface::ATOM),
             'dateModified' => $this->updatedAt?->format(\DateTimeInterface::ATOM),
             'articleSection' => $this->category?->getName(),

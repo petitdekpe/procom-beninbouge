@@ -1,0 +1,22 @@
+{# Carte Récap : visuel vertical 9:16 avec bouton lecture, rubrique et titre.
+   La carte entière est un lien vers la page du récap.
+   Attend : recap (App\Entity\Recap). Optionnel : isNew (badge « Nouveau »).
+   Styles : .bb-recap-card* dans assets/styles/home.css. #}
+{% set thumb = recap.thumbnail %}
+<a href="{{ path('app_recap_show', { slug: recap.slug }) }}" class="bb-recap-card"{% if recap.category %} style="--bb-cat:{{ recap.category.color }}"{% endif %}>
+    <span class="bb-recap-card-media">
+        {% if thumb %}<img src="{{ thumb }}" alt="" loading="lazy">{% endif %}
+    </span>
+    {% if isNew|default(false) %}
+        <span class="bb-chip bb-chip--tomato bb-recap-card-badge">Nouveau</span>
+    {% endif %}
+    <span class="bb-recap-card-play" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11.04-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14Z"/></svg>
+    </span>
+    <span class="bb-recap-card-body">
+        {% if recap.category %}
+            <span class="bb-recap-card-cat"><span class="bb-dot" aria-hidden="true"></span>{{ recap.category.name }}</span>
+        {% endif %}
+        <span class="bb-recap-card-title"><span class="bb-sr-only">Voir le récap : </span>{{ recap.title }}</span>
+    </span>
+</a>

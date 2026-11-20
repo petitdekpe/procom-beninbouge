@@ -44,36 +44,84 @@
     {{ include('partials/_header.html.twig') }}
 
     <main id="contenu">
-        {% set recapLayout = article.recapWithVideo %}
-        <article class="bb-article{{ recapLayout ? ' bb-article--recap' }}">
-            {% if recapLayout %}
-                {# ===== RÉCAP : vidéo mobile à gauche, texte à droite (empilés sur mobile) ===== #}
-                <div class="bb-container bb-recap">
-                    <div class="bb-recap-media">
-                        {{ include('article/_recap_player.html.twig') }}
-                    </div>
-                    <div class="bb-recap-text">
-                        {{ include('article/_head.html.twig', { recap: true }) }}
-                        {{ include('article/_content.html.twig') }}
-                    </div>
-                </div>
-            {% else %}
-                {# ===== EN-TÊTE ===== #}
-                {{ include('article/_head.html.twig') }}
+        <article class="bb-article">
+            {# ===== EN-TÊTE ===== #}
+            <header class="bb-container bb-article-head"{% if article.category %} style="--bb-cat:{{ article.category.color }}"{% endif %}>
+                <nav class="bb-breadcrumb" aria-label="Fil d'Ariane">
+                    <a href="{{ path('app_home') }}">Accueil</a>
+                    {% if article.category %}
+                        <span aria-hidden="true">/</span>
+                        <a href="{{ path('app_category_show', { slug: article.category.slug }) }}">{{ article.category.name }}</a>
+                    {% endif %}
+                </nav>
 
-                {% if article.coverImage %}
-                    <figure class="bb-container bb-article-cover">
-                        <div class="bb-article-cover-frame">
-                            <img src="{{ article.coverImage }}" alt="" fetchpriority="high">
-                        </div>
-                    </figure>
-                {% endif %}
-
-                {# ===== CORPS ===== #}
-                <div class="bb-container">
-                    {{ include('article/_content.html.twig') }}
+                <div class="bb-article-chips">
+                    {% if article.category %}
+                        <a href="{{ path('app_category_show', { slug: article.category.slug }) }}" class="bb-chip"><span class="bb-dot" aria-hidden="true"></span>{{ article.category.name }}</a>
+                    {% endif %}
+                    {% if article.sponsored %}
+                        <span class="bb-chip bb-chip--gold">Publi-reportage</span>
+                    {% endif %}
                 </div>
+
+                <h1 class="bb-display bb-article-title">{{ article.title }}</h1>
+
+                <div class="bb-article-meta">
+                    <p class="bb-article-byline">
+                        {% if article.author %}<strong>{{ article.author.firstName }} {{ article.author.lastName }}</strong><span aria-hidden="true">·</span>{% endif %}
+                        {% if article.publishedAt %}<time datetime="{{ article.publishedAt|date('c') }}">{{ article.publishedAt|french_date }}</time><span aria-hidden="true">·</span>{% endif %}
+                        <span>{{ article.content|reading_time }} min de lecture</span>
+                    </p>
+                    <ul class="bb-share" aria-label="Partager l'article">
+                        {% for share in shareLinks %}
+                            <li>
+                                <a href="{{ share.href }}" target="_blank" rel="noopener" class="bb-icon-btn bb-share-link" aria-label="{{ share.label }}" data-action="click->share-tracker#track" data-share-tracker-channel-param="{{ share.channel }}">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ share.icon|raw }}</svg>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </header>
+
+            {% if article.coverImage %}
+                <figure class="bb-container bb-article-cover">
+                    <div class="bb-article-cover-frame">
+                        <img src="{{ article.coverImage }}" alt="" fetchpriority="high">
+                    </div>
+                </figure>
             {% endif %}
+
+            {# ===== CORPS ===== #}
+            <div class="bb-container">
+                <div class="bb-article-body bb-prose">{{ article.content|raw }}</div>
+
+                <div class="bb-prose">
+                    {% if article.tags|length > 0 %}
+                        <ul class="bb-tags" aria-label="Mots-clés">
+                            {% for tag in article.tags %}
+                                <li><a href="{{ path('app_tag_show', { slug: tag.slug }) }}" class="bb-tag">#{{ tag.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    {% if article.author %}
+                        <aside class="bb-author" aria-label="L'auteur">
+                            <span class="bb-author-avatar">
+                                {% if article.author.avatar %}
+                                    <img src="{{ article.author.avatar }}" alt="">
+                                {% else %}
+                                    {{ article.author.firstName|first }}{{ article.author.lastName|first }}
+                                {% endif %}
+                            </span>
+                            <div>
+                                <p class="bb-author-name">{{ article.author.firstName }} {{ article.author.lastName }}</p>
+                                {% if article.author.bio %}<p class="bb-author-bio">{{ article.author.bio }}</p>{% endif %}
+                            </div>
+                        </aside>
+                    {% endif %}
+                </div>
+            </div>
         </article>
 
         {# ===== COMMENTAIRES ===== #}

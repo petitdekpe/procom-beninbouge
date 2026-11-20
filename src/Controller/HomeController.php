@@ -8,6 +8,7 @@ use App\Repository\AnnouncementRepository;
 use App\Repository\ArticleRepository;
 use App\Repository\HomeSectionRepository;
 use App\Repository\MediaRepository;
+use App\Repository\RecapRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -15,8 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 /**
  * Homepage (charte 2026, V2): the order and visibility of the sections still
  * come from /admin/home-sections. Each article appears only once on the
- * page — the "Une" grid first, then the most-read list, the "Récap" rail
- * (vertical video articles), then "Le fil" —
+ * page — the "Une" grid first, then the most-read list, then "Le fil" —
  * so every query excludes the ids already picked above it.
  */
 final class HomeController extends AbstractController
@@ -32,6 +32,7 @@ final class HomeController extends AbstractController
         private MediaRepository $mediaRepository,
         private HomeSectionRepository $homeSectionRepository,
         private AnnouncementRepository $announcementRepository,
+        private RecapRepository $recapRepository,
     ) {
     }
 
@@ -58,10 +59,6 @@ final class HomeController extends AbstractController
 
         $mostRead = $isEnabled(HomeSectionType::HeroSlider) || $isEnabled(HomeSectionType::PopularArticles)
             ? $remember($this->articleRepository->findMostViewedPublished(self::MOST_READ_SIZE, $shownIds))
-            : [];
-
-        $recaps = $isEnabled(HomeSectionType::Recap)
-            ? $remember($this->articleRepository->findLatestPublishedRecaps(self::RECAP_SIZE, $shownIds))
             : [];
 
         $fil = $isEnabled(HomeSectionType::LatestNews)
@@ -92,7 +89,10 @@ final class HomeController extends AbstractController
             'une' => $une,
             'mostRead' => $mostRead,
             'fil' => $fil,
-            'recaps' => $recaps,
+            // Les récaps sont leur propre contenu (App\Entity\Recap), sans lien avec les articles.
+            'recaps' => $isEnabled(HomeSectionType::Recap)
+                ? $this->recapRepository->findLatestPublished(self::RECAP_SIZE)
+                : [],
             'categoryHighlightArticles' => $categoryHighlightArticles,
             'videos' => \array_slice($videos, 0, 5),
             'podcasts' => $podcasts,

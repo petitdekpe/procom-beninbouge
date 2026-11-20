@@ -6,7 +6,6 @@ use App\Entity\Article;
 use App\Entity\ArticleView;
 use App\Entity\Category;
 use App\Entity\Enum\ArticleStatus;
-use App\Entity\Enum\ArticleType;
 use App\Entity\Tag;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -65,33 +64,6 @@ class ArticleRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('a')
             ->andWhere('a.status = :status')
             ->setParameter('status', ArticleStatus::Published)
-            ->orderBy('a.publishedAt', 'DESC')
-            ->setMaxResults($limit);
-
-        if ([] !== $excludedIds) {
-            $qb->andWhere('a.id NOT IN (:excludedIds)')->setParameter('excludedIds', $excludedIds);
-        }
-
-        return $qb->getQuery()->getResult();
-    }
-
-    /**
-     * Latest published « Récap » articles (video format mobile), most
-     * recent first — feeds the homepage "Récap" section. Only those with a
-     * video: a Recap whose video is still missing has nothing to show there.
-     *
-     * @param list<int> $excludedIds
-     *
-     * @return list<Article>
-     */
-    public function findLatestPublishedRecaps(int $limit, array $excludedIds = []): array
-    {
-        $qb = $this->createQueryBuilder('a')
-            ->andWhere('a.status = :status')
-            ->andWhere('a.type = :type')
-            ->andWhere('a.videoUrl IS NOT NULL')
-            ->setParameter('status', ArticleStatus::Published)
-            ->setParameter('type', ArticleType::Recap)
             ->orderBy('a.publishedAt', 'DESC')
             ->setMaxResults($limit);
 

@@ -6,7 +6,6 @@ use App\Entity\Article;
 use App\Entity\Author;
 use App\Entity\Category;
 use App\Entity\Enum\ArticleStatus;
-use App\Entity\Enum\ArticleType;
 use App\Entity\Tag;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -68,24 +67,6 @@ final class ArticleAdminType extends AbstractType
                     ),
                 ],
             ])
-            ->add('videoUrl', TextType::class, [
-                'label' => 'Vidéo (lien YouTube ou fichier .mp4 / .webm)',
-                'required' => false,
-                'help' => 'Format « Récap » : vidéo au format mobile (vertical 9:16). Lien YouTube (Short compris) ou lien direct vers un fichier.',
-            ])
-            ->add('videoFile', FileType::class, [
-                'label' => 'Ou téléversez une vidéo',
-                'required' => false,
-                'mapped' => false,
-                'help' => 'MP4 ou WebM, 50 Mo maximum. Remplace le lien ci-dessus.',
-                'constraints' => [
-                    new File(
-                        maxSize: '50M',
-                        mimeTypes: ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v'],
-                        mimeTypesMessage: 'Veuillez téléverser une vidéo valide (MP4 ou WebM).',
-                    ),
-                ],
-            ])
             ->add('category', EntityType::class, [
                 'label' => 'Catégorie',
                 'class' => Category::class,
@@ -107,20 +88,6 @@ final class ArticleAdminType extends AbstractType
             ->add('featured', CheckboxType::class, ['label' => 'Mis en avant (À la une)', 'required' => false])
             ->add('pinned', CheckboxType::class, ['label' => 'Épinglé (bandeau alerte)', 'required' => false])
         ;
-
-        // Les publi-reportages (type « sponsored ») se gèrent via l'API : on ne
-        // les propose pas ici pour ne pas écraser leur type par erreur.
-        if (!$builder->getData()?->isSponsored()) {
-            $builder->add('type', ChoiceType::class, [
-                'label' => 'Format',
-                'choices' => [
-                    'Article classique' => ArticleType::Editorial,
-                    'Récap (vidéo au format mobile)' => ArticleType::Recap,
-                ],
-                'choice_value' => fn (?ArticleType $type) => $type?->value,
-                'help' => 'Un Récap affiche la vidéo à gauche et le texte à droite sur ordinateur, et alimente la section « Récap » de l\'accueil.',
-            ]);
-        }
 
         if ($this->security->isGranted('ROLE_ADMIN')) {
             $builder

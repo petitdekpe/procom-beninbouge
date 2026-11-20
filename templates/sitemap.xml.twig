@@ -38,6 +38,14 @@
         <priority>0.6</priority>
     </url>
     {% endfor %}
+    {% for recap in recaps %}
+    <url>
+        <loc>{{ url('app_recap_show', { slug: recap.slug }) }}</loc>
+        {% if recap.updatedAt %}<lastmod>{{ recap.updatedAt|date('c') }}</lastmod>{% endif %}
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    {% endfor %}
     {% for page in pages %}
     <url>
         <loc>{{ url('app_page_show', { slug: page.slug }) }}</loc>

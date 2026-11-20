@@ -1,0 +1,59 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Récaps{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Récaps</h1>
+        <a href="{{ path('admin_recap_new') }}" class="bo-btn bo-btn-accent">+ Nouveau récap</a>
+    </div>
+    <p class="bo-muted" style="margin:-8px 0 20px">Vidéos au format mobile avec leur texte : elles alimentent la section « Récap » de l'accueil et ont leur propre page.</p>
+
+    <div data-list-root>
+        <div class="bo-toolbar">
+            <div class="bo-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.8-3.8"/></svg>
+                <input type="text" data-list-search placeholder="Rechercher des récaps">
+            </div>
+        </div>
+
+        <div class="bo-card">
+            {% if recaps|length > 0 %}
+                <table class="bo-table">
+                    <thead>
+                        <tr><th>Titre</th><th>Catégorie</th><th>Statut</th><th>Publié le</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for recap in recaps %}
+                            <tr data-search="{{ (recap.title ~ ' ' ~ recap.slug)|lower }}">
+                                <td>
+                                    <div class="bo-row-title">
+                                        {% if recap.thumbnail %}
+                                            <img class="bo-thumb" src="{{ recap.thumbnail }}" alt="">
+                                        {% else %}
+                                            <span class="bo-thumb-fallback">{{ recap.title|slice(0, 1)|upper }}</span>
+                                        {% endif %}
+                                        {{ recap.title }}
+                                    </div>
+                                </td>
+                                <td class="bo-muted">{{ recap.category ? recap.category.name : '—' }}</td>
+                                <td class="bo-muted">{{ recap.published ? 'Publié' : 'Brouillon' }}</td>
+                                <td class="bo-muted">{{ recap.publishedAt ? recap.publishedAt|date('d/m/Y H:i') : '—' }}</td>
+                                <td style="text-align:right;white-space:nowrap">
+                                    <a href="{{ path('app_recap_show', { slug: recap.slug }) }}" target="_blank" rel="noopener" class="bo-btn bo-btn-muted">Aperçu</a>
+                                    <a href="{{ path('admin_recap_edit', { id: recap.id }) }}" class="bo-btn bo-btn-muted">Modifier</a>
+                                    <form method="post" action="{{ path('admin_recap_delete', { id: recap.id }) }}" style="display:inline" onsubmit="return confirm('Supprimer ce récap ?');">
+                                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                        <button type="submit" class="bo-btn bo-btn-danger">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="bo-empty">Aucun récap pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -52,6 +52,20 @@ final class SiteSettingsAdminType extends AbstractType
                 'constraints' => [new File(...self::IMAGE_CONSTRAINTS)],
             ])
 
+            // ----- Aperçu des liens partagés -----
+            ->add('shareImageUrl', TextType::class, [
+                'label' => 'URL de l\'image d\'aperçu des liens',
+                'required' => false,
+                'help' => 'Vignette affichée quand un lien du site est partagé (WhatsApp, Facebook, X, LinkedIn…) depuis une page sans image propre : accueil, rubriques, pages… Les articles gardent leur image de couverture. Vide : le logo est utilisé.',
+            ])
+            ->add('shareImageFile', FileType::class, [
+                'label' => 'Ou téléversez l\'image d\'aperçu',
+                'required' => false,
+                'mapped' => false,
+                'help' => 'Format idéal : 1200 × 630 px (paysage). JPEG, PNG, WebP ou GIF, 5 Mo maximum. Remplace l\'URL ci-dessus.',
+                'constraints' => [new File(...self::IMAGE_CONSTRAINTS)],
+            ])
+
             // ----- Pied de page -----
             ->add('footerTagline', TextareaType::class, [
                 'label' => 'Texte du pied de page',

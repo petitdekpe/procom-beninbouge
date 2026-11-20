@@ -42,6 +42,7 @@ final class SiteSettingsController extends AbstractController
             $this->handleImageUpload($settings, $form, 'logoFile', $settings->setLogoUrl(...));
             $this->handleImageUpload($settings, $form, 'logoFooterFile', $settings->setLogoFooterUrl(...));
             $this->handleImageUpload($settings, $form, 'faviconFile', $settings->setFaviconUrl(...));
+            $this->handleImageUpload($settings, $form, 'shareImageFile', $settings->setShareImageUrl(...));
 
             $this->entityManager->flush();
 

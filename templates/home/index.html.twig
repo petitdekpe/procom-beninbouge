@@ -40,7 +40,7 @@
    affichée, et un article n'apparaît qu'une fois sur la page. #}
 {% set enabledTypes = homeSections|map(s => s.type.value) %}
 {% set uneEnabled = 'hero_slider' in enabledTypes %}
-<div data-controller="video-modal">
+<div class="bb-home" data-controller="video-modal">
 
     {{ include('partials/_header.html.twig') }}
 

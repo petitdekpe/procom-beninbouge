@@ -4,9 +4,21 @@
  */
 
 /* ---------- La une (mosaïque) ---------- */
+/* Accueil : espacement vertical entre sections resserré (la variable ne
+   change que dans la page d'accueil ; les autres pages gardent 56-96 px). */
+.bb-home {
+    --bb-section: clamp(36px, 4.5vw, 60px);
+}
+
+/* Deux sections qui se suivent cumulent leur padding du bas et du haut : on
+   donne à chacune la moitié de l'espace voulu entre elles. */
+.bb-home .bb-section {
+    padding-block: calc(var(--bb-section) * .55);
+}
+
 .bb-une {
-    padding-top: clamp(24px, 3vw, 44px);
-    padding-bottom: clamp(48px, 6vw, 80px);
+    padding-top: clamp(20px, 2.5vw, 36px);
+    padding-bottom: clamp(28px, 3.5vw, 48px);
 }
 
 .bb-une-grid {
@@ -386,7 +398,7 @@
 
 /* ---------- Section vidéo (bleu pétrole) ---------- */
 .bb-vrail {
-    padding-block: clamp(56px, 6vw, 80px);
+    padding-block: clamp(36px, 4.5vw, 60px);
     background: var(--bb-petrol);
     color: var(--bb-white);
 }
@@ -503,7 +515,7 @@
 /* ---------- Slider d'images (au-dessus de l'actualité) ---------- */
 .bb-banner {
     position: relative;
-    margin-block: clamp(28px, 4vw, 56px);
+    margin-block: clamp(20px, 3vw, 40px);
 }
 
 .bb-banner-track {
@@ -863,8 +875,8 @@
 
 /* ---------- Ça recrute (aplat jaune) ---------- */
 .bb-jobs {
-    margin-block: calc(var(--bb-section) * .6);
-    padding-block: clamp(56px, 7vw, 88px);
+    margin-block: calc(var(--bb-section) * .4);
+    padding-block: clamp(36px, 5vw, 64px);
     background: var(--bb-gold);
     color: var(--bb-black);
 }

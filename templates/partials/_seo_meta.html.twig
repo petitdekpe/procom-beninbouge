@@ -10,11 +10,12 @@
       canonicalUrl    (string, required)   — absolute URL, e.g. via url('route_name', {...})
       metaDescription (string|null)        — omitted entirely if not given
       ogType          (string, default 'website') — 'article' for article pages
-      ogImage         (string|null)        — falls back to the site logo when not given
+      ogImage         (string|null)        — falls back to the link-preview image set in
+                                             the site settings, then to the site logo
       structuredData  (array|null)         — rendered as a single JSON-LD <script> block if given
 #}
 {% set seoSettings = site_settings() %}
-{% set seoImage = (ogImage ?? null) ?: seoSettings.logoUrl %}
+{% set seoImage = (ogImage ?? null) ?: (seoSettings.shareImageUrl ?: seoSettings.logoUrl) %}
 {# Version JPEG 1200 × 630 pour les réseaux sociaux quand l'image est locale
    (App\Service\SocialImageGenerator), sinon l'image telle quelle. #}
 {% set socialImage = social_image(seoImage) %}

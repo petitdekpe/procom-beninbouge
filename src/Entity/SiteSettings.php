@@ -53,6 +53,15 @@ class SiteSettings
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $faviconUrl = null;
 
+    /**
+     * Vignette d'aperçu des liens partagés (og:image / twitter:image) pour
+     * les pages sans image propre : accueil, rubriques, pages statiques…
+     * Les articles, dossiers, annonces et récaps gardent leur couverture.
+     * Vide : le logo sert de repli (templates/partials/_seo_meta.html.twig).
+     */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $shareImageUrl = null;
+
     // ----- Pied de page -----
 
     #[ORM\Column(type: 'text', nullable: true)]
@@ -200,6 +209,18 @@ class SiteSettings
     public function setFaviconUrl(?string $faviconUrl): static
     {
         $this->faviconUrl = $faviconUrl;
+
+        return $this;
+    }
+
+    public function getShareImageUrl(): ?string
+    {
+        return $this->shareImageUrl;
+    }
+
+    public function setShareImageUrl(?string $shareImageUrl): static
+    {
+        $this->shareImageUrl = $shareImageUrl;
 
         return $this;
     }

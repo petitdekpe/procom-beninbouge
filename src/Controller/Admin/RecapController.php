@@ -26,7 +26,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * Récaps : vidéos au format mobile avec leur texte. Un CRUD simple, sans le
  * workflow éditorial des articles (brouillon ou publié, c'est tout).
  */
-#[IsGranted('ROLE_EDITOR')]
+#[IsGranted('recaps.manage')]
 #[Route('/admin/recaps')]
 final class RecapController extends AbstractController
 {

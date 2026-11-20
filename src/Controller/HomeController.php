@@ -6,6 +6,7 @@ use App\Entity\Enum\HomeSectionType;
 use App\Entity\Enum\MediaType;
 use App\Repository\AnnouncementRepository;
 use App\Repository\ArticleRepository;
+use App\Repository\HomeBannerRepository;
 use App\Repository\HomeSectionRepository;
 use App\Repository\MediaRepository;
 use App\Repository\RecapRepository;
@@ -34,6 +35,7 @@ final class HomeController extends AbstractController
         private HomeSectionRepository $homeSectionRepository,
         private AnnouncementRepository $announcementRepository,
         private RecapRepository $recapRepository,
+        private HomeBannerRepository $bannerRepository,
     ) {
     }
 
@@ -93,6 +95,9 @@ final class HomeController extends AbstractController
             'mostRead' => $mostRead,
             'fil' => $fil,
             // Les récaps sont leur propre contenu (App\Entity\Recap), sans lien avec les articles.
+            'banners' => $isEnabled(HomeSectionType::Banner)
+                ? $this->bannerRepository->findLiveOrdered()
+                : [],
             'recaps' => $isEnabled(HomeSectionType::Recap)
                 ? $this->recapRepository->findLatestPublished(self::RECAP_SIZE)
                 : [],

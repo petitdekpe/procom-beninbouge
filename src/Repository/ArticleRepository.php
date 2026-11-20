@@ -203,6 +203,108 @@ class ArticleRepository extends ServiceEntityRepository
     }
 
     /**
+     * Article count per status (trashed articles excluded by the
+     * soft_delete filter), for the admin dashboard. Every status is
+     * present in the result, at 0 when no article has it.
+     *
+     * @return array<string, int> keyed by ArticleStatus value
+     */
+    public function countByStatus(): array
+    {
+        $counts = array_fill_keys(array_map(static fn (ArticleStatus $s) => $s->value, ArticleStatus::cases()), 0);
+
+        $rows = $this->createQueryBuilder('a')
+            ->select('a.status AS status, COUNT(a.id) AS total')
+            ->groupBy('a.status')
+            ->getQuery()
+            ->getResult();
+
+        foreach ($rows as $row) {
+            $status = $row['status'] instanceof ArticleStatus ? $row['status']->value : (string) $row['status'];
+            $counts[$status] = (int) $row['total'];
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Number of articles published between $from (inclusive) and $to
+     * (exclusive) — for the dashboard's "publiés cette semaine" figure.
+     */
+    public function countPublishedBetween(\DateTimeImmutable $from, \DateTimeImmutable $to): int
+    {
+        return (int) $this->createQueryBuilder('a')
+            ->select('COUNT(a.id)')
+            ->andWhere('a.status = :status')
+            ->andWhere('a.publishedAt >= :from AND a.publishedAt < :to')
+            ->setParameter('status', ArticleStatus::Published)
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Scheduled articles still to come, soonest first — for the dashboard.
+     *
+     * @return list<Article>
+     */
+    public function findUpcomingScheduled(int $limit): array
+    {
+        return $this->createQueryBuilder('a')
+            ->addSelect('c')
+            ->leftJoin('a.category', 'c')
+            ->andWhere('a.status = :status')
+            ->setParameter('status', ArticleStatus::Scheduled)
+            ->orderBy('a.publishedAt', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Most recently modified articles, any status — for the dashboard's
+     * "Derniers articles modifiés" list.
+     *
+     * @return list<Article>
+     */
+    public function findRecentlyUpdated(int $limit): array
+    {
+        return $this->createQueryBuilder('a')
+            ->addSelect('c', 'au')
+            ->leftJoin('a.category', 'c')
+            ->leftJoin('a.author', 'au')
+            ->orderBy('a.updatedAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Titles of the given articles in one query (trashed ones are left
+     * out by the soft_delete filter) — for the dashboard activity log.
+     *
+     * @param list<int> $ids
+     *
+     * @return array<int, string> title keyed by article id
+     */
+    public function findTitlesByIds(array $ids): array
+    {
+        if ([] === $ids) {
+            return [];
+        }
+
+        $rows = $this->createQueryBuilder('a')
+            ->select('a.id AS id, a.title AS title')
+            ->andWhere('a.id IN (:ids)')
+            ->setParameter('ids', array_values(array_unique($ids)))
+            ->getQuery()
+            ->getResult();
+
+        return array_column($rows, 'title', 'id');
+    }
+
+    /**
      * Scheduled articles whose publication date has arrived — due to go
      * live (see App\Command\PublishScheduledArticlesCommand).
      *

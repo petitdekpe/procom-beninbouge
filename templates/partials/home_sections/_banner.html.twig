@@ -1,0 +1,40 @@
+{# Slider d'images rectangulaires de l'accueil (au-dessus de l'actualité),
+   géré dans /admin/bannieres. Défilement automatique (suspendu au survol,
+   au focus et si le visiteur réduit les animations), flèches, points et
+   balayage tactile : assets/controllers/banner_slider_controller.js.
+   Attend : banners (list<App\Entity\HomeBanner>, déjà filtrées sur les actives).
+   Rien n'est affiché sans bannière ; une seule image n'a pas de commandes.
+   Styles : .bb-banner* dans assets/styles/home.css. #}
+{% if banners|length > 0 %}
+    {% set total = banners|length %}
+    <section class="bb-container bb-banner" aria-roledescription="carrousel" aria-label="À découvrir"
+             data-controller="banner-slider" data-banner-slider-interval-value="5500">
+        <div class="bb-banner-track" data-banner-slider-target="track" tabindex="0">
+            {% for banner in banners %}
+                <div class="bb-banner-slide" data-banner-slider-target="slide" role="group" aria-roledescription="diapositive" aria-label="{{ loop.index }} sur {{ total }}">
+                    {% if banner.linkUrl %}
+                        <a href="{{ banner.linkUrl }}" class="bb-banner-link"{% if banner.externalLink %} target="_blank" rel="noopener"{% endif %}>
+                            <img src="{{ banner.imageUrl }}" alt="{{ banner.title }}"{% if loop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>
+                        </a>
+                    {% else %}
+                        <img src="{{ banner.imageUrl }}" alt="{{ banner.title }}"{% if loop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if total > 1 %}
+            <button type="button" class="bb-banner-arrow bb-banner-arrow--prev" data-action="banner-slider#prev" aria-label="Image précédente">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button type="button" class="bb-banner-arrow bb-banner-arrow--next" data-action="banner-slider#next" aria-label="Image suivante">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <div class="bb-banner-dots">
+                {% for banner in banners %}
+                    <button type="button" class="bb-banner-dot" data-banner-slider-target="dot" data-action="banner-slider#goTo" data-banner-slider-index-param="{{ loop.index0 }}" aria-label="Aller à l'image {{ loop.index }}"></button>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </section>
+{% endif %}

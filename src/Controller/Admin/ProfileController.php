@@ -18,7 +18,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * Author::$pending* and only take effect once an admin approves them from
  * the Validations queue (App\Controller\Admin\ValidationController).
  */
-#[IsGranted('ROLE_EDITOR')]
+#[IsGranted('articles.write')]
 #[Route('/admin/profile')]
 final class ProfileController extends AbstractController
 {

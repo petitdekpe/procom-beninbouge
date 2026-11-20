@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Nouvelle bannière{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-card" style="padding:28px">
+        {% include 'admin/home_banner/_form.html.twig' with { heading: 'Ajouter une bannière' } %}
+    </div>
+{% endblock %}

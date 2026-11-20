@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Post;
 use App\Repository\UserRepository;
 use App\State\UserRegisterProcessor;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -18,11 +19,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Every registered user is at least ROLE_READER (can comment, react,
  * vote). ROLE_EDITOR (journaliste), ROLE_EDITOR_IN_CHIEF (rédacteur en
- * chef), ROLE_PROOFREADER (correcteur) and ROLE_ADMIN are granted
- * explicitly by an admin through the dedicated /users/{id}/roles endpoint.
+ * chef), ROLE_PROOFREADER (correcteur), ROLE_ADMIN and any custom role
+ * (App\Entity\Role) are granted explicitly by an admin, from /admin/users
+ * or through the dedicated /users/{id}/roles endpoint. What a role may do
+ * in the back-office is defined by its permissions (App\Security\Permission).
  */
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(options: ['engine' => 'InnoDB'])]
+#[UniqueEntity(fields: ['email'], message: 'Cette adresse e-mail est déjà utilisée.')]
 #[ApiResource(
     operations: [
         new GetCollection(security: "is_granted('ROLE_ADMIN')"),
@@ -64,7 +68,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var list<string>
      */
     #[ORM\Column]
-    #[Assert\Choice(choices: ['ROLE_READER', 'ROLE_EDITOR', 'ROLE_EDITOR_IN_CHIEF', 'ROLE_PROOFREADER', 'ROLE_ADMIN'], multiple: true)]
+    // Les rôles viennent de la table app_role (App\Entity\Role), y compris les
+    // rôles personnalisés : on contrôle seulement la forme du code.
+    #[Assert\All([new Assert\Regex(pattern: '/^ROLE_[A-Z0-9_]+$/')])]
     #[Groups(['user:read', 'user:manage_roles'])]
     private array $roles = [];
 
@@ -78,6 +84,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    /**
+     * Compte désactivé depuis /admin/users : connexion refusée
+     * (App\Security\UserChecker), sans supprimer l'historique du compte.
+     */
+    #[ORM\Column(options: ['default' => true])]
+    private bool $enabled = true;
+
+    /**
+     * Vrai tant que le mot de passe est un mot de passe temporaire envoyé par
+     * e-mail : l'administration redirige alors vers le changement de mot de
+     * passe (App\EventSubscriber\PasswordChangeSubscriber).
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $mustChangePassword = false;
 
     /**
      * The editor's own "byline" identity (see Author::$user). Most users
@@ -179,6 +200,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    public function setEnabled(bool $enabled): static
+    {
+        $this->enabled = $enabled;
+
+        return $this;
+    }
+
+    public function isMustChangePassword(): bool
+    {
+        return $this->mustChangePassword;
+    }
+
+    public function setMustChangePassword(bool $mustChangePassword): static
+    {
+        $this->mustChangePassword = $mustChangePassword;
+
+        return $this;
     }
 
     public function getAuthor(): ?Author

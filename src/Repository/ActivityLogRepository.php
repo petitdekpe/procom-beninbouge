@@ -15,4 +15,22 @@ class ActivityLogRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, ActivityLog::class);
     }
+
+    /**
+     * Latest logged actions with their author, newest first — for the
+     * admin dashboard.
+     *
+     * @return list<ActivityLog>
+     */
+    public function findLatest(int $limit): array
+    {
+        return $this->createQueryBuilder('l')
+            ->addSelect('u')
+            ->leftJoin('l.actor', 'u')
+            ->orderBy('l.createdAt', 'DESC')
+            ->addOrderBy('l.id', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

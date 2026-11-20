@@ -27,7 +27,7 @@ final class WorkflowController extends AbstractController
     ) {
     }
 
-    #[IsGranted('ROLE_EDITOR_IN_CHIEF')]
+    #[IsGranted('workflow.review')]
     #[Route('/relecture', name: 'admin_workflow_review', methods: ['GET'])]
     public function review(): Response
     {
@@ -36,7 +36,7 @@ final class WorkflowController extends AbstractController
         ]);
     }
 
-    #[IsGranted('ROLE_EDITOR_IN_CHIEF')]
+    #[IsGranted('workflow.review')]
     #[Route('/relecture/{id}/approve', name: 'admin_workflow_review_approve', methods: ['POST'])]
     public function approveReview(Request $request, Article $article): Response
     {
@@ -48,7 +48,7 @@ final class WorkflowController extends AbstractController
         return $this->redirectToRoute('admin_workflow_review');
     }
 
-    #[IsGranted('ROLE_EDITOR_IN_CHIEF')]
+    #[IsGranted('workflow.review')]
     #[Route('/relecture/{id}/reject', name: 'admin_workflow_review_reject', methods: ['POST'])]
     public function rejectReview(Request $request, Article $article): Response
     {
@@ -68,7 +68,7 @@ final class WorkflowController extends AbstractController
         return $this->redirectToRoute('admin_workflow_review');
     }
 
-    #[IsGranted('ROLE_PROOFREADER')]
+    #[IsGranted('workflow.proofread')]
     #[Route('/correction', name: 'admin_workflow_correction', methods: ['GET'])]
     public function correction(): Response
     {
@@ -77,7 +77,7 @@ final class WorkflowController extends AbstractController
         ]);
     }
 
-    #[IsGranted('ROLE_PROOFREADER')]
+    #[IsGranted('workflow.proofread')]
     #[Route('/correction/{id}/validate', name: 'admin_workflow_correction_validate', methods: ['POST'])]
     public function validateCorrection(Request $request, Article $article): Response
     {
@@ -104,7 +104,7 @@ final class WorkflowController extends AbstractController
         return $this->redirectToRoute('admin_workflow_correction');
     }
 
-    #[IsGranted('ROLE_PROOFREADER')]
+    #[IsGranted('workflow.proofread')]
     #[Route('/correction/{id}/reject', name: 'admin_workflow_correction_reject', methods: ['POST'])]
     public function rejectCorrection(Request $request, Article $article): Response
     {

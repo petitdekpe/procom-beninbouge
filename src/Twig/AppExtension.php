@@ -14,6 +14,7 @@ use App\Repository\ArticleViewRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\PageRepository;
 use App\Repository\SiteSettingsRepository;
+use App\Security\Permission;
 use Symfony\Contracts\Service\ResetInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -70,7 +71,8 @@ final class AppExtension extends AbstractExtension implements ResetInterface
     {
         return match ($type) {
             HomeSectionType::HeroSlider => 'Slider principal',
-            HomeSectionType::LatestNews => 'Dernières actualités',
+            HomeSectionType::Banner => 'Bannières (slider d\'images)',
+            HomeSectionType::LatestNews =>'Dernières actualités',
             HomeSectionType::PopularArticles => 'Articles populaires',
             HomeSectionType::Videos => 'Vidéos',
             HomeSectionType::Recap => 'Récap (vidéos verticales)',
@@ -88,6 +90,7 @@ final class AppExtension extends AbstractExtension implements ResetInterface
             new TwigFunction('site_settings', [$this, 'siteSettings']),
             new TwigFunction('article_views', [$this, 'articleViews']),
             new TwigFunction('nav_categories', [$this, 'navCategories']),
+            new TwigFunction('permission_groups', [Permission::class, 'grouped']),
         ];
     }
 

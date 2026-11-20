@@ -164,6 +164,87 @@ class ArticleViewRepository extends ServiceEntityRepository
     }
 
     /**
+     * Views recorded between $from (inclusive) and $to (exclusive).
+     */
+    public function countBetween(\DateTimeImmutable $from, \DateTimeImmutable $to): int
+    {
+        return (int) $this->createQueryBuilder('v')
+            ->select('COUNT(v.id)')
+            ->andWhere('v.createdAt >= :from AND v.createdAt < :to')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Distinct visitors between $from (inclusive) and $to (exclusive) —
+     * same "cookies blocked" caveat as countUniqueTotal().
+     */
+    public function countUniqueBetween(\DateTimeImmutable $from, \DateTimeImmutable $to): int
+    {
+        return (int) $this->createQueryBuilder('v')
+            ->select('COUNT(DISTINCT v.visitorId)')
+            ->andWhere('v.visitorId IS NOT NULL')
+            ->andWhere('v.createdAt >= :from AND v.createdAt < :to')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Views per calendar day since $since, for the dashboard chart. DQL
+     * has no DATE() function, hence the native query. Days without any
+     * view are missing from the result: the caller fills the gaps.
+     *
+     * @return array<string, int> view count keyed by 'Y-m-d'
+     */
+    public function countByDaySince(\DateTimeImmutable $since): array
+    {
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
+            'SELECT DATE(created_at) AS day, COUNT(id) AS total FROM article_view WHERE created_at >= :since GROUP BY DATE(created_at)',
+            ['since' => $since->format('Y-m-d H:i:s')],
+        );
+
+        $map = [];
+        foreach ($rows as $row) {
+            $map[(string) $row['day']] = (int) $row['total'];
+        }
+
+        return $map;
+    }
+
+    /**
+     * Most viewed articles over a period, for the dashboard.
+     *
+     * @return list<array{id: int, title: string, slug: string, viewsCount: int}>
+     */
+    public function topArticlesSince(\DateTimeImmutable $since, int $limit): array
+    {
+        $rows = $this->createQueryBuilder('v')
+            ->select('a.id AS id, a.title AS title, a.slug AS slug, COUNT(v.id) AS viewsCount')
+            ->join('v.article', 'a')
+            ->andWhere('v.createdAt >= :since')
+            ->setParameter('since', $since)
+            ->groupBy('a.id')
+            ->orderBy('viewsCount', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        return array_map(
+            static fn (array $row): array => [
+                'id' => (int) $row['id'],
+                'title' => $row['title'],
+                'slug' => $row['slug'],
+                'viewsCount' => (int) $row['viewsCount'],
+            ],
+            $rows,
+        );
+    }
+
+    /**
      * @return list<array{source: string|null, count: int}>
      */
     public function countBySourceForArticle(Article $article): array

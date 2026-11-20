@@ -18,7 +18,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * (App\Controller\ContactController). Restricted to editors-in-chief and
  * admins since they carry personal contact details.
  */
-#[IsGranted('ROLE_EDITOR_IN_CHIEF')]
+#[IsGranted('contact.manage')]
 #[Route('/admin/messages')]
 final class ContactMessageController extends AbstractController
 {

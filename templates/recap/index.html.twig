@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% set recapIndexUrl = page > 1 ? url('app_recap_index', { page: page }) : url('app_recap_index') %}
+
+{% block title %}Récap{% if page > 1 %} (page {{ page }}){% endif %} | {{ site_settings().siteName }}{% endblock %}
+
+{% block stylesheets %}
+    {{ include('partials/_seo_meta.html.twig', {
+        ogTitle: 'Récap | ' ~ site_settings().siteName,
+        metaDescription: "L'essentiel de l'actualité en vidéo, au format mobile : tous les récaps de " ~ site_settings().siteName ~ '.',
+        canonicalUrl: recapIndexUrl,
+    }) }}
+{% endblock %}
+
+{% block body %}
+<div>
+    {{ include('partials/_header.html.twig') }}
+
+    <main id="contenu">
+        {{ include('partials/_page_head.html.twig', {
+            crumbs: [{ label: 'Récap' }],
+            kicker: 'Récap',
+            title: "L'essentiel",
+            accent: 'en vidéo',
+            lead: "L'actualité résumée en quelques secondes, au format mobile.",
+            color: '#CF3732',
+        }) }}
+
+        <section class="bb-container bb-section--tight" aria-label="Liste des récaps">
+            {% if recaps|length > 0 %}
+                <ul class="bb-recap-grid">
+                    {% for recap in recaps %}
+                        <li>{{ include('partials/_recap_card.html.twig', { recap: recap }) }}</li>
+                    {% endfor %}
+                </ul>
+                {{ include('partials/_pagination.html.twig', { page: page, pageCount: pageCount, route: 'app_recap_index' }) }}
+            {% else %}
+                <p class="bb-empty">Aucun récap publié pour le moment.</p>
+            {% endif %}
+        </section>
+    </main>
+
+    {{ include('partials/_footer.html.twig') }}
+</div>
+{% endblock %}

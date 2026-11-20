@@ -41,7 +41,7 @@
         {% if article.pendingApproval %}
             <div class="bo-flash" style="background:#fff7e0;color:#7a5b00">
                 <p style="margin:0 0 8px">Cet article est attribué à un autre auteur : il est en attente de validation par un administrateur (statut demandé : {{ article.requestedStatus.value == 'published' ? 'Publié' : 'Programmé' }}) et reste invisible sur le site jusque-là.</p>
-                {% if is_granted('ROLE_ADMIN') %}
+                {% if is_granted('validations.manage') %}
                     <div style="display:flex;gap:8px;margin-top:6px">
                         <button type="submit" form="bo-approve-form" class="bo-btn bo-btn-accent">Valider</button>
                         <button type="submit" form="bo-reject-form" class="bo-btn bo-btn-muted">Rejeter</button>
@@ -67,7 +67,7 @@
     </div>
     {{ form_end(form) }}
 
-    {% if article.pendingApproval and is_granted('ROLE_ADMIN') %}
+    {% if article.pendingApproval and is_granted('validations.manage') %}
         <form id="bo-approve-form" method="post" action="{{ path('admin_validation_article_approve', { id: article.id }) }}">
             <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
         </form>

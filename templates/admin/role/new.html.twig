@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Nouveau rôle{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-card" style="padding:28px">
+        {% include 'admin/role/_form.html.twig' with { heading: 'Créer un rôle', groups: permission_groups() } %}
+    </div>
+{% endblock %}

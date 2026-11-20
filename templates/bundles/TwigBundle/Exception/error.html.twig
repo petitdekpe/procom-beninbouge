@@ -1,0 +1,140 @@
+{# Page d'erreur publique (404, 403, 500…), remplace celle de Symfony. Volontairement
+   autonome : pas de base.html.twig, pas de site_settings(), donc pas d'accès à la
+   base de données, pour qu'elle s'affiche même quand c'est elle qui est en
+   panne. Elle charge seulement la charte (tokens.css, base.css) et le
+   mini-jeu du marcheur du logo (assets/error-game.js). Variables fournies
+   par Symfony : status_code, status_text. Aperçu en dev : /_error/404, /_error/500. #}
+{% set code = status_code|default(500) %}
+{% if code == 404 %}
+    {% set kicker = 'Erreur 404' %}
+    {% set heading = 'Cette page a pris la fuite.' %}
+    {% set lead = "Le lien est peut-être cassé, ou la page a été déplacée. Le temps de retrouver votre chemin, aidez notre marcheur à courir !" %}
+{% elseif code == 403 or code == 401 %}
+    {% set kicker = 'Erreur ' ~ code %}
+    {% set heading = 'Cette zone est réservée.' %}
+    {% set lead = "Vous n'avez pas l'autorisation d'accéder à cette page. Pendant que vous revenez sur vos pas, un petit tour de piste ?" %}
+{% elseif code >= 500 %}
+    {% set kicker = 'Erreur ' ~ code %}
+    {% set heading = 'Petite panne de notre côté.' %}
+    {% set lead = "Ce n'est pas vous, c'est nous : l'équipe est dessus. Réessayez dans un instant, et pourquoi pas une course en attendant ?" %}
+{% else %}
+    {% set kicker = 'Erreur ' ~ code %}
+    {% set heading = 'Oups, quelque chose cloche.' %}
+    {% set lead = "Cette demande n'a pas pu aboutir. Revenez à l'accueil, ou faites courir notre marcheur le temps d'y réfléchir." %}
+{% endif %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="color-scheme" content="light dark">
+    <title>{{ heading }} ({{ code }}) | Bénin Bouge</title>
+    <script>
+        try {
+            var bbTheme = localStorage.getItem('bb-theme');
+            if (bbTheme === 'light' || bbTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', bbTheme);
+            }
+        } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="{{ asset('styles/tokens.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/base.css') }}">
+    <style>
+        .bb-error {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: clamp(20px, 4vw, 40px) var(--bb-gutter, 20px) 40px;
+        }
+        .bb-error-inner { width: 100%; max-width: 760px; margin-inline: auto; }
+        .bb-error-logo { display: block; width: 150px; margin-bottom: clamp(24px, 5vw, 48px); }
+        .bb-error-logo img { display: block; width: 150px; height: auto; }
+        .bb-error-logo .bb-logo-dark { display: none; }
+        @media (prefers-color-scheme: dark) {
+            html:not([data-theme="light"]) .bb-error-logo .bb-logo-light { display: none; }
+            html:not([data-theme="light"]) .bb-error-logo .bb-logo-dark { display: block; }
+        }
+        html[data-theme="dark"] .bb-error-logo .bb-logo-light { display: none; }
+        html[data-theme="dark"] .bb-error-logo .bb-logo-dark { display: block; }
+        .bb-error-code {
+            font-family: var(--bb-font-display);
+            font-size: clamp(88px, 22vw, 180px);
+            line-height: .85;
+            color: var(--bb-tomato);
+            margin: 10px 0 6px;
+        }
+        .bb-error h1 {
+            font-family: var(--bb-font-display);
+            font-weight: 400;
+            font-size: clamp(30px, 5vw, 48px);
+            line-height: 1.02;
+            text-transform: uppercase;
+        }
+        .bb-error-lead { margin-top: 14px; max-width: 560px; font-size: clamp(16px, 1.6vw, 19px); color: var(--bb-ink-muted); }
+        .bb-error-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+        .bb-error-game {
+            margin-top: clamp(28px, 5vw, 48px);
+            padding: 14px;
+            border: 1px solid var(--bb-line);
+            border-radius: var(--bb-r-lg, 24px);
+            background: var(--bb-raised, var(--bb-surface));
+            box-shadow: var(--bb-shadow);
+        }
+        .bb-error-game canvas {
+            display: block;
+            width: 100%;
+            touch-action: manipulation;
+            cursor: pointer;
+            border-radius: 12px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .bb-error-hint { margin-top: 10px; font-size: 13px; color: var(--bb-ink-muted); text-align: center; }
+        .bb-error-hint kbd {
+            display: inline-block;
+            padding: 1px 7px;
+            border: 1px solid var(--bb-line);
+            border-bottom-width: 2px;
+            border-radius: 6px;
+            font: inherit;
+            font-weight: 700;
+        }
+        .bb-error-hint .bb-touch { display: none; }
+        @media (hover: none) {
+            .bb-error-hint .bb-keys { display: none; }
+            .bb-error-hint .bb-touch { display: inline; }
+        }
+    </style>
+</head>
+<body class="bb-site">
+    <main class="bb-error">
+        <div class="bb-error-inner">
+            <a href="{{ path('app_home') }}" class="bb-error-logo" aria-label="Bénin Bouge, accueil">
+                <img class="bb-logo-light" src="{{ asset('images/logo-benin-bouge-noir.png') }}" alt="" width="800" height="302">
+                <img class="bb-logo-dark" src="{{ asset('images/logo-benin-bouge-blanc.png') }}" alt="" width="800" height="302">
+            </a>
+
+            <span class="bb-kicker">{{ kicker }}</span>
+            <p class="bb-error-code" aria-hidden="true">{{ code }}</p>
+            <h1>{{ heading }}</h1>
+            <p class="bb-error-lead">{{ lead }}</p>
+
+            <div class="bb-error-actions">
+                <a href="{{ path('app_home') }}" class="bb-btn bb-btn--cta">Retour à l'accueil</a>
+                <a href="{{ path('app_contact') }}" class="bb-btn bb-btn--ghost">Nous joindre</a>
+            </div>
+
+            <section class="bb-error-game" aria-label="Mini-jeu">
+                <canvas id="bb-runner" width="720" height="200" data-sprite="{{ asset('images/bb-runner.png') }}" role="img" aria-label="Mini-jeu : le marcheur de Bénin Bouge court sur la carte du Bénin. Appuyez sur Espace ou touchez le jeu pour sauter les obstacles."></canvas>
+                <p class="bb-error-hint">
+                    <span class="bb-keys"><kbd>Espace</kbd> ou <kbd>↑</kbd> pour sauter · <kbd>↓</kbd> pour se baisser</span>
+                    <span class="bb-touch">Touchez le jeu pour sauter.</span>
+                </p>
+                <p id="bb-runner-status" class="bb-sr-only" role="status" aria-live="polite"></p>
+            </section>
+        </div>
+    </main>
+    <script src="{{ asset('error-game.js') }}" defer></script>
+</body>
+</html>

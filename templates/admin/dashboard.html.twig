@@ -2,32 +2,351 @@
 
 {% block admin_title %}Tableau de bord{% endblock %}
 
+{#
+   Tableau de bord (App\Controller\Admin\DashboardController). Chaque bloc
+   n'existe que si le contrôleur l'a calculé, c'est-à-dire si l'utilisateur
+   a la permission correspondante : todo (files d'attente), audience
+   (stats.view), content (articles.write), newsletter (contact.manage),
+   activity (administrateurs), inventory (toujours).
+#}
 {% block admin_body %}
-    <div class="bo-page-head">
-        <h1 class="bo-page-title">Tableau de bord</h1>
-    </div>
-    <p class="bo-muted" style="margin:0 0 22px;font-size:14px">Gérez ici le contenu qui alimente la page d'accueil : articles, catégories, auteurs, projets et médias vidéo.</p>
+{% set statusMeta = {
+    draft:         { label: 'Brouillons',    color: '#b3b3b3' },
+    in_review:     { label: 'En relecture',  color: '#f5a623' },
+    in_correction: { label: 'En correction', color: '#e8743b' },
+    scheduled:     { label: 'Programmés',    color: '#6c5dd3' },
+    published:     { label: 'Publiés',       color: '#1ed760' },
+    archived:      { label: 'Archivés',      color: '#4a4a4d' },
+} %}
+{% set statusSingular = {
+    draft: 'Brouillon', in_review: 'En relecture', in_correction: 'En correction',
+    scheduled: 'Programmé', published: 'Publié', archived: 'Archivé',
+} %}
+{% set activityLabels = {
+    publication: 'a publié', moderation: 'a modéré', deletion: 'a supprimé',
+    trashed: 'a mis à la corbeille', restored: 'a restauré',
+    submitted_for_review: 'a soumis en relecture', review_approved: 'a validé la relecture de',
+    review_rejected: 'a refusé en relecture', validated: 'a validé et publié',
+    correction_rejected: 'a refusé en correction', unpublished: 'a dépublié',
+    archived: 'a archivé', unarchived: 'a désarchivé',
+} %}
+{% set entityLabels = {
+    Article: 'l\'article', Comment: 'le commentaire', Author: 'l\'auteur', ContactMessage: 'le message',
+    Announcement: 'l\'annonce', Media: 'le média', Recap: 'le récap', User: 'l\'utilisateur',
+} %}
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px">
-        <a href="{{ path('admin_article_index') }}" class="bo-card" style="text-decoration:none;color:inherit;padding:18px;display:block">
-            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Articles</div>
-            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ counts.articles }}</div>
-        </a>
-        <a href="{{ path('admin_category_index') }}" class="bo-card" style="text-decoration:none;color:inherit;padding:18px;display:block">
-            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Catégories</div>
-            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ counts.categories }}</div>
-        </a>
-        <a href="{{ path('admin_author_index') }}" class="bo-card" style="text-decoration:none;color:inherit;padding:18px;display:block">
-            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Auteurs</div>
-            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ counts.authors }}</div>
-        </a>
-        <a href="{{ path('admin_project_index') }}" class="bo-card" style="text-decoration:none;color:inherit;padding:18px;display:block">
-            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Projets</div>
-            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ counts.projects }}</div>
-        </a>
-        <a href="{{ path('admin_media_index') }}" class="bo-card" style="text-decoration:none;color:inherit;padding:18px;display:block">
-            <div class="bo-muted" style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px">Médias</div>
-            <div style="font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px">{{ counts.media }}</div>
-        </a>
+    <style>
+        .db-section{margin-bottom:30px}
+        .db-section-title{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 12px}
+        .db-section-title h2{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--sp-muted);margin:0}
+        .db-section-title a{font-size:12.5px;font-weight:800;text-decoration:none;color:var(--sp-accent)}
+        .db-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+        .db-grid-2{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:16px}
+        .db-label{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted)}
+        .db-num{font-family:'Anton',system-ui,sans-serif;font-size:32px;line-height:1.1;margin-top:6px}
+        .db-sub{font-size:12.5px;color:var(--sp-muted);margin-top:4px}
+        .db-pad{padding:18px}
+        .db-pad-lg{padding:22px}
+
+        .db-grid-todo{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+        .db-todo{display:block;text-decoration:none;color:inherit;padding:16px 18px;border-left:4px solid var(--sp-border);transition:transform .12s ease,box-shadow .12s ease}
+        .db-todo:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.06)}
+        .db-todo.is-hot{border-left-color:var(--sp-amber)}
+        .db-todo.is-hot .db-num{color:var(--sp-black)}
+        .db-todo.is-clear .db-num{color:#c4c4c7}
+
+        .db-trend{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:800;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:middle}
+        .db-trend.up{background:#e7f9ee;color:#0b6b32}
+        .db-trend.down{background:var(--sp-danger-bg);color:var(--sp-danger-text)}
+        .db-trend.flat{background:#f0f0f1;color:var(--sp-muted)}
+
+        .db-chart{display:flex;align-items:flex-end;gap:5px;height:150px;margin-top:16px}
+        .db-bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-width:0}
+        .db-bar span{display:block;background:var(--sp-accent-soft);border-radius:5px 5px 2px 2px;min-height:3px}
+        .db-bar.is-today span{background:var(--sp-accent)}
+        .db-bar:hover span{background:var(--sp-accent)}
+        .db-chart-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--sp-muted);margin-top:8px;font-weight:700}
+
+        .db-list{list-style:none;margin:0;padding:0}
+        .db-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #f1f1f2;font-size:13.5px}
+        .db-list li:last-child{border-bottom:none}
+        .db-list .t{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .db-list a.t{text-decoration:none}
+        .db-list a.t:hover{text-decoration:underline}
+        .db-list .m{color:var(--sp-muted);font-size:12.5px;white-space:nowrap;flex:none}
+        .db-rank{display:inline-flex;width:22px;height:22px;border-radius:50%;background:#f0f0f1;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;margin-right:8px;flex:none}
+
+        .db-stack{display:flex;height:12px;border-radius:999px;overflow:hidden;background:#f0f0f1;margin:14px 0 16px}
+        .db-stack span{display:block;height:100%}
+        .db-legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 16px}
+        .db-legend div{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:700}
+        .db-legend .dot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block;margin-right:7px}
+        .db-legend .n{color:var(--sp-muted);font-weight:800}
+
+        .db-activity li{justify-content:flex-start;align-items:flex-start}
+        .db-activity .who{font-weight:800}
+        .db-activity .when{margin-left:auto}
+
+        .db-inv{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f1f2;font-size:13.5px;font-weight:700;text-decoration:none;color:inherit}
+        .db-inv:last-child{border-bottom:none}
+        a.db-inv:hover{color:var(--sp-accent)}
+        .db-inv strong{font-family:'Anton',system-ui,sans-serif;font-weight:400;font-size:18px}
+
+        @media (max-width: 1100px){ .db-grid-2{grid-template-columns:1fr} }
+    </style>
+
+    {# ---- En-tête ---- #}
+    <div class="bo-page-head">
+        <div>
+            <h1 class="bo-page-title">Tableau de bord</h1>
+            <p class="bo-muted" style="margin:6px 0 0;font-size:14px">
+                Bonjour{% if app.user and app.user.displayName %} {{ app.user.displayName }}{% endif %} · {{ now|french_date }}
+            </p>
+        </div>
+        {% if audience %}<a href="{{ path('admin_stats_index') }}" class="bo-btn bo-btn-accent">Statistiques complètes →</a>{% endif %}
     </div>
+
+    {# ---- À traiter ---- #}
+    {% if todo|length > 0 %}
+        {% set pendingTotal = todo|reduce((sum, item) => sum + item.count, 0) %}
+        <section class="db-section">
+            <div class="db-section-title">
+                <h2>À traiter</h2>
+                <span class="bo-muted" style="font-size:12.5px;font-weight:700">{{ pendingTotal > 0 ? pendingTotal ~ ' élément' ~ (pendingTotal > 1 ? 's' : '') ~ ' en attente' : 'Tout est à jour ✓' }}</span>
+            </div>
+            <div class="db-grid db-grid-todo">
+                {% for item in todo %}
+                    <a href="{{ path(item.route, item.params) }}" class="bo-card db-todo {{ item.count > 0 ? 'is-hot' : 'is-clear' }}">
+                        <div class="db-label">{{ item.label }}</div>
+                        <div class="db-num">{{ item.count|format_number }}</div>
+                        <div class="db-sub">{{ item.count > 0 ? item.hint : 'Rien en attente' }}</div>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+    {# ---- Audience ---- #}
+    {% if audience %}
+        <section class="db-section">
+            <div class="db-section-title">
+                <h2>Audience · 7 derniers jours</h2>
+                <a href="{{ path('admin_stats_articles') }}">Détail par article →</a>
+            </div>
+            <div class="db-grid" style="margin-bottom:16px">
+                <div class="bo-card db-pad">
+                    <div class="db-label">Vues aujourd'hui</div>
+                    <div class="db-num">{{ audience.today|format_number }}</div>
+                    <div class="db-sub">Hier : {{ audience.yesterday|format_number }}</div>
+                </div>
+                <div class="bo-card db-pad">
+                    <div class="db-label">Vues sur 7 jours</div>
+                    <div class="db-num">
+                        {{ audience.week|format_number }}
+                        {% if audience.weekTrend is not null %}
+                            <span class="db-trend {{ audience.weekTrend > 0 ? 'up' : (audience.weekTrend < 0 ? 'down' : 'flat') }}" title="Par rapport aux 7 jours précédents ({{ audience.prevWeek|format_number }} vues)">
+                                {{ audience.weekTrend > 0 ? '▲ +' : (audience.weekTrend < 0 ? '▼ ' : '') }}{{ audience.weekTrend }} %
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="db-sub">7 jours précédents : {{ audience.prevWeek|format_number }}</div>
+                </div>
+                <div class="bo-card db-pad">
+                    <div class="db-label">Lecteurs uniques</div>
+                    <div class="db-num">{{ audience.uniqueWeek|format_number }}</div>
+                    <div class="db-sub">sur 7 jours</div>
+                </div>
+                <div class="bo-card db-pad">
+                    <div class="db-label">Temps de lecture moyen</div>
+                    <div class="db-num">
+                        {%- if audience.avgDuration is not null -%}
+                            {%- set secs = audience.avgDuration|round -%}
+                            {{ (secs // 60) }} min {{ '%02d'|format(secs % 60) }}
+                        {%- else -%}—{%- endif -%}
+                    </div>
+                    <div class="db-sub">depuis le début du suivi</div>
+                </div>
+                {% if newsletter %}
+                    <a href="{{ path('admin_newsletter_index') }}" class="bo-card db-pad" style="text-decoration:none;color:inherit">
+                        <div class="db-label">Abonnés newsletter</div>
+                        <div class="db-num">{{ newsletter.total|format_number }}</div>
+                        <div class="db-sub">{{ newsletter.week > 0 ? '+' ~ newsletter.week ~ ' cette semaine' : 'Aucun nouvel abonné cette semaine' }}</div>
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="db-grid-2">
+                <div class="bo-card db-pad-lg">
+                    <div class="db-label">Vues par jour · {{ audience.days|length }} derniers jours</div>
+                    <div class="db-chart" role="img" aria-label="Vues par jour sur les {{ audience.days|length }} derniers jours">
+                        {% for d in audience.days %}
+                            <div class="db-bar{{ loop.last ? ' is-today' : '' }}" title="{{ d.date|date('d/m') }} :{{ d.count|format_number }} vue{{ d.count > 1 ? 's' : '' }}">
+                                <span style="height:{{ (d.count / audience.maxDay * 100)|round(1) }}%"></span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="db-chart-axis">
+                        <span>{{ (audience.days|first).date|date('d/m') }}</span>
+                        <span>Pic : {{ audience.maxDay|format_number }} vue{{ audience.maxDay > 1 ? 's' : '' }}/jour</span>
+                        <span>Aujourd'hui</span>
+                    </div>
+                </div>
+                <div class="bo-card db-pad-lg">
+                    <div class="db-label" style="margin-bottom:6px">Les plus lus cette semaine</div>
+                    {% if audience.topWeek|length > 0 %}
+                        <ol class="db-list">
+                            {% for row in audience.topWeek %}
+                                <li>
+                                    <span style="display:flex;align-items:center;min-width:0">
+                                        <span class="db-rank">{{ loop.index }}</span>
+                                        <a class="t" href="{{ path('app_article_show', { slug: row.slug }) }}" target="_blank" rel="noopener">{{ row.title }}</a>
+                                    </span>
+                                    <span class="m">{{ row.viewsCount|format_number }} vue{{ row.viewsCount > 1 ? 's' : '' }}</span>
+                                </li>
+                            {% endfor %}
+                        </ol>
+                    {% else %}
+                        <p class="bo-empty">Aucune vue cette semaine.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    {# ---- Articles ---- #}
+    {% if content %}
+        {% set totalArticles = content.byStatus|reduce((sum, n) => sum + n, 0) %}
+        <section class="db-section">
+            <div class="db-section-title">
+                <h2>Articles</h2>
+                <a href="{{ path('admin_article_index') }}">Tous les articles →</a>
+            </div>
+
+            <div class="db-grid-2" style="margin-bottom:16px">
+                <div class="bo-card db-pad-lg">
+                    <div style="display:flex;gap:28px;flex-wrap:wrap">
+                        <div>
+                            <div class="db-label">Publiés cette semaine</div>
+                            <div class="db-num">{{ content.publishedWeek|format_number }}</div>
+                        </div>
+                        <div>
+                            <div class="db-label">Publiés ce mois-ci</div>
+                            <div class="db-num">{{ content.publishedMonth|format_number }}</div>
+                        </div>
+                        <div>
+                            <div class="db-label">Au total</div>
+                            <div class="db-num">{{ totalArticles|format_number }}</div>
+                        </div>
+                    </div>
+                    {% if totalArticles > 0 %}
+                        <div class="db-stack" aria-hidden="true">
+                            {% for status, meta in statusMeta %}
+                                {% set n = content.byStatus[status] ?? 0 %}
+                                {% if n > 0 %}<span style="width:{{ (n / totalArticles * 100)|round(2) }}%;background:{{ meta.color }}" title="{{ meta.label }} : {{ n }}"></span>{% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="db-legend">
+                        {% for status, meta in statusMeta %}
+                            <div><span><span class="dot" style="background:{{ meta.color }}"></span>{{ meta.label }}</span><span class="n">{{ (content.byStatus[status] ?? 0)|format_number }}</span></div>
+                        {% endfor %}
+                        {% if content.trashed > 0 %}
+                            <div><span><span class="dot" style="background:var(--sp-danger-text)"></span>Corbeille</span><span class="n">{{ content.trashed|format_number }}</span></div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="bo-card db-pad-lg">
+                    <div class="db-label" style="margin-bottom:6px">Publications programmées</div>
+                    {% if content.upcoming|length > 0 %}
+                        <ul class="db-list">
+                            {% for article in content.upcoming %}
+                                <li>
+                                    <a class="t" href="{{ path('admin_article_edit', { id: article.id }) }}">{{ article.title }}</a>
+                                    <span class="m">{{ article.publishedAt ? article.publishedAt|date('d/m') ~ ' à ' ~ article.publishedAt|date('H:i') : '—' }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="bo-empty">Aucune publication programmée.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bo-card">
+                <div class="db-pad-lg" style="padding-bottom:4px"><div class="db-label">Derniers articles modifiés</div></div>
+                {% if content.recent|length > 0 %}
+                    <table class="bo-table">
+                        <thead><tr><th>Article</th><th>Rubrique</th><th>Auteur</th><th>Statut</th><th style="text-align:right">Modifié</th></tr></thead>
+                        <tbody>
+                            {% for article in content.recent %}
+                                {% set s = article.status.value %}
+                                <tr>
+                                    <td style="font-weight:700;max-width:380px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                                        <a href="{{ path('admin_article_edit', { id: article.id }) }}" style="text-decoration:none">{{ article.title }}</a>
+                                    </td>
+                                    <td class="bo-muted">{{ article.category ? article.category.name : '—' }}</td>
+                                    <td class="bo-muted">{{ article.author ? (article.author.firstName ~ ' ' ~ article.author.lastName)|trim : '—' }}</td>
+                                    <td><span class="bo-status"><span class="dot" style="background:{{ statusMeta[s].color ?? '#b3b3b3' }}"></span>{{ statusSingular[s] ?? s }}</span></td>
+                                    <td class="bo-muted" style="text-align:right;white-space:nowrap">{{ article.updatedAt ? article.updatedAt|time_ago : '—' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="bo-empty">Aucun article pour le moment.</p>
+                {% endif %}
+            </div>
+        </section>
+    {% endif %}
+
+    {# ---- Activité récente + inventaire ---- #}
+    <section class="db-section">
+        <div class="{{ activity|length > 0 ? 'db-grid-2' : '' }}">
+            {% if activity|length > 0 %}
+                <div class="bo-card db-pad-lg">
+                    <div class="db-label" style="margin-bottom:6px">Activité récente</div>
+                    <ul class="db-list db-activity">
+                        {% for log in activity %}
+                            {% set a = log.action.value %}
+                            <li>
+                                <span>
+                                    <span class="who">{{ log.actor ? (log.actor.displayName ?: log.actor.userIdentifier) : 'Système' }}</span>
+                                    {{ activityLabels[a] ?? a }} {{ entityLabels[log.entityType] ?? log.entityType }}
+                                    {% if log.entityType == 'Article' and activityArticles[log.entityId] is defined %}
+                                        {% set title = activityArticles[log.entityId]|excerpt(50) %}
+                                        {% if is_granted('articles.write') %}
+                                            <a href="{{ path('admin_article_edit', { id: log.entityId }) }}" style="font-weight:700">« {{ title }} »</a>
+                                        {% else %}
+                                            « {{ title }} »
+                                        {% endif %}
+                                    {% else %}
+                                        #{{ log.entityId }}
+                                    {% endif %}
+                                    {% if log.details %}<span class="bo-muted"> · {{ log.details|excerpt(60) }}</span>{% endif %}
+                                </span>
+                                <span class="m when" title="{{ log.createdAt|date('d/m/Y H:i') }}">{{ log.createdAt|time_ago }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="bo-card db-pad-lg">
+                <div class="db-label" style="margin-bottom:6px">Contenu du site</div>
+                <div{% if activity|length == 0 %} style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));column-gap:28px"{% endif %}>
+                    {% for row in inventory %}
+                        {% if row.route %}
+                            <a href="{{ path(row.route) }}" class="db-inv"><span>{{ row.label }}</span><strong>{{ row.count|format_number }}</strong></a>
+                        {% else %}
+                            <div class="db-inv"><span>{{ row.label }}</span><strong>{{ row.count|format_number }}</strong></div>
+                        {% endif %}
+                    {% endfor %}
+                    {% if announcementsOnline is not null %}
+                        <a href="{{ path('admin_announcement_index', { tab: 'online' }) }}" class="db-inv"><span>Annonces en ligne</span><strong>{{ announcementsOnline|format_number }}</strong></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
 {% endblock %}

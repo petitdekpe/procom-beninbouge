@@ -1,9 +1,10 @@
 {# ===== EN-TÊTE (charte 2026, V2) =====
    Logo officiel (version noire en thème clair, blanche en sombre), menu en
-   pilule construit à partir des rubriques gérées dans l'admin
-   (nav_categories(), les 4 premières ici, toutes dans le tiroir), bouton de
-   thème clair/sombre et appel à publier une annonce. Sous 1180 px le menu
-   passe dans le tiroir latéral (assets/controllers/nav_toggle_controller.js).
+   pilule fixe « Accueil, Bénin, Récap, Dossiers, Vidéos, Annonces » (Bénin =
+   la rubrique de slug « benin » gérée dans l'admin ; toutes les rubriques
+   restent dans le tiroir via nav_categories()), bouton de thème
+   clair/sombre et bouton « Nous joindre » vers la page Contact. Sous 1180 px
+   le menu passe dans le tiroir latéral (assets/controllers/nav_toggle_controller.js).
    Styles : .bb-header*, .bb-nav*, .bb-drawer* dans assets/styles/layout.css. #}
 {% set settings = site_settings() %}
 {% set categories = nav_categories() %}
@@ -14,8 +15,9 @@
 {% elseif currentRoute == 'app_article_show' and article is defined and article.category %}
     {% set activeCategorySlug = article.category.parent ? article.category.parent.slug : article.category.slug %}
 {% endif %}
-{% set primaryCategories = categories|slice(0, 4) %}
+{% set benin = categories|filter(c => c.slug == 'benin')|first %}
 {% set extraItems = [
+    { label: 'Récap', href: path('app_recap_index'), active: currentRoute starts with 'app_recap' },
     { label: 'Dossiers', href: path('app_dossier_index'), active: currentRoute starts with 'app_dossier' },
     { label: 'Vidéos', href: path('app_videos'), active: currentRoute == 'app_videos' },
     { label: 'Annonces', href: path('app_announcement_index'), active: currentRoute starts with 'app_announcement' },
@@ -29,10 +31,10 @@
 
         <nav class="bb-nav" aria-label="Navigation principale">
             <a href="{{ path('app_home') }}" class="bb-nav-link{{ currentRoute == 'app_home' ? ' is-active' }}"{% if currentRoute == 'app_home' %} aria-current="page"{% endif %}>Accueil</a>
-            {% for cat in primaryCategories %}
-                {% set isActive = activeCategorySlug == cat.slug %}
-                <a href="{{ path('app_category_show', { slug: cat.slug }) }}" class="bb-nav-link{{ isActive ? ' is-active' }}"{% if isActive %} aria-current="page"{% endif %}>{{ cat.name }}</a>
-            {% endfor %}
+            {% if benin %}
+                {% set isActive = activeCategorySlug == benin.slug %}
+                <a href="{{ path('app_category_show', { slug: benin.slug }) }}" class="bb-nav-link{{ isActive ? ' is-active' }}"{% if isActive %} aria-current="page"{% endif %}>{{ benin.name }}</a>
+            {% endif %}
             {% for item in extraItems %}
                 <a href="{{ item.href }}" class="bb-nav-link{{ item.active ? ' is-active' }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>
             {% endfor %}
@@ -43,7 +45,7 @@
                 <svg class="bb-theme-icon bb-theme-icon--moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
                 <svg class="bb-theme-icon bb-theme-icon--sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
             </button>
-            <a href="{{ path('app_announcement_submit') }}" class="bb-btn bb-btn--cta bb-header-cta">Publier une annonce</a>
+            <a href="{{ path('app_contact') }}" class="bb-btn bb-btn--cta bb-header-cta">Nous joindre</a>
             <button type="button" class="bb-icon-btn bb-menu-toggle" data-action="nav-toggle#open" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="bb-drawer" data-nav-toggle-target="button">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg>
             </button>
@@ -68,10 +70,9 @@
                 <a href="{{ item.href }}" class="bb-drawer-link{{ item.active ? ' is-active' }}" data-action="nav-toggle#close">{{ item.label }}</a>
             {% endfor %}
             <a href="{{ path('app_about') }}" class="bb-drawer-link{{ currentRoute == 'app_about' ? ' is-active' }}" data-action="nav-toggle#close">À propos</a>
-            <a href="{{ path('app_home') }}#contact" class="bb-drawer-link" data-action="nav-toggle#close">Nous joindre</a>
         </nav>
         <div class="bb-drawer-footer">
-            <a href="{{ path('app_announcement_submit') }}" class="bb-btn bb-btn--cta bb-btn--block" data-action="nav-toggle#close">Publier une annonce</a>
+            <a href="{{ path('app_contact') }}" class="bb-btn bb-btn--cta bb-btn--block" data-action="nav-toggle#close">Nous joindre</a>
             {% if settings.whatsappUrl %}
                 <a href="{{ settings.whatsappUrl }}" target="_blank" rel="noopener" class="bb-btn bb-btn--ghost bb-btn--block">Chaîne WhatsApp</a>
             {% endif %}

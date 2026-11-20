@@ -1,0 +1,102 @@
+{# Navigation latérale de l'administration, regroupée en sections repliables
+   (<details>) pour rester courte : seule la section de la page courante est
+   ouverte par défaut, les autres s'ouvrent à la demande (état mémorisé par
+   le script de templates/admin/layout.html.twig). Chaque entrée n'apparaît que
+   si l'utilisateur a la permission associée (App\Security\Permission) ; une
+   section sans entrée visible n'est pas affichée. Pour ajouter une page,
+   ajouter une ligne ici avec sa permission. #}
+{% set route = app.request.attributes.get('_route') ?? '' %}
+{% set navGroups = [
+    { label: null, key: 'main', items: [
+        { label: 'Accueil', href: 'admin_dashboard', prefix: 'admin_dashboard', perm: 'admin.access',
+          icon: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>' },
+    ] },
+    { label: 'Contenu', key: 'contenu', items: [
+        { label: 'Articles', href: 'admin_article_index', prefix: 'admin_article', perm: 'articles.write',
+          icon: '<path d="M7 3h7l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 16.5h6M9 9.5h2"/>' },
+        { label: 'Récaps', href: 'admin_recap_index', prefix: 'admin_recap', perm: 'recaps.manage',
+          icon: '<rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="m11 9.5 3 2.5-3 2.5Z"/>' },
+        { label: 'Dossiers', href: 'admin_dossier_index', prefix: 'admin_dossier', perm: 'taxonomy.manage',
+          icon: '<path d="M3 7a1 1 0 0 1 1-1h6l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7Z"/>' },
+        { label: 'Catégories', href: 'admin_category_index', prefix: 'admin_category', perm: 'taxonomy.manage',
+          icon: '<path d="M3 11.5 11.5 3H19a1 1 0 0 1 1 1v7.5l-8.5 8.5a1 1 0 0 1-1.4 0L3 11.9a1 1 0 0 1 0-1.4Z"/><circle cx="15" cy="8" r="1.5"/>' },
+        { label: 'Mots-clés', href: 'admin_tag_index', prefix: 'admin_tag', perm: 'taxonomy.manage',
+          icon: '<path d="M20.6 12.6 12.6 20.6a2 2 0 0 1-2.8 0l-6.4-6.4a2 2 0 0 1 0-2.8L11.4 3.4A2 2 0 0 1 12.8 3H19a1 1 0 0 1 1 1v6.2a2 2 0 0 1-.6 1.4Z"/><circle cx="15" cy="7.5" r="1.3"/>' },
+        { label: 'Médias', href: 'admin_media_index', prefix: 'admin_media', perm: 'media.manage',
+          icon: '<rect x="3" y="5" width="18" height="14" rx="1.5"/><circle cx="9" cy="11" r="2"/><path d="M3 17l4.5-4 3 2.5L17 11l4 4"/>' },
+    ] },
+    { label: 'Rédaction', key: 'redaction', items: [
+        { label: 'Relecture', href: 'admin_workflow_review', prefix: 'admin_workflow_review', perm: 'workflow.review',
+          icon: '<path d="M4 19.5V6a2 2 0 0 1 2-2h8l6 6v9.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M13 4v5h5"/><path d="m9 15 2 2 4-4"/>' },
+        { label: 'Correction', href: 'admin_workflow_correction', prefix: 'admin_workflow_correction', perm: 'workflow.proofread',
+          icon: '<path d="M4 17.5 15 6.5l2.5 2.5L6.5 20H4v-2.5Z"/><path d="m14 8 2.5 2.5"/>' },
+        { label: 'Commentaires', href: 'admin_comment_index', prefix: 'admin_comment', perm: 'comments.moderate',
+          icon: '<path d="M4 19.5V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5 4.5Z"/>' },
+        { label: 'Validations', href: 'admin_validation_index', prefix: 'admin_validation', perm: 'validations.manage',
+          icon: '<path d="M12 3l7 3v6c0 4.5-3 7-7 9-4-2-7-4.5-7-9V6Z"/><path d="m9 12 2 2 4-4"/>' },
+    ] },
+    { label: 'Régie', key: 'regie', items: [
+        { label: 'Annonces', href: 'admin_announcement_index', prefix: 'admin_announcement', perm: 'announcements.manage',
+          icon: '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>' },
+        { label: 'Publicités', href: 'admin_home_banner_index', prefix: 'admin_home_banner', perm: 'ads.manage',
+          icon: '<rect x="3" y="6" width="18" height="9" rx="1.5"/><path d="M8 19h8"/>' },
+    ] },
+    { label: 'Audience', key: 'audience', items: [
+        { label: 'Statistiques', href: 'admin_stats_index', prefix: 'admin_stats', perm: 'stats.view',
+          icon: '<path d="M4 20V10M11 20V4M18 20v-7"/>' },
+        { label: 'Messages', href: 'admin_contact_message_index', prefix: 'admin_contact_message', perm: 'contact.manage',
+          icon: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>' },
+        { label: 'Newsletter', href: 'admin_newsletter_index', prefix: 'admin_newsletter', perm: 'contact.manage',
+          icon: '<path d="M3.7 3.05a.5.5 0 0 0-.68.63l2.84 7.62a2 2 0 0 1 0 1.4l-2.84 7.62a.5.5 0 0 0 .68.63l18-8.5a.5.5 0 0 0 0-.9z"/><path d="M6 12h16"/>' },
+    ] },
+    { label: 'Site', key: 'site', items: [
+        { label: 'Page d\'accueil', href: 'admin_home_section_index', prefix: 'admin_home_section', perm: 'home.manage',
+          icon: '<path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.5V19a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9.5"/><path d="M10 20v-5h4v5"/>' },
+        { label: 'Pages', href: 'admin_page_index', prefix: 'admin_page', perm: 'pages.manage',
+          icon: '<path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 12h6M9 16h6"/>' },
+        { label: 'Projets', href: 'admin_project_index', prefix: 'admin_project', perm: 'pages.manage',
+          icon: '<rect x="3" y="8" width="18" height="11" rx="1.5"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/>' },
+        { label: 'Équipe', href: 'admin_team_member_index', prefix: 'admin_team_member', perm: 'team.manage',
+          icon: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
+        { label: 'Paramètres', href: 'admin_site_settings_edit', prefix: 'admin_site_settings', perm: 'settings.manage',
+          icon: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>' },
+    ] },
+    { label: 'Équipe et accès', key: 'acces', items: [
+        { label: 'Auteurs', href: 'admin_author_index', prefix: 'admin_author', perm: 'authors.manage',
+          icon: '<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6.5 7-6.5s7 2.9 7 6.5"/>' },
+        { label: 'Utilisateurs', href: 'admin_user_index', prefix: 'admin_user', perm: 'users.manage',
+          icon: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c0-3.2 2.5-5.8 5.5-5.8s5.5 2.6 5.5 5.8"/><path d="M16 4.5c1.5.3 2.6 1.7 2.6 3.3s-1.1 3-2.6 3.3"/><path d="M19 13.5c1.7.4 3 1.9 3 3.7"/>' },
+        { label: 'Rôles et permissions', href: 'admin_role_index', prefix: 'admin_role', perm: 'roles.manage',
+          icon: '<path d="M12 3l7 3v6c0 4.5-3 7-7 9-4-2-7-4.5-7-9V6Z"/><path d="M12 8v5"/><circle cx="12" cy="15.5" r=".6"/>' },
+    ] },
+] %}
+<nav class="bo-nav" aria-label="Navigation de l'administration">
+    {% for group in navGroups %}
+        {% set visible = group.items|filter(item => is_granted(item.perm)) %}
+        {% if visible|length > 0 %}
+            {% set groupActive = visible|filter(item => route starts with item.prefix)|length > 0 %}
+
+            {% if group.label is null %}
+                {% for item in visible %}
+                    <a href="{{ path(item.href) }}" class="bo-nav-link {{ route starts with item.prefix ? 'active' : '' }}" title="{{ item.label }}">
+                        <svg viewBox="0 0 24 24">{{ item.icon|raw }}</svg>
+                        <span class="bo-label">{{ item.label }}</span>
+                    </a>
+                {% endfor %}
+            {% else %}
+                <details class="bo-nav-group" data-nav-group="{{ group.key }}"{{ groupActive ? ' open data-active' : '' }}>
+                    <summary class="bo-nav-group-label">
+                        <span class="bo-label">{{ group.label }}</span>
+                        <svg class="bo-nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </summary>
+                    {% for item in visible %}
+                        <a href="{{ path(item.href) }}" class="bo-nav-link {{ route starts with item.prefix ? 'active' : '' }}" title="{{ item.label }}">
+                            <svg viewBox="0 0 24 24">{{ item.icon|raw }}</svg>
+                            <span class="bo-label">{{ item.label }}</span>
+                        </a>
+                    {% endfor %}
+                </details>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</nav>

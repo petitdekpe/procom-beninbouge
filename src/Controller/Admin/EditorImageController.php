@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  * the editor uploads the picked file here and embeds the returned URL inline,
  * reusing the same ImageUploader as Article cover images and Media files.
  */
-#[IsGranted('ROLE_EDITOR')]
+#[IsGranted('admin.access')]
 final class EditorImageController extends AbstractController
 {
     public function __construct(

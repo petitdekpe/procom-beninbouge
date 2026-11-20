@@ -6,7 +6,7 @@
     <div class="bo-page-head">
         <h1 class="bo-page-title">Annonces & Opportunités</h1>
         <div style="display:flex;gap:10px">
-            {% if is_granted('ROLE_ADMIN') %}
+            {% if is_granted('announcements.pricing') %}
                 <a href="{{ path('admin_announcement_pricing') }}" class="bo-btn bo-btn-muted">Tarifs</a>
             {% endif %}
             <a href="{{ path('app_announcement_index') }}" target="_blank" rel="noopener" class="bo-btn bo-btn-muted">Voir la page publique</a>

@@ -1,0 +1,52 @@
+{{ form_start(form) }}
+    <div class="bo-wizard-head">
+        <div>
+            <p class="bo-wizard-title">{{ heading }}</p>
+        </div>
+        <a href="{{ path('admin_user_index') }}" class="bo-wizard-close" title="Fermer">✕</a>
+    </div>
+
+    {{ form_errors(form) }}
+
+    <div class="bo-step">
+        <div class="bo-form-row">{{ form_row(form.displayName) }}</div>
+        <div class="bo-form-row">{{ form_row(form.email) }}</div>
+
+        <div class="bo-form-row">
+            <label>{{ form.roles.vars.label }}</label>
+            {% for choice in form.roles %}
+                <label style="display:flex;align-items:flex-start;gap:8px;font-weight:700;margin:0 0 10px">
+                    {{ form_widget(choice, { attr: { style: 'margin-top:3px' } }) }}
+                    <span>
+                        {{ choice.vars.label }}
+                        {% if choice.vars.attr['data-description']|default('') != '' %}
+                            <span class="bo-muted" style="display:block;font-weight:500;font-size:12.5px">{{ choice.vars.attr['data-description'] }}</span>
+                        {% endif %}
+                    </span>
+                </label>
+            {% endfor %}
+            {% if form.roles|length == 0 %}<p class="bo-muted">Aucun rôle disponible.</p>{% endif %}
+            {{ form_errors(form.roles) }}
+            {% if form.roles.vars.help %}<div class="help">{{ form.roles.vars.help }}</div>{% endif %}
+        </div>
+
+        {% if form.enabled is defined %}
+            <div class="bo-form-row">{{ form_row(form.enabled) }}</div>
+        {% endif %}
+
+        {% if creating|default(false) %}
+            <p class="bo-muted" style="font-size:13px">À l'enregistrement, un mot de passe temporaire est généré et envoyé à cette adresse. Il devra être changé à la première connexion.</p>
+        {% endif %}
+    </div>
+
+    {% do form.roles.setRendered %}
+    {{ form_rest(form) }}
+
+    <div class="bo-wizard-footer">
+        <span></span>
+        <div style="display:flex;gap:10px">
+            <a href="{{ path('admin_user_index') }}" class="bo-btn bo-btn-muted">Annuler</a>
+            <button type="submit" class="bo-btn bo-btn-accent">{{ creating|default(false) ? 'Créer et envoyer le mot de passe' : 'Enregistrer' }}</button>
+        </div>
+    </div>
+{{ form_end(form) }}

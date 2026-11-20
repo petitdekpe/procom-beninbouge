@@ -20,7 +20,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * so this stays ROLE_ADMIN-only rather than the ROLE_EDITOR used by
  * Category/Media/HomeSection.
  */
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('settings.manage')]
 #[Route('/admin/settings')]
 final class SiteSettingsController extends AbstractController
 {

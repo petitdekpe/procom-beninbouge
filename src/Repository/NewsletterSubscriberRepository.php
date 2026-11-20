@@ -23,4 +23,14 @@ class NewsletterSubscriberRepository extends ServiceEntityRepository
     {
         return $this->findBy([], ['createdAt' => 'DESC']);
     }
+
+    public function countSince(\DateTimeImmutable $since): int
+    {
+        return (int) $this->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->andWhere('s.createdAt >= :since')
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

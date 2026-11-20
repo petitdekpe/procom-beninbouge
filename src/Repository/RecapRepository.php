@@ -39,4 +39,35 @@ class RecapRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function countPublished(): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->andWhere('r.status = :status')
+            ->andWhere('r.videoUrl IS NOT NULL')
+            ->setParameter('status', ArticleStatus::Published)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * One page of published récaps, most recent first — for the public
+     * "Récap" listing (App\Controller\RecapController::index).
+     *
+     * @return list<Recap>
+     */
+    public function findPublishedPage(int $page, int $perPage): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.status = :status')
+            ->andWhere('r.videoUrl IS NOT NULL')
+            ->setParameter('status', ArticleStatus::Published)
+            ->orderBy('r.publishedAt', 'DESC')
+            ->addOrderBy('r.id', 'DESC')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage)
+            ->getQuery()
+            ->getResult();
+    }
 }

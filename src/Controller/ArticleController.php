@@ -35,7 +35,7 @@ final class ArticleController extends AbstractController
             throw $this->createNotFoundException('Article introuvable.');
         }
 
-        if (ArticleStatus::Published !== $article->getStatus() && !$this->isGranted('ROLE_EDITOR')) {
+        if (ArticleStatus::Published !== $article->getStatus() && !$this->isGranted('admin.access')) {
             throw $this->createNotFoundException('Article introuvable.');
         }
 

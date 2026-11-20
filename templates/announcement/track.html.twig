@@ -54,7 +54,7 @@
                     <p>Motif indiqué par la rédaction :</p>
                     <blockquote>{{ announcement.rejectionReason }}</blockquote>
                     <p>Pour toute question, écrivez-nous en mentionnant la référence {{ announcement.reference }}.</p>
-                    <a href="{{ path('app_home') }}#contact" class="bb-btn-secondary">Nous joindre</a>
+                    <a href="{{ path('app_contact') }}" class="bb-btn-secondary">Nous joindre</a>
                 {% endif %}
 
                 {% if status in ['pending_payment', 'payment_failed'] %}

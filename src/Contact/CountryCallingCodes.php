@@ -4,7 +4,7 @@ namespace App\Contact;
 
 /**
  * Indicatifs proposés dans le formulaire « Nous joindre »
- * (templates/partials/home_sections/_contact.html.twig) et acceptés par
+ * (templates/contact/_form.html.twig) et acceptés par
  * App\Controller\ContactController — Bénin en tête (valeur par défaut),
  * puis la sous-région et les pays de la diaspora, par ordre alphabétique.
  */

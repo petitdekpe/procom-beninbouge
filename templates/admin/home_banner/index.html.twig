@@ -1,0 +1,100 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Publicités{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Publicités du slider</h1>
+        <div style="display:flex;gap:10px">
+            {% if is_granted('home.manage') %}
+                <a href="{{ path('admin_home_section_index') }}" class="bo-btn bo-btn-muted">Emplacement sur l'accueil</a>
+            {% endif %}
+            <a href="{{ path('app_home') }}" target="_blank" rel="noopener" class="bo-btn bo-btn-muted">Voir le site</a>
+            <a href="{{ path('admin_home_banner_new') }}" class="bo-btn bo-btn-accent">+ Nouvelle publicité</a>
+        </div>
+    </div>
+
+    <div class="bo-toolbar">
+        <div class="bo-filters">
+            {% for key, label in tabs %}
+                <a href="{{ path('admin_home_banner_index', key != 'live' ? { tab: key } : {}) }}" class="bo-pill {{ currentTab == key ? 'active' : '' }}">{{ label }}{% if counts[key] > 0 %} ({{ counts[key] }}){% endif %}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <p class="bo-muted" style="margin:-6px 0 18px">Images rectangulaires (de préférence 1600 × 500 px) affichées en slider sur l'accueil, au-dessus de l'actualité. Une publicité est diffusée tant qu'elle est active et dans sa période. {% if currentTab == 'live' %}L'ordre ci-dessous est celui du slider.{% endif %}</p>
+
+    <div class="bo-card">
+        {% if banners|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr>
+                        {% if currentTab == 'live' %}<th>Ordre</th>{% endif %}
+                        <th>Publicité</th>
+                        <th>Annonceur</th>
+                        <th>Période</th>
+                        <th>Montant</th>
+                        <th style="text-align:right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for banner in banners %}
+                        <tr>
+                            {% if currentTab == 'live' %}<td class="bo-muted">{{ loop.index }}</td>{% endif %}
+                            <td>
+                                <div class="bo-row-title">
+                                    <img src="{{ banner.imageUrl }}" alt="" style="width:120px;aspect-ratio:16/5;object-fit:cover;border-radius:7px;background:#eee;flex:none">
+                                    <div>
+                                        <div style="font-weight:700">{{ banner.title }}</div>
+                                        <div class="bo-muted" style="font-size:11.5px;font-weight:600">{{ banner.reference }}{% if banner.linkUrl %} · {{ banner.linkUrl|length > 38 ? banner.linkUrl|slice(0, 38) ~ '…' : banner.linkUrl }}{% endif %}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-weight:700">{{ banner.advertiser }}</div>
+                                {% if banner.contactName or banner.contactEmail or banner.contactPhone %}
+                                    <div class="bo-muted" style="font-size:11.5px">{{ [banner.contactName, banner.contactPhone, banner.contactEmail]|filter(v => v)|join(' · ') }}</div>
+                                {% endif %}
+                            </td>
+                            <td class="bo-muted" style="white-space:nowrap">
+                                {{ banner.startsAt|date('d/m/Y') }} → {{ banner.endsAt|date('d/m/Y') }}
+                                <div style="font-size:11.5px">{{ banner.durationDays }} j{% if banner.status == 'scheduled' %} · débute le {{ banner.startsAt|date('d/m H:i') }}{% elseif banner.status == 'live' %} · fin {{ banner.endsAt|date('d/m H:i') }}{% endif %}</div>
+                            </td>
+                            <td class="bo-muted" style="white-space:nowrap">{{ banner.amount > 0 ? banner.amount|format_number ~ ' FCFA' : '—' }}</td>
+                            <td style="text-align:right;white-space:nowrap">
+                                {% if currentTab == 'live' %}
+                                    <form method="post" action="{{ path('admin_home_banner_move_up', { id: banner.id }) }}" style="display:inline">
+                                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                        <button type="submit" class="bo-btn bo-btn-muted" {{ loop.first ? 'disabled' : '' }} title="Monter">↑</button>
+                                    </form>
+                                    <form method="post" action="{{ path('admin_home_banner_move_down', { id: banner.id }) }}" style="display:inline">
+                                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                        <button type="submit" class="bo-btn bo-btn-muted" {{ loop.last ? 'disabled' : '' }} title="Descendre">↓</button>
+                                    </form>
+                                {% endif %}
+                                {% if currentTab != 'expired' %}
+                                    <form method="post" action="{{ path('admin_home_banner_toggle', { id: banner.id }) }}" style="display:inline">
+                                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                        <button type="submit" class="bo-btn bo-btn-muted">{{ banner.enabled ? 'Mettre en pause' : 'Reprendre' }}</button>
+                                    </form>
+                                {% endif %}
+                                <a href="{{ path('admin_home_banner_edit', { id: banner.id }) }}" class="bo-btn {{ currentTab == 'expired' ? 'bo-btn-accent' : 'bo-btn-muted' }}">{{ currentTab == 'expired' ? 'Prolonger' : 'Modifier' }}</a>
+                                <form method="post" action="{{ path('admin_home_banner_delete', { id: banner.id }) }}" style="display:inline" onsubmit="return confirm('Supprimer cette publicité ?');">
+                                    <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                    <button type="submit" class="bo-btn bo-btn-danger">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">{{ {
+                live: "Aucune publicité en ligne. Le slider n'apparaît pas sur l'accueil tant qu'il n'y en a pas.",
+                scheduled: 'Aucune publicité programmée.',
+                expired: 'Aucune publicité terminée.',
+                paused: 'Aucune publicité en pause.',
+            }[currentTab] }}</p>
+        {% endif %}
+    </div>
+{% endblock %}

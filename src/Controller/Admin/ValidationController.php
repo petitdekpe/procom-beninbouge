@@ -24,7 +24,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * author (Article::$pendingApproval) both land here until an admin
  * approves or rejects them.
  */
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('validations.manage')]
 #[Route('/admin/validations')]
 final class ValidationController extends AbstractController
 {

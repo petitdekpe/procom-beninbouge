@@ -31,6 +31,8 @@ security:
             lazy: true
             stateless: true
             provider: app_user_provider
+            # Refuse les comptes désactivés (App\Security\UserChecker).
+            user_checker: App\Security\UserChecker
             http_basic: ~
 
             # Activate different ways to authenticate:

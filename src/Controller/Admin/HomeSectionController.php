@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_EDITOR')]
+#[IsGranted('home.manage')]
 #[Route('/admin/home-sections')]
 final class HomeSectionController extends AbstractController
 {

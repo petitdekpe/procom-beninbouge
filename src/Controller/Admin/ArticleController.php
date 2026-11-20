@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_EDITOR')]
+#[IsGranted('articles.write')]
 #[Route('/admin/articles')]
 final class ArticleController extends AbstractController
 {
@@ -159,7 +159,7 @@ final class ArticleController extends AbstractController
         return $this->redirectToRoute('admin_article_index');
     }
 
-    #[IsGranted('ROLE_EDITOR_IN_CHIEF')]
+    #[IsGranted('articles.publish')]
     #[Route('/{id}/unpublish', name: 'admin_article_unpublish', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function unpublish(Request $request, Article $article): Response
     {
@@ -171,7 +171,7 @@ final class ArticleController extends AbstractController
         return $this->redirectToRoute('admin_article_index');
     }
 
-    #[IsGranted('ROLE_EDITOR_IN_CHIEF')]
+    #[IsGranted('articles.publish')]
     #[Route('/{id}/archive', name: 'admin_article_archive', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function archive(Request $request, Article $article): Response
     {
@@ -183,7 +183,7 @@ final class ArticleController extends AbstractController
         return $this->redirectToRoute('admin_article_index');
     }
 
-    #[IsGranted('ROLE_EDITOR_IN_CHIEF')]
+    #[IsGranted('articles.publish')]
     #[Route('/{id}/unarchive', name: 'admin_article_unarchive', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function unarchive(Request $request, Article $article): Response
     {

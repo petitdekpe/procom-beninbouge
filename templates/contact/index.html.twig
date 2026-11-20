@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% set contactUrl = url('app_contact') %}
+{% set contactDescription = 'Une information, une suggestion, un partenariat : écrivez à la rédaction de ' ~ site_settings().siteName ~ '.' %}
+
+{% block title %}Nous joindre | {{ site_settings().siteName }}{% endblock %}
+
+{% block stylesheets %}
+    {{ include('partials/_seo_meta.html.twig', {
+        ogTitle: 'Nous joindre | ' ~ site_settings().siteName,
+        metaDescription: contactDescription,
+        canonicalUrl: contactUrl,
+    }) }}
+{% endblock %}
+
+{% block body %}
+<div>
+    {{ include('partials/_header.html.twig') }}
+
+    <main id="contenu">
+        {{ include('contact/_form.html.twig') }}
+    </main>
+
+    {{ include('partials/_footer.html.twig') }}
+</div>
+{% endblock %}

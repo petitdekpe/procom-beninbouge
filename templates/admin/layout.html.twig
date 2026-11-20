@@ -59,6 +59,31 @@
         .bo-nav-link svg{flex:none;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
         .bo-nav-link:hover{background:var(--sp-bg)}
         .bo-nav-link.active{background:var(--sp-black);color:#fff}
+        .bo-pill{text-decoration:none}
+        .bo-btn-sm{padding:7px 13px;font-size:12.5px}
+        .bo-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+        .bo-actions form{display:inline;margin:0}
+        .bo-nav-group{margin-top:4px}
+        .bo-nav-group>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:12px 14px 6px;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--sp-muted);border-radius:8px;user-select:none}
+        .bo-nav-group>summary::-webkit-details-marker{display:none}
+        .bo-nav-group>summary:hover{color:var(--sp-black)}
+        .bo-nav-group>summary:focus-visible{outline:2px solid var(--sp-accent);outline-offset:2px}
+        .bo-nav-chevron{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s ease}
+        .bo-nav-group:not([open]) .bo-nav-chevron{transform:rotate(-90deg)}
+        .bo-nav-group[open]>.bo-nav-link{margin-top:0}
+        .bo-nav-group>.bo-nav-link{margin-bottom:2px}
+        .bo-app.bo-collapsed .bo-nav-group>summary{padding:10px 0 4px;justify-content:center;border-top:1px solid var(--sp-border);border-radius:0;margin-top:6px}
+        .bo-app.bo-collapsed .bo-nav-chevron{display:none}
+        .bo-user{position:relative}
+        .bo-user>summary{list-style:none;cursor:pointer;display:flex}
+        .bo-user>summary::-webkit-details-marker{display:none}
+        .bo-user-menu{position:absolute;right:0;top:40px;min-width:230px;background:#fff;border:1px solid var(--sp-border);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:8px;z-index:40}
+        .bo-user-menu .who{padding:8px 10px 10px;border-bottom:1px solid var(--sp-border);margin-bottom:6px}
+        .bo-user-menu .who strong{display:block;font-size:13.5px}
+        .bo-user-menu .who span{font-size:12px;color:var(--sp-muted);word-break:break-all}
+        .bo-user-menu a{display:block;padding:9px 10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13.5px}
+        .bo-user-menu a:hover{background:var(--sp-bg)}
+        .bo-flash-info{background:#fff7e0;color:#7a5b00}
 
         .bo-sidebar-collapse{margin-top:auto;align-self:flex-start;width:30px;height:30px;border-radius:50%;border:1px solid var(--sp-border);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sp-muted)}
         .bo-sidebar-collapse svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s ease}
@@ -123,7 +148,7 @@
         .bo-step{max-width:640px}
         .bo-form-row{margin-bottom:18px}
         .bo-form-row label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}
-        .bo-form-row input[type=text],.bo-form-row input[type=email],.bo-form-row input[type=number],
+        .bo-form-row input[type=text],.bo-form-row input[type=email],.bo-form-row input[type=password],.bo-form-row input[type=number],
         .bo-form-row input[type=datetime-local],.bo-form-row textarea,.bo-form-row select{
             width:100%;padding:10px 13px;border:1px solid var(--sp-border);border-radius:9px;font-family:inherit;font-size:14px;background:#fff
         }
@@ -174,127 +199,37 @@
                 <button type="button" class="bo-icon-btn" title="Notifications" disabled>
                     <svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5"/><path d="M4 16h16l-1.2 2.2a1 1 0 0 1-.9.5H6.1a1 1 0 0 1-.9-.5L4 16Z"/><path d="M10.5 20a1.5 1.5 0 0 0 3 0"/></svg>
                 </button>
-                <span class="bo-avatar">{{ app.user ? app.user.userIdentifier|first|upper : 'A' }}</span>
+                <details class="bo-user">
+                    <summary aria-label="Menu du compte"><span class="bo-avatar">{{ app.user ? (app.user.displayName ?: app.user.userIdentifier)|first|upper : 'A' }}</span></summary>
+                    <div class="bo-user-menu">
+                        {% if app.user %}
+                            <div class="who"><strong>{{ app.user.displayName }}</strong><span>{{ app.user.userIdentifier }}</span></div>
+                        {% endif %}
+                        {% if is_granted('articles.write') %}<a href="{{ path('admin_profile') }}">Mon profil d'auteur</a>{% endif %}
+                        <a href="{{ path('admin_account_password') }}">Changer mon mot de passe</a>
+                    </div>
+                </details>
             </div>
         </header>
 
         <div class="bo-body-row">
             <aside class="bo-sidebar">
-                <a href="{{ path('admin_article_new') }}" class="bo-new-btn">
-                    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                    <span class="bo-label">Nouvel article</span>
-                </a>
-                <nav class="bo-nav">
-                    <a href="{{ path('admin_dashboard') }}" class="bo-nav-link {{ app.request.attributes.get('_route') == 'admin_dashboard' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
-                        <span class="bo-label">Accueil</span>
+                {% if is_granted('articles.write') %}
+                    <a href="{{ path('admin_article_new') }}" class="bo-new-btn">
+                        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                        <span class="bo-label">Nouvel article</span>
                     </a>
-                    <a href="{{ path('admin_stats_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_stats' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>
-                        <span class="bo-label">Statistiques</span>
-                    </a>
-                    <a href="{{ path('admin_article_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_article' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 16.5h6M9 9.5h2"/></svg>
-                        <span class="bo-label">Articles</span>
-                    </a>
-                    <a href="{{ path('admin_recap_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_recap' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="m11 9.5 3 2.5-3 2.5Z"/></svg>
-                        <span class="bo-label">Récaps</span>
-                    </a>
-                    <a href="{{ path('admin_category_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_category' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><path d="M3 11.5 11.5 3H19a1 1 0 0 1 1 1v7.5l-8.5 8.5a1 1 0 0 1-1.4 0L3 11.9a1 1 0 0 1 0-1.4Z"/><circle cx="15" cy="8" r="1.5"/></svg>
-                        <span class="bo-label">Catégories</span>
-                    </a>
-                    <a href="{{ path('admin_tag_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_tag' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><path d="M20.6 12.6 12.6 20.6a2 2 0 0 1-2.8 0l-6.4-6.4a2 2 0 0 1 0-2.8L11.4 3.4A2 2 0 0 1 12.8 3H19a1 1 0 0 1 1 1v6.2a2 2 0 0 1-.6 1.4Z"/><circle cx="15" cy="7.5" r="1.3"/></svg>
-                        <span class="bo-label">Mots-clés</span>
-                    </a>
-                    <a href="{{ path('admin_dossier_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_dossier' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><path d="M3 7a1 1 0 0 1 1-1h6l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7Z"/></svg>
-                        <span class="bo-label">Dossiers</span>
-                    </a>
-                    <a href="{{ path('admin_author_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_author' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6.5 7-6.5s7 2.9 7 6.5"/></svg>
-                        <span class="bo-label">Auteurs</span>
-                    </a>
-                    <a href="{{ path('admin_project_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_project' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="11" rx="1.5"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>
-                        <span class="bo-label">Projets</span>
-                    </a>
-                    <a href="{{ path('admin_media_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_media' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5"/><circle cx="9" cy="11" r="2"/><path d="M3 17l4.5-4 3 2.5L17 11l4 4"/></svg>
-                        <span class="bo-label">Médias</span>
-                    </a>
-                    <a href="{{ path('admin_comment_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_comment' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><path d="M4 19.5V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5 4.5Z"/></svg>
-                        <span class="bo-label">Commentaires</span>
-                    </a>
-                    {% if is_granted('ROLE_EDITOR_IN_CHIEF') %}
-                        <a href="{{ path('admin_announcement_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_announcement' ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
-                            <span class="bo-label">Annonces</span>
-                        </a>
-                        <a href="{{ path('admin_contact_message_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_contact_message' ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                            <span class="bo-label">Messages</span>
-                        </a>
-                        <a href="{{ path('admin_newsletter_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_newsletter' ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24"><path d="M3.7 3.05a.5.5 0 0 0-.68.63l2.84 7.62a2 2 0 0 1 0 1.4l-2.84 7.62a.5.5 0 0 0 .68.63l18-8.5a.5.5 0 0 0 0-.9z"/><path d="M6 12h16"/></svg>
-                            <span class="bo-label">Newsletter</span>
-                        </a>
-                        <a href="{{ path('admin_team_member_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_team_member' ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            <span class="bo-label">Équipe</span>
-                        </a>
-                    {% endif %}
-                    <a href="{{ path('admin_page_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_page' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 12h6M9 16h6"/></svg>
-                        <span class="bo-label">Pages</span>
-                    </a>
-                    <a href="{{ path('admin_home_section_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_home_section' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.5V19a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9.5"/><path d="M10 20v-5h4v5"/></svg>
-                        <span class="bo-label">Page d'accueil</span>
-                    </a>
-                    <a href="{{ path('admin_profile') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_profile' ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6.5 7-6.5s7 2.9 7 6.5"/><circle cx="12" cy="12" r="10"/></svg>
-                        <span class="bo-label">Mon profil</span>
-                    </a>
-                    {% if is_granted('ROLE_EDITOR_IN_CHIEF') %}
-                        <a href="{{ path('admin_workflow_review') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_workflow_review' ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24"><path d="M4 19.5V6a2 2 0 0 1 2-2h8l6 6v9.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M13 4v5h5"/><path d="m9 15 2 2 4-4"/></svg>
-                            <span class="bo-label">Relecture</span>
-                        </a>
-                    {% endif %}
-                    {% if is_granted('ROLE_PROOFREADER') %}
-                        <a href="{{ path('admin_workflow_correction') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_workflow_correction' ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24"><path d="M4 17.5 15 6.5l2.5 2.5L6.5 20H4v-2.5Z"/><path d="m14 8 2.5 2.5"/></svg>
-                            <span class="bo-label">Correction</span>
-                        </a>
-                    {% endif %}
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <a href="{{ path('admin_validation_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_validation' ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7-7 9-4-2-7-4.5-7-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>
-                            <span class="bo-label">Validations</span>
-                        </a>
-                        <a href="{{ path('admin_user_index') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_user' ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c0-3.2 2.5-5.8 5.5-5.8s5.5 2.6 5.5 5.8"/><path d="M16 4.5c1.5.3 2.6 1.7 2.6 3.3s-1.1 3-2.6 3.3"/><path d="M19 13.5c1.7.4 3 1.9 3 3.7"/></svg>
-                            <span class="bo-label">Utilisateurs</span>
-                        </a>
-                        <a href="{{ path('admin_site_settings_edit') }}" class="bo-nav-link {{ app.request.attributes.get('_route') starts with 'admin_site_settings' ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-                            <span class="bo-label">Paramètres</span>
-                        </a>
-                    {% endif %}
-                </nav>
+                {% endif %}
+                {{ include('admin/_sidebar_nav.html.twig') }}
                 <button type="button" class="bo-sidebar-collapse" id="bo-sidebar-toggle" title="Réduire la barre latérale">
                     <svg viewBox="0 0 24 24"><path d="M11 6 5 12l6 6"/><path d="M18 6l-6 6 6 6"/></svg>
                 </button>
             </aside>
 
             <main class="bo-content">
-                {% for label, messages in app.flashes(['success', 'error']) %}
+                {% for label, messages in app.flashes(['success', 'error', 'info']) %}
                     {% for message in messages %}
-                        <div class="bo-flash bo-flash-{{ label }}">{{ message }}</div>
+                        <div class="bo-flash bo-flash-{{ label }}" role="{{ label == 'error' ? 'alert' : 'status' }}">{{ message }}</div>
                     {% endfor %}
                 {% endfor %}
 
@@ -307,13 +242,43 @@
         (function () {
             var app = document.getElementById('bo-app');
             var toggle = document.getElementById('bo-sidebar-toggle');
+            // Sections repliables du menu : la section de la page courante est
+            // ouverte par le serveur ; les autres reprennent l'état mémorisé.
+            // Sidebar réduite (icônes seules) : tout est déplié pour que chaque
+            // icône reste accessible, sans toucher à l'état mémorisé.
+            var groups = Array.prototype.slice.call(document.querySelectorAll('.bo-nav-group'));
+            var saved = {};
+            try { saved = JSON.parse(localStorage.getItem('bo-nav-groups') || '{}') || {}; } catch (e) {}
+            var compactQuery = window.matchMedia ? window.matchMedia('(max-width: 900px)') : null;
+            function isCompact() {
+                return (app && app.classList.contains('bo-collapsed')) || (compactQuery && compactQuery.matches);
+            }
+            function applyGroups() {
+                groups.forEach(function (g) {
+                    var key = g.getAttribute('data-nav-group');
+                    g.setAttribute('data-silent', '1');
+                    g.open = isCompact() || g.hasAttribute('data-active') || saved[key] === true;
+                });
+                window.setTimeout(function () { groups.forEach(function (g) { g.removeAttribute('data-silent'); }); }, 0);
+            }
+            groups.forEach(function (g) {
+                g.addEventListener('toggle', function () {
+                    if (g.hasAttribute('data-silent') || isCompact()) return;
+                    saved[g.getAttribute('data-nav-group')] = g.open;
+                    try { localStorage.setItem('bo-nav-groups', JSON.stringify(saved)); } catch (e) {}
+                });
+            });
+            if (compactQuery && compactQuery.addEventListener) compactQuery.addEventListener('change', applyGroups);
+
             if (toggle && app) {
                 if (localStorage.getItem('bo-sidebar-collapsed') === '1') app.classList.add('bo-collapsed');
                 toggle.addEventListener('click', function () {
                     app.classList.toggle('bo-collapsed');
                     localStorage.setItem('bo-sidebar-collapsed', app.classList.contains('bo-collapsed') ? '1' : '0');
+                    applyGroups();
                 });
             }
+            applyGroups();
 
             // Generic client-side search + pill filtering for admin list tables.
             // Expects: a <table class="bo-table"> whose rows carry a data-search

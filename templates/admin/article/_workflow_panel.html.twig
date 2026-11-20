@@ -34,15 +34,15 @@
                 </form>
             {% elseif article.status.value == 'in_review' %}
                 <span class="bo-muted" style="font-size:13px">En attente de relecture par le rédacteur en chef.</span>
-                {% if is_granted('ROLE_EDITOR_IN_CHIEF') %}
+                {% if is_granted('workflow.review') %}
                     <a href="{{ path('admin_workflow_review') }}" class="bo-btn bo-btn-muted">Aller à la file de relecture</a>
                 {% endif %}
             {% elseif article.status.value == 'in_correction' %}
                 <span class="bo-muted" style="font-size:13px">En cours de correction.</span>
-                {% if is_granted('ROLE_PROOFREADER') %}
+                {% if is_granted('workflow.proofread') %}
                     <a href="{{ path('admin_workflow_correction') }}" class="bo-btn bo-btn-muted">Aller à la file de correction</a>
                 {% endif %}
-            {% elseif article.status.value in ['published', 'scheduled'] and is_granted('ROLE_EDITOR_IN_CHIEF') %}
+            {% elseif article.status.value in ['published', 'scheduled'] and is_granted('articles.publish') %}
                 <form method="post" action="{{ path('admin_article_unpublish', { id: article.id }) }}" onsubmit="return confirm('Dépublier cet article ? Il repassera en brouillon.');">
                     <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
                     <button type="submit" class="bo-btn bo-btn-muted">Dépublier</button>
@@ -53,7 +53,7 @@
                         <button type="submit" class="bo-btn bo-btn-muted">Archiver</button>
                     </form>
                 {% endif %}
-            {% elseif article.status.value == 'archived' and is_granted('ROLE_EDITOR_IN_CHIEF') %}
+            {% elseif article.status.value == 'archived' and is_granted('articles.publish') %}
                 <form method="post" action="{{ path('admin_article_unarchive', { id: article.id }) }}">
                     <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
                     <button type="submit" class="bo-btn bo-btn-accent">Désarchiver</button>

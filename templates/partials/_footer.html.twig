@@ -26,7 +26,7 @@
                 <a href="{{ path('app_videos') }}">Vidéos</a>
                 <a href="{{ path('app_announcement_index') }}">Annonces &amp; emploi</a>
                 <a href="{{ path('app_announcement_submit') }}">Publier une annonce</a>
-                <a href="{{ path('app_home') }}#contact">Nous joindre</a>
+                <a href="{{ path('app_contact') }}">Nous joindre</a>
                 {% for page in footerPages %}
                     <a href="{{ path('app_page_show', { slug: page.slug }) }}">{{ page.title }}</a>
                 {% endfor %}

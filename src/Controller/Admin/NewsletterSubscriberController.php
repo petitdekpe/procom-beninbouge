@@ -18,7 +18,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * Newsletter sign-ups from the footer form. The site doesn't send
  * newsletters itself: the CSV export is meant for the mailing tool.
  */
-#[IsGranted('ROLE_EDITOR_IN_CHIEF')]
+#[IsGranted('contact.manage')]
 #[Route('/admin/newsletter')]
 final class NewsletterSubscriberController extends AbstractController
 {

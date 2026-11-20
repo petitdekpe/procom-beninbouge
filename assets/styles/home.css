@@ -500,12 +500,153 @@
     overflow: hidden;
 }
 
+/* ---------- Slider d'images (au-dessus de l'actualité) ---------- */
+.bb-banner {
+    position: relative;
+    margin-block: clamp(28px, 4vw, 56px);
+}
+
+.bb-banner-track {
+    display: flex;
+    overflow-x: auto;
+    border-radius: var(--bb-r-lg);
+    background: var(--bb-placeholder);
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.bb-banner-track::-webkit-scrollbar {
+    display: none;
+}
+
+.bb-banner-track:focus-visible {
+    outline: 3px solid var(--bb-focus);
+    outline-offset: 3px;
+}
+
+.bb-banner-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    aspect-ratio: 16 / 5;
+}
+
+.bb-banner-slide img,
+.bb-banner-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.bb-banner-slide img {
+    object-fit: cover;
+}
+
+.bb-banner-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(17, 27, 20, .62);
+    color: var(--bb-white);
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: background .2s ease;
+}
+
+.bb-banner-arrow:hover,
+.bb-banner-arrow:focus-visible {
+    background: var(--bb-gold);
+    color: var(--bb-black);
+}
+
+.bb-banner-arrow--prev {
+    left: clamp(10px, 1.6vw, 20px);
+}
+
+.bb-banner-arrow--next {
+    right: clamp(10px, 1.6vw, 20px);
+}
+
+.bb-banner-dots {
+    position: absolute;
+    right: 0;
+    bottom: 14px;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.bb-banner-dot {
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--bb-r-pill);
+    background: rgba(255, 255, 255, .6);
+    box-shadow: 0 0 0 1px rgba(17, 27, 20, .25);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: width .25s ease, background .25s ease;
+}
+
+.bb-banner-dot.is-active {
+    width: 28px;
+    background: var(--bb-gold);
+}
+
+/* Mobile : cadre moins panoramique pour que l'image reste lisible. */
+@media (max-width: 700px) {
+    .bb-banner-slide {
+        aspect-ratio: 16 / 9;
+    }
+
+    .bb-banner-arrow {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bb-banner-dot {
+        transition: none;
+    }
+}
+
 /* ---------- Section Récap (vidéos verticales) ---------- */
 .bb-recap-rail-list {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 16px;
     list-style: none;
+}
+
+/* Page « Récap » : grille qui revient à la ligne (pas de défilement). */
+.bb-recap-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+    list-style: none;
+}
+
+@media (max-width: 1100px) {
+    .bb-recap-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .bb-recap-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
 }
 
 .bb-recap-card {

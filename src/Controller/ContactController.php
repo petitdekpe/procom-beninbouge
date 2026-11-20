@@ -16,8 +16,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
- * Public endpoints behind the homepage "Nous joindre" section
- * (templates/partials/home_sections/_contact.html.twig) and the footer
+ * Public endpoints behind the Contact page (templates/contact/index.html.twig,
+ * reached from the header button and the homepage "Nous joindre" call to
+ * action) and the footer
  * newsletter form (templates/partials/_footer.html.twig). Both are plain
  * HTML forms (no Form component) so the footer stays self-sufficient on
  * every page; each is protected by a CSRF token and a hidden "website"
@@ -34,10 +35,16 @@ final class ContactController extends AbstractController
     ) {
     }
 
+    #[Route('/contact', name: 'app_contact', methods: ['GET'])]
+    public function index(): Response
+    {
+        return $this->render('contact/index.html.twig');
+    }
+
     #[Route('/contact', name: 'app_contact_submit', methods: ['POST'])]
     public function submit(Request $request): Response
     {
-        $redirect = $this->redirect($this->generateUrl('app_home').'#contact');
+        $redirect = $this->redirect($this->generateUrl('app_contact').'#contact');
 
         if (!$this->isCsrfTokenValid('contact', (string) $request->request->get('_token'))) {
             $this->addFlash('contact_error', 'Votre session a expiré. Merci de renvoyer le formulaire.');

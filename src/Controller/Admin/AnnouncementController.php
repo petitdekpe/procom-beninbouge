@@ -31,7 +31,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * approved or rejected within Announcement::REVIEW_DELAY_HOURS (48 h):
  * the « À valider » tab lists the oldest first and flags overdue ones.
  */
-#[IsGranted('ROLE_EDITOR_IN_CHIEF')]
+#[IsGranted('announcements.manage')]
 #[Route('/admin/annonces')]
 final class AnnouncementController extends AbstractController
 {
@@ -72,7 +72,7 @@ final class AnnouncementController extends AbstractController
      * Prices are a business decision: ROLE_ADMIN only, like the rest of the
      * site settings they're stored in.
      */
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('announcements.pricing')]
     #[Route('/tarifs', name: 'admin_announcement_pricing', methods: ['GET', 'POST'])]
     public function pricing(Request $request, SiteSettingsRepository $siteSettingsRepository): Response
     {

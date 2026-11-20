@@ -15,6 +15,16 @@
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
     </url>
+    <url>
+        <loc>{{ url('app_recap_index') }}</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>{{ url('app_contact') }}</loc>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+    </url>
     {% for article in articles %}
     <url>
         <loc>{{ url('app_article_show', { slug: article.slug }) }}</loc>

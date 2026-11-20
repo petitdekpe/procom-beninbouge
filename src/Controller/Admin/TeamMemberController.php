@@ -21,7 +21,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * The « Notre équipe » block of the À propos page (templates/about/index.html.twig):
  * members are created, reordered and hidden/shown here.
  */
-#[IsGranted('ROLE_EDITOR_IN_CHIEF')]
+#[IsGranted('team.manage')]
 #[Route('/admin/team')]
 final class TeamMemberController extends AbstractController
 {

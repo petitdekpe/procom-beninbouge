@@ -9,6 +9,7 @@ use App\Repository\RecapRepository;
 use App\Service\ImageUploader;
 use App\Service\RecapCoverResolver;
 use App\Service\SeoMetadataGenerator;
+use App\Service\UnicodeStyleNormalizer;
 use App\Service\VideoUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -36,6 +37,7 @@ final class RecapController extends AbstractController
         private VideoUploader $videoUploader,
         private RecapCoverResolver $coverResolver,
         private SeoMetadataGenerator $seo,
+        private UnicodeStyleNormalizer $unicodeStyles,
     ) {
     }
 
@@ -150,6 +152,10 @@ final class RecapController extends AbstractController
      */
     private function applyDefaults(Recap $recap): void
     {
+        // Comme pour les articles : faux gras/italiques Unicode collés depuis
+        // Facebook ou WhatsApp ramenés à du vrai texte, avant le slug et les meta.
+        $this->unicodeStyles->normalizeRecap($recap);
+
         if (!$recap->getSlug() && $recap->getTitle()) {
             $recap->setSlug($this->seo->uniqueSlug(
                 $recap->getTitle(),

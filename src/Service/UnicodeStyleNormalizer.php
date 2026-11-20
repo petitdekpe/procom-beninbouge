@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\Entity\Recap;
+
 /**
  * Faux gras et faux italiques Unicode (« 𝗔𝗡𝗚𝗘́𝗟𝗜𝗤𝗨𝗘 », « 𝐁𝐞𝐧𝐢𝐧 », « 𝘪𝘵𝘢𝘭𝘪𝘲𝘶𝘦 »)
  * collés depuis Facebook ou WhatsApp. Ce sont des symboles mathématiques
@@ -54,6 +56,29 @@ final class UnicodeStyleNormalizer
     public function hasStyledCharacters(?string $text): bool
     {
         return null !== $text && 1 === preg_match('/[\x{1D400}-\x{1D7FF}]/u', $text);
+    }
+
+    /**
+     * Même traitement que App\Service\ArticleSaver::normalizeUnicodeStyles()
+     * pour un récap : lettres ordinaires dans le titre et les meta,
+     * <strong>/<em> dans le texte. Renvoie vrai si quelque chose a changé.
+     */
+    public function normalizeRecap(Recap $recap): bool
+    {
+        $changed = false;
+        foreach ([
+            [$recap->getTitle(), $recap->setTitle(...), $this->toPlain(...)],
+            [$recap->getMetaTitle(), $recap->setMetaTitle(...), $this->toPlain(...)],
+            [$recap->getMetaDescription(), $recap->setMetaDescription(...), $this->toPlain(...)],
+            [$recap->getContent(), $recap->setContent(...), $this->toHtml(...)],
+        ] as [$value, $set, $normalize]) {
+            if ($this->hasStyledCharacters($value)) {
+                $set($normalize($value));
+                $changed = true;
+            }
+        }
+
+        return $changed;
     }
 
     public function toPlain(?string $text): ?string

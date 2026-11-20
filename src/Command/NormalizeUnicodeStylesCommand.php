@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Article;
 use App\Entity\Enum\ArticleStatus;
+use App\Entity\Recap;
 use App\Service\ArticleSaver;
 use App\Service\UnicodeStyleNormalizer;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,7 +21,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * chaque enregistrement (lettres ordinaires dans le titre et les meta,
  * <strong>/<em> dans le contenu). Une révision est gardée pour chaque
  * article modifié, donc l'ancienne version reste restaurable depuis
- * l'historique. --dry-run liste les articles concernés sans rien changer.
+ * l'historique. Les récaps (titre, meta, texte) sont traités de la même
+ * façon, sans historique. --dry-run liste les contenus concernés sans rien
+ * changer.
  */
 #[AsCommand(
     name: 'app:normalize-unicode-styles',
@@ -67,14 +70,35 @@ final class NormalizeUnicodeStylesCommand extends Command
             }
         }
 
-        if ([] === $changed) {
-            $io->success('Aucun article ne contient de faux gras Unicode.');
+        /** @var list<Recap> $recaps */
+        $recaps = $this->entityManager->getRepository(Recap::class)->findAll();
+        $changedRecaps = [];
+
+        foreach ($recaps as $recap) {
+            $before = $recap->getTitle();
+            if ($dryRun) {
+                $affected = $this->unicodeStyles->hasStyledCharacters($recap->getTitle())
+                    || $this->unicodeStyles->hasStyledCharacters($recap->getMetaTitle())
+                    || $this->unicodeStyles->hasStyledCharacters($recap->getMetaDescription())
+                    || $this->unicodeStyles->hasStyledCharacters($recap->getContent());
+            } else {
+                $affected = $this->unicodeStyles->normalizeRecap($recap);
+            }
+
+            if ($affected) {
+                $changedRecaps[] = $recap;
+                $io->writeln(sprintf('%s récap n°%d : %s → %s', $dryRun ? 'À corriger' : 'Corrigé', $recap->getId(), $before, $dryRun ? $this->unicodeStyles->toPlain($before) : $recap->getTitle()));
+            }
+        }
+
+        if ([] === $changed && [] === $changedRecaps) {
+            $io->success('Aucun article ni récap ne contient de faux gras Unicode.');
 
             return Command::SUCCESS;
         }
 
         if ($dryRun) {
-            $io->note(sprintf('%d article(s) à corriger. Relancez sans --dry-run pour appliquer.', \count($changed)));
+            $io->note(sprintf('%d article(s) et %d récap(s) à corriger. Relancez sans --dry-run pour appliquer.', \count($changed), \count($changedRecaps)));
 
             return Command::SUCCESS;
         }
@@ -85,7 +109,7 @@ final class NormalizeUnicodeStylesCommand extends Command
             $this->articleSaver->afterSave($article, wasPublished: ArticleStatus::Published === $article->getStatus());
         }
 
-        $io->success(sprintf('%d article(s) corrigé(s).', \count($changed)));
+        $io->success(sprintf('%d article(s) et %d récap(s) corrigé(s).', \count($changed), \count($changedRecaps)));
 
         return Command::SUCCESS;
     }

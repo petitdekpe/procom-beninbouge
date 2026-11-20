@@ -779,6 +779,33 @@ a.bb-page-link:hover {
     margin-inline: 0;
 }
 
+/* Texte d'un récap : interligne et espaces entre paragraphes resserrés
+   (22 px entre blocs dans un article). L'éditeur crée un <p> par Entrée,
+   donc une ligne vide donne <p><br></p> : on ne l'affiche pas, sinon
+   chaque saut de ligne ajoute un grand vide. */
+.bb-recap-text .bb-article-body {
+    padding-top: clamp(16px, 2vw, 24px);
+    line-height: 1.6;
+}
+
+.bb-recap-text .bb-article-body > * + * {
+    margin-top: 10px;
+}
+
+.bb-recap-text .bb-article-body p:empty,
+.bb-recap-text .bb-article-body p:has(> br:only-child) {
+    display: none;
+}
+
+.bb-recap-text .bb-article-body h2,
+.bb-recap-text .bb-article-body h3 {
+    margin-top: 22px;
+}
+
+.bb-recap-text .bb-article-body li + li {
+    margin-top: 4px;
+}
+
 @media (max-width: 860px) {
     .bb-recap {
         grid-template-columns: minmax(0, 1fr);

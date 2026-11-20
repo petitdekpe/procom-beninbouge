@@ -1,0 +1,30 @@
+{# Corps de l'article, mots-clés et auteur. Le conteneur (pleine page ou colonne
+   de droite du Récap) est fourni par article/show.html.twig.
+   Attend : article. #}
+<div class="bb-article-body bb-prose">{{ article.content|raw }}</div>
+
+<div class="bb-prose">
+    {% if article.tags|length > 0 %}
+        <ul class="bb-tags" aria-label="Mots-clés">
+            {% for tag in article.tags %}
+                <li><a href="{{ path('app_tag_show', { slug: tag.slug }) }}" class="bb-tag">#{{ tag.name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if article.author %}
+        <aside class="bb-author" aria-label="L'auteur">
+            <span class="bb-author-avatar">
+                {% if article.author.avatar %}
+                    <img src="{{ article.author.avatar }}" alt="">
+                {% else %}
+                    {{ article.author.firstName|first }}{{ article.author.lastName|first }}
+                {% endif %}
+            </span>
+            <div>
+                <p class="bb-author-name">{{ article.author.firstName }} {{ article.author.lastName }}</p>
+                {% if article.author.bio %}<p class="bb-author-bio">{{ article.author.bio }}</p>{% endif %}
+            </div>
+        </aside>
+    {% endif %}
+</div>

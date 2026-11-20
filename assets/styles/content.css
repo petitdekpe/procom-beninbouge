@@ -726,6 +726,75 @@ a.bb-page-link:hover {
     color: var(--bb-ink-muted);
 }
 
+/* ---------- Article « Récap » : vidéo mobile à gauche, texte à droite ---------- */
+.bb-recap {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+    padding-top: clamp(28px, 4vw, 56px);
+    padding-bottom: clamp(20px, 3vw, 40px);
+}
+
+/* La vidéo reste visible pendant la lecture du texte. */
+.bb-recap-media {
+    position: sticky;
+    top: 24px;
+}
+
+.bb-recap-player {
+    position: relative;
+    aspect-ratio: 9 / 16;
+    max-height: calc(100vh - 48px);
+    margin-inline: auto;
+    overflow: hidden;
+    border-radius: 28px;
+    background: var(--bb-black);
+    box-shadow: var(--bb-shadow);
+}
+
+.bb-recap-player iframe,
+.bb-recap-player video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    object-fit: contain;
+    background: var(--bb-black);
+}
+
+.bb-recap-text {
+    min-width: 0;
+}
+
+/* L'en-tête et le corps vivent dans la colonne : plus de conteneur centré. */
+.bb-article-head--recap {
+    max-width: none;
+    padding-top: 0;
+}
+
+.bb-recap-text .bb-prose {
+    max-width: none;
+    margin-inline: 0;
+}
+
+@media (max-width: 860px) {
+    .bb-recap {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 28px;
+    }
+
+    .bb-recap-media {
+        position: static;
+    }
+
+    .bb-recap-player {
+        width: min(100%, 360px);
+        max-height: none;
+    }
+}
+
 @media (max-width: 640px) {
     .bb-article-meta {
         flex-direction: column;

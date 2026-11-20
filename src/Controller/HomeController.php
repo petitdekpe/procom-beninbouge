@@ -15,7 +15,8 @@ use Symfony\Component\Routing\Attribute\Route;
 /**
  * Homepage (charte 2026, V2): the order and visibility of the sections still
  * come from /admin/home-sections. Each article appears only once on the
- * page — the "Une" grid first, then the most-read list, then "Le fil" —
+ * page — the "Une" grid first, then the most-read list, the "Récap" rail
+ * (vertical video articles), then "Le fil" —
  * so every query excludes the ids already picked above it.
  */
 final class HomeController extends AbstractController
@@ -23,6 +24,7 @@ final class HomeController extends AbstractController
     private const UNE_SIZE = 3;
     private const MOST_READ_SIZE = 4;
     private const FIL_SIZE = 6;
+    private const RECAP_SIZE = 5;
     private const TICKER_SIZE = 6;
 
     public function __construct(
@@ -58,6 +60,10 @@ final class HomeController extends AbstractController
             ? $remember($this->articleRepository->findMostViewedPublished(self::MOST_READ_SIZE, $shownIds))
             : [];
 
+        $recaps = $isEnabled(HomeSectionType::Recap)
+            ? $remember($this->articleRepository->findLatestPublishedRecaps(self::RECAP_SIZE, $shownIds))
+            : [];
+
         $fil = $isEnabled(HomeSectionType::LatestNews)
             ? $remember($this->articleRepository->findLatestPublished(self::FIL_SIZE, $shownIds))
             : [];
@@ -86,6 +92,7 @@ final class HomeController extends AbstractController
             'une' => $une,
             'mostRead' => $mostRead,
             'fil' => $fil,
+            'recaps' => $recaps,
             'categoryHighlightArticles' => $categoryHighlightArticles,
             'videos' => \array_slice($videos, 0, 5),
             'podcasts' => $podcasts,

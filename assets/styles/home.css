@@ -500,6 +500,109 @@
     overflow: hidden;
 }
 
+/* ---------- Section Récap (vidéos verticales) ---------- */
+.bb-recap-rail-list {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+    list-style: none;
+}
+
+.bb-recap-card {
+    position: relative;
+    display: block;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
+    border-radius: 20px;
+    background: var(--bb-petrol);
+    color: var(--bb-white);
+    isolation: isolate;
+}
+
+.bb-recap-card-media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+}
+
+.bb-recap-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .5s ease;
+}
+
+.bb-recap-card:hover .bb-recap-card-media img {
+    transform: scale(1.05);
+}
+
+.bb-recap-card-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(8, 30, 39, .94) 0%, rgba(8, 30, 39, .25) 50%, rgba(8, 30, 39, 0) 100%);
+}
+
+.bb-recap-card-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+}
+
+.bb-recap-card-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--bb-gold);
+    color: var(--bb-black);
+    transform: translate(-50%, -50%);
+    transition: transform .2s ease;
+}
+
+.bb-recap-card-play svg {
+    margin-left: 3px;
+}
+
+.bb-recap-card:hover .bb-recap-card-play {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.bb-recap-card-body {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bb-recap-card-cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--bb-green-light);
+}
+
+.bb-recap-card-title {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+}
+
 /* ---------- Le fil + Explorer ---------- */
 .bb-fil-grid {
     display: grid;
@@ -898,6 +1001,19 @@
     }
 
     .bb-vrail-list li {
+        scroll-snap-align: start;
+    }
+
+    .bb-recap-rail-list {
+        grid-template-columns: repeat(5, minmax(170px, 1fr));
+        margin-inline: calc(var(--bb-gutter) * -1);
+        padding-inline: var(--bb-gutter);
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+    }
+
+    .bb-recap-rail-list li {
         scroll-snap-align: start;
     }
 

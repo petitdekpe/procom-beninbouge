@@ -73,6 +73,7 @@ final class AppExtension extends AbstractExtension implements ResetInterface
             HomeSectionType::LatestNews => 'Dernières actualités',
             HomeSectionType::PopularArticles => 'Articles populaires',
             HomeSectionType::Videos => 'Vidéos',
+            HomeSectionType::Recap => 'Récap (vidéos verticales)',
             HomeSectionType::Podcasts => 'Podcasts',
             HomeSectionType::CategoryHighlight => 'Rubrique en avant',
             HomeSectionType::Contact => 'Nous joindre',

@@ -8,6 +8,7 @@ enum HomeSectionType: string
     case LatestNews = 'latest_news';
     case PopularArticles = 'popular_articles';
     case Videos = 'videos';
+    case Recap = 'recap';
     case Podcasts = 'podcasts';
     case CategoryHighlight = 'category_highlight';
     case Contact = 'contact';

@@ -1,0 +1,42 @@
+{# Section « Récap » de l'accueil : articles vidéo au format mobile, en cartes
+   verticales 9:16 (visuel, bouton lecture, rubrique, titre). Chaque carte
+   mène à l'article, où la vidéo s'affiche à gauche et le texte à droite.
+   Défilement horizontal sur mobile.
+   Attend : recaps (list<Article>, déjà filtrés sur les Récap publiés avec vidéo).
+   Rien n'est affiché sans Récap. Styles : .bb-recap-rail* dans assets/styles/home.css. #}
+{% if recaps|length > 0 %}
+    {% set newSince = date('-3 days') %}
+    <section id="recap" class="bb-container bb-section bb-recap-rail" aria-labelledby="recap-title">
+        <div class="bb-sec-head">
+            <div>
+                <span class="bb-kicker">L'essentiel en vidéo</span>
+                <h2 id="recap-title" class="bb-display bb-h2">Récap</h2>
+            </div>
+        </div>
+
+        <ul class="bb-recap-rail-list" data-controller="impression-tracker" data-impression-tracker-context-value="home_recap">
+            {% for article in recaps %}
+                {% set thumb = article.videoThumbnail %}
+                <li>
+                    <a href="{{ path('app_article_show', { slug: article.slug }) }}" class="bb-recap-card" data-impression-tracker-target="card" data-article-id="{{ article.id }}"{% if article.category %} style="--bb-cat:{{ article.category.color }}"{% endif %}>
+                        <span class="bb-recap-card-media">
+                            {% if thumb %}<img src="{{ thumb }}" alt="" loading="lazy">{% endif %}
+                        </span>
+                        {% if article.publishedAt and article.publishedAt > newSince %}
+                            <span class="bb-chip bb-chip--tomato bb-recap-card-badge">Nouveau</span>
+                        {% endif %}
+                        <span class="bb-recap-card-play" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11.04-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14Z"/></svg>
+                        </span>
+                        <span class="bb-recap-card-body">
+                            {% if article.category %}
+                                <span class="bb-recap-card-cat"><span class="bb-dot" aria-hidden="true"></span>{{ article.category.name }}</span>
+                            {% endif %}
+                            <span class="bb-recap-card-title"><span class="bb-sr-only">Voir le récap : </span>{{ article.title }}</span>
+                        </span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+{% endif %}

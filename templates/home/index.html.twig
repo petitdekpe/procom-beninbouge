@@ -57,6 +57,8 @@
             {% elseif section.type.value == 'popular_articles' and not uneEnabled %}
                 {# Avec « La une », les plus lus sont déjà dans sa grille. #}
                 {{ include('partials/home_sections/_popular_articles.html.twig', { popular: mostRead }) }}
+            {% elseif section.type.value == 'recap' %}
+                {{ include('partials/home_sections/_recap.html.twig', { recaps: recaps }) }}
             {% elseif section.type.value == 'videos' %}
                 {{ include('partials/home_sections/_videos.html.twig', { videos: videos }) }}
             {% elseif section.type.value == 'podcasts' %}

@@ -8,6 +8,7 @@ use App\Service\DocumentLibrary;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
@@ -17,8 +18,11 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 final class DocumentController extends AbstractController
 {
+    private const BOT_PATTERN = '/bot|crawl|spider|slurp|facebookexternalhit|facebookcatalog|whatsapp|telegram|skypeuripreview|embedly|preview|curl|wget|python-requests|headless/i';
+
     #[Route('/documents/{slug}', name: 'app_document_download', methods: ['GET'])]
     public function download(
+        Request $request,
         #[MapEntity(mapping: ['slug' => 'slug'])] Document $document,
         DocumentLibrary $documentLibrary,
         DocumentRepository $documentRepository,
@@ -28,7 +32,11 @@ final class DocumentController extends AbstractController
             throw $this->createNotFoundException('Fichier introuvable.');
         }
 
-        $documentRepository->incrementDownloadCount($document);
+        if ($this->isRealDownload($request)) {
+            $documentRepository->incrementDownloadCount($document);
+        }
+
+        BinaryFileResponse::trustXSendfileTypeHeader();
 
         $response = new BinaryFileResponse($path);
         $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $documentLibrary->downloadFilename($document));
@@ -38,5 +46,24 @@ final class DocumentController extends AbstractController
         $response->headers->set('X-Robots-Tag', 'noindex');
 
         return $response;
+    }
+
+    /**
+     * Ne compte pas les requêtes HEAD ni les robots : moteurs de recherche
+     * et aperçus de liens (WhatsApp, Facebook, X, Telegram…) appellent
+     * l'URL dès qu'elle est partagée, sans que personne ne télécharge.
+     */
+    private function isRealDownload(Request $request): bool
+    {
+        if (!$request->isMethod('GET')) {
+            return false;
+        }
+
+        $userAgent = (string) $request->headers->get('User-Agent');
+        if ('' === $userAgent) {
+            return false;
+        }
+
+        return 1 !== preg_match(self::BOT_PATTERN, $userAgent);
     }
 }

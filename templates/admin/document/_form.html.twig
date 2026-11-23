@@ -17,8 +17,11 @@
             <div class="bo-form-row">
                 <label>Fichier actuel</label>
                 <p class="bo-muted" style="margin:4px 0 0">
-                    <a href="{{ path('app_document_download', { slug: document.slug }) }}">{{ document.originalFilename ?: document.slug }}</a>
+                    <a href="{{ document.filePath }}" download>{{ document.originalFilename ?: document.slug }}</a>
                     · lien : {{ url('app_document_download', { slug: document.slug }) }}
+                </p>
+                <p style="margin:6px 0 0;font-weight:700">
+                    {{ document.downloadCount|number_format(0, ',', ' ') }} téléchargement{{ document.downloadCount > 1 ? 's' }}
                 </p>
             </div>
         {% endif %}

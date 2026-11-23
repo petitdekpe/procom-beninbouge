@@ -31,10 +31,15 @@ final class DocumentController extends AbstractController
     }
 
     #[Route('', name: 'admin_document_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $sort = 'telechargements' === $request->query->get('tri') ? 'downloads' : 'recent';
+
         return $this->render('admin/document/index.html.twig', [
-            'documents' => $this->documentRepository->findBy([], ['id' => 'DESC']),
+            'documents' => $this->documentRepository->findBy([], 'downloads' === $sort
+                ? ['downloadCount' => 'DESC', 'id' => 'DESC']
+                : ['id' => 'DESC']),
+            'sort' => $sort,
         ]);
     }
 

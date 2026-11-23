@@ -3,8 +3,14 @@
 {% block admin_title %}Documents{% endblock %}
 
 {% block admin_body %}
+    {% set totalDownloads = documents|reduce((sum, d) => sum + d.downloadCount, 0) %}
     <div class="bo-page-head">
-        <h1 class="bo-page-title">Documents</h1>
+        <div>
+            <h1 class="bo-page-title">Documents</h1>
+            <p class="bo-muted" style="margin:6px 0 0;font-size:13.5px">
+                {{ documents|length }} document{{ documents|length > 1 ? 's' }} · <strong style="color:var(--sp-black)">{{ totalDownloads|number_format(0, ',', ' ') }}</strong> téléchargement{{ totalDownloads > 1 ? 's' }} au total
+            </p>
+        </div>
         <a href="{{ path('admin_document_new') }}" class="bo-btn bo-btn-accent">+ Nouveau document</a>
     </div>
 
@@ -14,13 +20,17 @@
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.8-3.8"/></svg>
                 <input type="text" data-list-search placeholder="Rechercher des documents">
             </div>
+            <div class="bo-filters">
+                <a href="{{ path('admin_document_index') }}" class="bo-pill {{ sort == 'recent' ? 'active' }}">Plus récents</a>
+                <a href="{{ path('admin_document_index', { tri: 'telechargements' }) }}" class="bo-pill {{ sort == 'downloads' ? 'active' }}">Plus téléchargés</a>
+            </div>
         </div>
 
         <div class="bo-card">
             {% if documents|length > 0 %}
                 <table class="bo-table">
                     <thead>
-                        <tr><th>Nom</th><th>Format</th><th>Taille</th><th>Lien de téléchargement</th><th>Articles</th><th>Téléch.</th><th></th></tr>
+                        <tr><th>Nom</th><th>Format</th><th>Taille</th><th>Lien de téléchargement</th><th>Articles</th><th style="text-align:right">Téléchargements</th><th></th></tr>
                     </thead>
                     <tbody>
                         {% for document in documents %}
@@ -47,9 +57,10 @@
                                         <a href="{{ path('admin_article_edit', { id: article.id }) }}" style="display:block;font-size:12.5px">{{ article.title|length > 40 ? article.title|slice(0, 40) ~ '…' : article.title }}</a>
                                     {% else %}—{% endfor %}
                                 </td>
-                                <td class="bo-muted">{{ document.downloadCount }}</td>
+                                <td style="text-align:right;font-weight:800;font-size:15px;font-variant-numeric:tabular-nums">{{ document.downloadCount|number_format(0, ',', ' ') }}</td>
                                 <td style="text-align:right;white-space:nowrap">
-                                    <a href="{{ downloadUrl }}" class="bo-btn bo-btn-muted">Télécharger</a>
+                                    {# Lien direct vers le fichier : un téléchargement depuis l'admin ne gonfle pas le compteur. #}
+                                    <a href="{{ document.filePath }}" class="bo-btn bo-btn-muted" download>Télécharger</a>
                                     <a href="{{ path('admin_document_edit', { id: document.id }) }}" class="bo-btn bo-btn-muted">Modifier</a>
                                     <form method="post" action="{{ path('admin_document_delete', { id: document.id }) }}" style="display:inline" onsubmit="return confirm('Supprimer ce document ? Son lien de téléchargement ne fonctionnera plus et il sera retiré des articles qui le joignent.');">
                                         <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">

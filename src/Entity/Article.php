@@ -189,9 +189,23 @@ class Article implements SoftDeletableInterface
     #[ORM\JoinTable(name: 'article_tag', options: ['engine' => 'InnoDB'])]
     private Collection $tags;
 
+    /**
+     * Documents de la documenthèque joints à l'article, proposés au
+     * téléchargement en bas de la page publique.
+     *
+     * @var Collection<int, Document>
+     */
+    #[ApiProperty(readable: false, writable: false)]
+    #[ORM\ManyToMany(targetEntity: Document::class, inversedBy: 'articles')]
+    #[ORM\JoinTable(name: 'article_document', options: ['engine' => 'InnoDB'])]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(onDelete: 'CASCADE')]
+    private Collection $documents;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
+        $this->documents = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -503,6 +517,30 @@ class Article implements SoftDeletableInterface
     public function removeTag(Tag $tag): static
     {
         $this->tags->removeElement($tag);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Document>
+     */
+    public function getDocuments(): Collection
+    {
+        return $this->documents;
+    }
+
+    public function addDocument(Document $document): static
+    {
+        if (!$this->documents->contains($document)) {
+            $this->documents->add($document);
+        }
+
+        return $this;
+    }
+
+    public function removeDocument(Document $document): static
+    {
+        $this->documents->removeElement($document);
 
         return $this;
     }

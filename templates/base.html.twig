@@ -35,6 +35,40 @@
             <link rel="preload" href="{{ asset('fonts/tt-commons-regular.woff2') }}" as="font" type="font/woff2" crossorigin>
         {% endblock %}
 
+        {% block analytics %}
+            {# Search Console + Google Analytics 4, réglés dans Paramètres généraux.
+               Bloc vidé par l'admin (admin/layout.html.twig) pour ne pas mesurer
+               le back-office. GA n'est chargé qu'en prod pour ne pas fausser les stats. #}
+            {% if baseSettings.googleSiteVerification %}
+                <meta name="google-site-verification" content="{{ baseSettings.googleSiteVerification }}">
+            {% endif %}
+            {% if baseSettings.googleAnalyticsId and app.environment == 'prod' %}
+                <script async src="https://www.googletagmanager.com/gtag/js?id={{ baseSettings.googleAnalyticsId|url_encode }}"></script>
+                <script>
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    // Turbo Drive change de page sans recharger : la page vue
+                    // automatique de gtag ne compterait que la première. On la
+                    // coupe et on envoie un page_view à chaque turbo:load (qui
+                    // se déclenche aussi au chargement initial). Le garde évite
+                    // d'empiler l'écouteur si Turbo réévalue ce script.
+                    if (!window.bbAnalytics) {
+                        window.bbAnalytics = { lastUrl: document.referrer };
+                        gtag('js', new Date());
+                        gtag('config', {{ baseSettings.googleAnalyticsId|json_encode|raw }}, { send_page_view: false });
+                        document.addEventListener('turbo:load', function () {
+                            gtag('event', 'page_view', {
+                                page_location: location.href,
+                                page_title: document.title,
+                                page_referrer: window.bbAnalytics.lastUrl
+                            });
+                            window.bbAnalytics.lastUrl = location.href;
+                        });
+                    }
+                </script>
+            {% endif %}
+        {% endblock %}
+
         {% block stylesheets %}
         {% endblock %}
 

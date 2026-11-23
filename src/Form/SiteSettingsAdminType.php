@@ -97,6 +97,19 @@ final class SiteSettingsAdminType extends AbstractType
                 'help' => 'Lien complet, ex. https://wa.me/22900000000',
             ])
 
+            // ----- Référencement & mesure d'audience -----
+            ->add('googleAnalyticsId', TextType::class, [
+                'label' => 'Identifiant Google Analytics 4',
+                'required' => false,
+                'attr' => ['placeholder' => 'G-XXXXXXXXXX'],
+                'help' => 'Google Analytics → Administration → Flux de données → Web. Vide : aucun suivi. Le suivi ne s\'applique qu\'aux pages publiques, pas à l\'administration.',
+            ])
+            ->add('googleSiteVerification', TextType::class, [
+                'label' => 'Code de validation Google Search Console',
+                'required' => false,
+                'help' => 'Search Console → Ajouter une propriété → Préfixe d\'URL → Balise HTML. Vous pouvez coller la balise entière, seule la valeur est conservée.',
+            ])
+
             // ----- Maintenance -----
             ->add('maintenanceMode', CheckboxType::class, [
                 'label' => 'Activer le mode maintenance',

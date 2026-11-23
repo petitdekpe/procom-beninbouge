@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Nouveau document{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-card" style="padding:28px">
+        {% include 'admin/document/_form.html.twig' with { heading: 'Ajouter un document' } %}
+    </div>
+{% endblock %}

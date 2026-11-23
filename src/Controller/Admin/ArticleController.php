@@ -11,6 +11,7 @@ use App\Form\ArticleAdminType;
 use App\Repository\ArticleRepository;
 use App\Repository\ArticleRevisionRepository;
 use App\Service\ArticleSaver;
+use App\Service\DocumentLibrary;
 use App\Service\EditorProfileProvisioner;
 use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,6 +33,7 @@ final class ArticleController extends AbstractController
         private ArticleSaver $articleSaver,
         private EditorProfileProvisioner $editorProfileProvisioner,
         private ImageUploader $imageUploader,
+        private DocumentLibrary $documentLibrary,
         private EntityManagerInterface $entityManager,
     ) {
     }
@@ -68,6 +70,7 @@ final class ArticleController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $uploadedCover = $this->handleCoverImageUpload($article, $form);
+            $this->handleDocumentUploads($article, $form);
 
             $wasPublished = $this->articleSaver->applyDefaults($article);
             $this->articleSaver->save($article, $wasPublished);
@@ -97,6 +100,7 @@ final class ArticleController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $uploadedCover = $this->handleCoverImageUpload($article, $form);
+            $this->handleDocumentUploads($article, $form);
 
             $wasPublished = $this->articleSaver->applyDefaults($article);
             $this->articleSaver->save($article, $wasPublished);
@@ -246,6 +250,19 @@ final class ArticleController extends AbstractController
         $article->setCoverImage($this->imageUploader->upload($file));
 
         return true;
+    }
+
+    /**
+     * Each file uploaded from the article form becomes a Document of the
+     * documenthèque (named after the file) and is attached to the article.
+     */
+    private function handleDocumentUploads(Article $article, FormInterface $form): void
+    {
+        foreach ((array) $form->get('documentFiles')->getData() as $file) {
+            if ($file instanceof UploadedFile) {
+                $article->addDocument($this->documentLibrary->createFromUpload($file));
+            }
+        }
     }
 
     /**

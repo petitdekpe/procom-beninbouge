@@ -542,6 +542,78 @@
     text-align: left;
 }
 
+/* Documents joints à un article (documenthèque) */
+.bb-docs {
+    margin-top: 36px;
+}
+
+.bb-docs-title {
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    color: var(--bb-ink-muted);
+}
+
+.bb-docs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.bb-prose .bb-docs-list li {
+    margin: 0;
+}
+
+.bb-doc {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 1px solid var(--bb-line);
+    border-radius: var(--bb-r-md);
+    color: var(--bb-ink);
+    text-decoration: none;
+}
+
+.bb-doc:hover {
+    border-color: var(--bb-hover);
+    background: var(--bb-surface-2);
+}
+
+.bb-doc-ext {
+    flex: none;
+    min-width: 44px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    background: var(--bb-ink);
+    color: var(--bb-bg);
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.bb-doc-name {
+    flex: 1;
+    min-width: 0;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.bb-doc-size {
+    flex: none;
+    font-size: 13px;
+    color: var(--bb-ink-muted);
+}
+
+.bb-doc svg {
+    flex: none;
+}
+
 .bb-tags {
     display: flex;
     flex-wrap: wrap;

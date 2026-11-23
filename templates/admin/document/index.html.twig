@@ -1,0 +1,89 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Documents{% endblock %}
+
+{% block admin_body %}
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Documents</h1>
+        <a href="{{ path('admin_document_new') }}" class="bo-btn bo-btn-accent">+ Nouveau document</a>
+    </div>
+
+    <div data-list-root>
+        <div class="bo-toolbar">
+            <div class="bo-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.8-3.8"/></svg>
+                <input type="text" data-list-search placeholder="Rechercher des documents">
+            </div>
+        </div>
+
+        <div class="bo-card">
+            {% if documents|length > 0 %}
+                <table class="bo-table">
+                    <thead>
+                        <tr><th>Nom</th><th>Format</th><th>Taille</th><th>Lien de téléchargement</th><th>Articles</th><th>Téléch.</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for document in documents %}
+                            {% set downloadUrl = url('app_document_download', { slug: document.slug }) %}
+                            <tr data-search="{{ (document.name ~ ' ' ~ document.originalFilename ~ ' ' ~ document.slug)|lower }}">
+                                <td>
+                                    <div style="font-weight:700">{{ document.name }}</div>
+                                    <div class="bo-muted" style="font-size:12px">{{ document.originalFilename }} · ajouté le {{ document.createdAt|date('d/m/Y') }}</div>
+                                </td>
+                                <td><span class="bo-format-badge">{{ document.extension ?: '—' }}</span></td>
+                                <td class="bo-muted" style="white-space:nowrap">
+                                    {% if document.size is not null %}
+                                        {% if document.size >= 1048576 %}{{ (document.size / 1048576)|number_format(1, ',', ' ') }} Mo{% else %}{{ (document.size / 1024)|round(0, 'ceil') }} Ko{% endif %}
+                                    {% else %}—{% endif %}
+                                </td>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:8px">
+                                        <input type="text" readonly value="{{ downloadUrl }}" class="bo-select" style="min-width:220px;flex:1;font-size:12.5px" onclick="this.select()" aria-label="Lien de téléchargement de {{ document.name }}">
+                                        <button type="button" class="bo-btn bo-btn-muted bo-btn-sm" data-copy-link="{{ downloadUrl }}">Copier</button>
+                                    </div>
+                                </td>
+                                <td class="bo-muted">
+                                    {% for article in document.articles %}
+                                        <a href="{{ path('admin_article_edit', { id: article.id }) }}" style="display:block;font-size:12.5px">{{ article.title|length > 40 ? article.title|slice(0, 40) ~ '…' : article.title }}</a>
+                                    {% else %}—{% endfor %}
+                                </td>
+                                <td class="bo-muted">{{ document.downloadCount }}</td>
+                                <td style="text-align:right;white-space:nowrap">
+                                    <a href="{{ downloadUrl }}" class="bo-btn bo-btn-muted">Télécharger</a>
+                                    <a href="{{ path('admin_document_edit', { id: document.id }) }}" class="bo-btn bo-btn-muted">Modifier</a>
+                                    <form method="post" action="{{ path('admin_document_delete', { id: document.id }) }}" style="display:inline" onsubmit="return confirm('Supprimer ce document ? Son lien de téléchargement ne fonctionnera plus et il sera retiré des articles qui le joignent.');">
+                                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                                        <button type="submit" class="bo-btn bo-btn-danger">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="bo-empty">Aucun document pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('[data-copy-link]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var link = button.getAttribute('data-copy-link');
+                var done = function () {
+                    var label = button.textContent;
+                    button.textContent = 'Copié ✓';
+                    setTimeout(function () { button.textContent = label; }, 1600);
+                };
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(link).then(done);
+                } else {
+                    var input = button.parentNode.querySelector('input');
+                    input.select();
+                    document.execCommand('copy');
+                    done();
+                }
+            });
+        });
+    </script>
+{% endblock %}

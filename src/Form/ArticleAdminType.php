@@ -5,8 +5,11 @@ namespace App\Form;
 use App\Entity\Article;
 use App\Entity\Author;
 use App\Entity\Category;
+use App\Entity\Document;
 use App\Entity\Enum\ArticleStatus;
 use App\Entity\Tag;
+use App\Service\DocumentLibrary;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\AbstractType;
@@ -18,6 +21,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\All;
 use Symfony\Component\Validator\Constraints\File;
 
 /**
@@ -84,6 +88,26 @@ final class ArticleAdminType extends AbstractType
                 'choice_label' => 'name',
                 'multiple' => true,
                 'required' => false,
+            ])
+            ->add('documents', EntityType::class, [
+                'label' => 'Documents joints',
+                'class' => Document::class,
+                'choice_label' => fn (Document $document) => $document->getName().' ('.$document->getExtension().')',
+                'query_builder' => fn (EntityRepository $repository) => $repository->createQueryBuilder('d')->orderBy('d.name', 'ASC'),
+                'multiple' => true,
+                'required' => false,
+                'by_reference' => false,
+                'help' => 'Choisissez dans la documenthèque (Ctrl/Cmd + clic pour en sélectionner plusieurs). Ils seront proposés au téléchargement en bas de l\'article.',
+            ])
+            ->add('documentFiles', FileType::class, [
+                'label' => 'Ou téléversez de nouveaux documents',
+                'required' => false,
+                'mapped' => false,
+                'multiple' => true,
+                'help' => DocumentLibrary::ALLOWED_FORMATS_LABEL.', '.str_replace('M', ' Mo', DocumentLibrary::MAX_SIZE).' maximum chacun. Ajoutés à la documenthèque sous le nom du fichier (renommables depuis Documents).',
+                'constraints' => [
+                    new All([DocumentLibrary::fileConstraint()]),
+                ],
             ])
             ->add('featured', CheckboxType::class, ['label' => 'Mis en avant (À la une)', 'required' => false])
             ->add('pinned', CheckboxType::class, ['label' => 'Épinglé (bandeau alerte)', 'required' => false])

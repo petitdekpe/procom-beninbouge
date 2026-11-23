@@ -110,6 +110,19 @@ class SiteSettings
     #[Assert\Url]
     private ?string $whatsappUrl = null;
 
+    // ----- Référencement & mesure d'audience -----
+    // Rendus dans templates/base.html.twig (pages publiques uniquement).
+
+    /** Identifiant de mesure Google Analytics 4, ex. G-XXXXXXXXXX. Vide : pas de suivi. */
+    #[ORM\Column(length: 32, nullable: true)]
+    #[Assert\Regex(pattern: '/^G-[A-Z0-9]+$/', message: 'Format attendu : G-XXXXXXXXXX (identifiant de mesure GA4).')]
+    private ?string $googleAnalyticsId = null;
+
+    /** Jeton de la balise meta google-site-verification (Google Search Console). */
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Regex(pattern: '/^[A-Za-z0-9_-]+$/', message: 'Collez uniquement la valeur de content="…" fournie par Search Console.')]
+    private ?string $googleSiteVerification = null;
+
     // ----- Annonces & Opportunités (tarifs, en FCFA par jour d'affichage) -----
     // Voir App\Service\AnnouncementPricing. Valeurs par défaut provisoires,
     // à ajuster dans l'admin (Réglages → Tarifs des annonces).
@@ -353,6 +366,39 @@ class SiteSettings
     public function setWhatsappUrl(?string $whatsappUrl): static
     {
         $this->whatsappUrl = $whatsappUrl;
+
+        return $this;
+    }
+
+    public function getGoogleAnalyticsId(): ?string
+    {
+        return $this->googleAnalyticsId;
+    }
+
+    public function setGoogleAnalyticsId(?string $googleAnalyticsId): static
+    {
+        $googleAnalyticsId = $googleAnalyticsId !== null ? strtoupper(trim($googleAnalyticsId)) : null;
+        $this->googleAnalyticsId = $googleAnalyticsId ?: null;
+
+        return $this;
+    }
+
+    public function getGoogleSiteVerification(): ?string
+    {
+        return $this->googleSiteVerification;
+    }
+
+    /**
+     * Accepte le jeton seul ou la balise complète copiée depuis Search Console
+     * (<meta name="google-site-verification" content="…" />) : on n'en garde que la valeur.
+     */
+    public function setGoogleSiteVerification(?string $googleSiteVerification): static
+    {
+        $value = $googleSiteVerification !== null ? trim($googleSiteVerification) : null;
+        if ($value && preg_match('/content\s*=\s*["\']([^"\']+)["\']/i', $value, $m)) {
+            $value = trim($m[1]);
+        }
+        $this->googleSiteVerification = $value ?: null;
 
         return $this;
     }

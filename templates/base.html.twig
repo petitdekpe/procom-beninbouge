@@ -57,6 +57,12 @@
                         gtag('js', new Date());
                         gtag('config', {{ baseSettings.googleAnalyticsId|json_encode|raw }}, { send_page_view: false });
                         document.addEventListener('turbo:load', function () {
+                            // Ce script survit aux visites Turbo : en passant d'une
+                            // page publique à l'admin (body sans .bb-site), on coupe
+                            // tout envoi à GA, y compris ses événements automatiques.
+                            var isPublic = document.body.classList.contains('bb-site');
+                            window['ga-disable-' + {{ baseSettings.googleAnalyticsId|json_encode|raw }}] = !isPublic;
+                            if (!isPublic) { return; }
                             gtag('event', 'page_view', {
                                 page_location: location.href,
                                 page_title: document.title,

@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:20px;align-items:start">
+    <div class="bo-grid-2" style="display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:20px;align-items:start">
         <div class="bo-card" style="padding:24px">
             <p class="bo-muted" style="margin:0 0 6px">{{ announcement.reference }} · {{ announcement.category.label }} · {{ announcement.organization }}</p>
             {% if announcement.location or announcement.deadline %}

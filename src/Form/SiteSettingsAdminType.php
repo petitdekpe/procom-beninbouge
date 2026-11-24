@@ -102,7 +102,7 @@ final class SiteSettingsAdminType extends AbstractType
                 'label' => 'Identifiant Google Analytics 4',
                 'required' => false,
                 'attr' => ['placeholder' => 'G-XXXXXXXXXX'],
-                'help' => 'Google Analytics → Administration → Flux de données → Web. Vide : aucun suivi. Le suivi ne s\'applique qu\'aux pages publiques, pas à l\'administration.',
+                'help' => 'Google Analytics → Administration → Flux de données → Web. Vide : aucun suivi. Le suivi ne s\'applique qu\'aux pages publiques, pas à l\'administration. Dans les mesures améliorées du flux, décochez « Modifications de page en fonction des événements de l\'historique du navigateur », sinon les pages vues sont comptées en double.',
             ])
             ->add('googleSiteVerification', TextType::class, [
                 'label' => 'Code de validation Google Search Console',

@@ -1,0 +1,105 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block admin_title %}Performance de la régie{% endblock %}
+
+{% block admin_body %}
+    {% set kpiLabel = 'font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px' %}
+    {% set kpiValue = "font-family:'Anton',system-ui,sans-serif;font-size:32px;margin-top:6px" %}
+    {% set h2Style = 'font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 14px' %}
+
+    <div class="bo-page-head">
+        <h1 class="bo-page-title">Performance de la régie</h1>
+    </div>
+
+    <div class="bo-toolbar">
+        <div class="bo-filters">
+            {% for value, label in periods %}
+                <a href="{{ path('admin_regie_stats', value != 30 ? { jours: value } : {}) }}" class="bo-pill {{ days == value ? 'active' : '' }}">{{ label }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <p class="bo-muted" style="margin:-6px 0 22px;font-size:14px">
+        Un <strong>affichage</strong> est compté quand au moins la moitié du contenu reste visible près d'une seconde, une fois par page chargée. Un <strong>clic</strong> est un clic sur le contenu. Les robots sont ignorés, et la mesure ne couvre que la période écoulée depuis sa mise en place.
+    </p>
+
+    {# ===== PUBLICITÉS DU SLIDER ===== #}
+    <h2 style="{{ h2Style }}">Publicités du slider de l'accueil</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:18px">
+        <div class="bo-card" style="padding:18px"><div class="bo-muted" style="{{ kpiLabel }}">Affichages</div><div style="{{ kpiValue }}">{{ bannerTotals.impressions|format_number }}</div></div>
+        <div class="bo-card" style="padding:18px"><div class="bo-muted" style="{{ kpiLabel }}">Clics</div><div style="{{ kpiValue }}">{{ bannerTotals.clicks|format_number }}</div></div>
+        <div class="bo-card" style="padding:18px"><div class="bo-muted" style="{{ kpiLabel }}">Taux de clic</div><div style="{{ kpiValue }}">{{ bannerTotals.ctr is not null ? bannerTotals.ctr|number_format(1, ',', ' ') ~ ' %' : '—' }}</div></div>
+    </div>
+
+    <div class="bo-card" style="margin-bottom:34px">
+        {% if banners|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr><th>Publicité</th><th>Annonceur</th><th>Statut</th><th style="text-align:right">Affichages</th><th style="text-align:right">Lecteurs</th><th style="text-align:right">Clics</th><th style="text-align:right">Taux de clic</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in banners %}
+                        <tr>
+                            <td>
+                                <div class="bo-row-title">
+                                    <img src="{{ row.banner.imageUrl }}" alt="" style="width:96px;aspect-ratio:16/5;object-fit:cover;border-radius:7px;background:#eee;flex:none">
+                                    <div>
+                                        <a href="{{ path('admin_home_banner_edit', { id: row.banner.id }) }}" style="font-weight:700">{{ row.banner.title }}</a>
+                                        <div class="bo-muted" style="font-size:11.5px;font-weight:600">{{ row.banner.reference }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ row.banner.advertiser }}</td>
+                            <td class="bo-muted">{{ row.banner.statusLabel }}</td>
+                            <td style="text-align:right">{{ row.impressions|format_number }}</td>
+                            <td style="text-align:right" class="bo-muted">{{ row.readers|format_number }}</td>
+                            <td style="text-align:right">{{ row.clicks|format_number }}</td>
+                            <td style="text-align:right;font-weight:700">{{ row.ctr is not null ? row.ctr|number_format(1, ',', ' ') ~ ' %' : '—' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">Aucun affichage de publicité sur la période.</p>
+        {% endif %}
+    </div>
+
+    {# ===== ANNONCES ===== #}
+    <h2 style="{{ h2Style }}">Annonces</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:18px">
+        <div class="bo-card" style="padding:18px"><div class="bo-muted" style="{{ kpiLabel }}">Affichages (cartes, pop-up)</div><div style="{{ kpiValue }}">{{ announcementTotals.impressions|format_number }}</div></div>
+        <div class="bo-card" style="padding:18px"><div class="bo-muted" style="{{ kpiLabel }}">Clics vers l'annonce</div><div style="{{ kpiValue }}">{{ announcementTotals.clicks|format_number }}</div></div>
+        <div class="bo-card" style="padding:18px"><div class="bo-muted" style="{{ kpiLabel }}">Taux de clic</div><div style="{{ kpiValue }}">{{ announcementTotals.ctr is not null ? announcementTotals.ctr|number_format(1, ',', ' ') ~ ' %' : '—' }}</div></div>
+        <div class="bo-card" style="padding:18px"><div class="bo-muted" style="{{ kpiLabel }}">Pages vues</div><div style="{{ kpiValue }}">{{ announcementTotals.views|format_number }}</div></div>
+        <div class="bo-card" style="padding:18px"><div class="bo-muted" style="{{ kpiLabel }}">Contacts et candidatures</div><div style="{{ kpiValue }}">{{ announcementTotals.actions|format_number }}</div></div>
+    </div>
+
+    <div class="bo-card">
+        {% if announcements|length > 0 %}
+            <table class="bo-table">
+                <thead>
+                    <tr><th>Annonce</th><th>Organisation</th><th style="text-align:right">Affichages</th><th style="text-align:right">Clics</th><th style="text-align:right">Taux de clic</th><th style="text-align:right">Pages vues</th><th style="text-align:right">Lecteurs</th><th style="text-align:right">Contacts</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in announcements %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('admin_announcement_show', { id: row.announcement.id }) }}" style="font-weight:700">{{ row.announcement.title }}</a>
+                                <div class="bo-muted" style="font-size:11.5px;font-weight:600">{{ row.announcement.reference }}{{ row.announcement.withHomeCard ? ' · carte accueil' }}{{ row.announcement.withPopup ? ' · pop-up' }}</div>
+                            </td>
+                            <td>{{ row.announcement.organization }}</td>
+                            <td style="text-align:right">{{ row.impressions|format_number }}</td>
+                            <td style="text-align:right">{{ row.clicks|format_number }}</td>
+                            <td style="text-align:right;font-weight:700">{{ row.ctr is not null ? row.ctr|number_format(1, ',', ' ') ~ ' %' : '—' }}</td>
+                            <td style="text-align:right">{{ row.views|format_number }}</td>
+                            <td style="text-align:right" class="bo-muted">{{ row.readers|format_number }}</td>
+                            <td style="text-align:right">{{ row.actions|format_number }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="bo-empty">Aucune annonce affichée ni consultée sur la période.</p>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -16,6 +16,7 @@
             {% for announcement in announcements %}
                 <article class="bb-ann-popup-slide"
                          data-announcement-popup-target="slide"
+                         data-controller="ad-tracker" data-ad-tracker-target-value="announcement" data-ad-tracker-id-value="{{ announcement.id }}" data-ad-tracker-placement-value="popup"
                          data-key="{{ announcement.reference }}"
                          {% if announcements|length > 1 %}role="group" aria-roledescription="diapositive" aria-label="{{ loop.index }} sur {{ announcements|length }}"{% endif %}>
                     {% if announcement.image %}

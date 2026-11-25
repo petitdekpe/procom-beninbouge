@@ -123,6 +123,56 @@ class SiteSettings
     #[Assert\Regex(pattern: '/^[A-Za-z0-9_-]+$/', message: 'Collez uniquement la valeur de content="…" fournie par Search Console.')]
     private ?string $googleSiteVerification = null;
 
+    // ----- Page « Audience » (kit média pour annonceurs) -----
+    // Chiffres que le site ne peut pas mesurer lui-même (réseaux sociaux,
+    // profil des lecteurs). Tous optionnels : une valeur vide masque le
+    // bloc correspondant sur /audience (App\Controller\AudienceController).
+
+    /** Portée mensuelle cumulée, tous canaux confondus. */
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
+    private ?int $audienceMonthlyReach = null;
+
+    /** Part des lecteurs de moins de 35 ans, en %. */
+    #[ORM\Column(nullable: true)]
+    #[Assert\Range(min: 0, max: 100)]
+    private ?int $audienceUnder35Percent = null;
+
+    /** Part des lecteurs situés au Bénin, en %. */
+    #[ORM\Column(nullable: true)]
+    #[Assert\Range(min: 0, max: 100)]
+    private ?int $audienceBeninPercent = null;
+
+    /** Part des lecteurs situés dans la diaspora, en %. */
+    #[ORM\Column(nullable: true)]
+    #[Assert\Range(min: 0, max: 100)]
+    private ?int $audienceDiasporaPercent = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
+    private ?int $facebookFollowers = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
+    private ?int $instagramFollowers = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
+    private ?int $youtubeSubscribers = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
+    private ?int $twitterFollowers = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
+    private ?int $whatsappMembers = null;
+
+    /** Origine et date des chiffres ci-dessus, ex. « Meta Insights et YouTube Studio, octobre 2026 ». */
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    private ?string $audienceSource = null;
+
     // ----- Annonces & Opportunités (tarifs, en FCFA par jour d'affichage) -----
     // Voir App\Service\AnnouncementPricing. Valeurs par défaut provisoires,
     // à ajuster dans l'admin (Réglages → Tarifs des annonces).
@@ -399,6 +449,127 @@ class SiteSettings
             $value = trim($m[1]);
         }
         $this->googleSiteVerification = $value ?: null;
+
+        return $this;
+    }
+
+    public function getAudienceMonthlyReach(): ?int
+    {
+        return $this->audienceMonthlyReach;
+    }
+
+    public function setAudienceMonthlyReach(?int $value): static
+    {
+        $this->audienceMonthlyReach = $value;
+
+        return $this;
+    }
+
+    public function getAudienceUnder35Percent(): ?int
+    {
+        return $this->audienceUnder35Percent;
+    }
+
+    public function setAudienceUnder35Percent(?int $value): static
+    {
+        $this->audienceUnder35Percent = $value;
+
+        return $this;
+    }
+
+    public function getAudienceBeninPercent(): ?int
+    {
+        return $this->audienceBeninPercent;
+    }
+
+    public function setAudienceBeninPercent(?int $value): static
+    {
+        $this->audienceBeninPercent = $value;
+
+        return $this;
+    }
+
+    public function getAudienceDiasporaPercent(): ?int
+    {
+        return $this->audienceDiasporaPercent;
+    }
+
+    public function setAudienceDiasporaPercent(?int $value): static
+    {
+        $this->audienceDiasporaPercent = $value;
+
+        return $this;
+    }
+
+    public function getFacebookFollowers(): ?int
+    {
+        return $this->facebookFollowers;
+    }
+
+    public function setFacebookFollowers(?int $value): static
+    {
+        $this->facebookFollowers = $value;
+
+        return $this;
+    }
+
+    public function getInstagramFollowers(): ?int
+    {
+        return $this->instagramFollowers;
+    }
+
+    public function setInstagramFollowers(?int $value): static
+    {
+        $this->instagramFollowers = $value;
+
+        return $this;
+    }
+
+    public function getYoutubeSubscribers(): ?int
+    {
+        return $this->youtubeSubscribers;
+    }
+
+    public function setYoutubeSubscribers(?int $value): static
+    {
+        $this->youtubeSubscribers = $value;
+
+        return $this;
+    }
+
+    public function getTwitterFollowers(): ?int
+    {
+        return $this->twitterFollowers;
+    }
+
+    public function setTwitterFollowers(?int $value): static
+    {
+        $this->twitterFollowers = $value;
+
+        return $this;
+    }
+
+    public function getWhatsappMembers(): ?int
+    {
+        return $this->whatsappMembers;
+    }
+
+    public function setWhatsappMembers(?int $value): static
+    {
+        $this->whatsappMembers = $value;
+
+        return $this;
+    }
+
+    public function getAudienceSource(): ?string
+    {
+        return $this->audienceSource;
+    }
+
+    public function setAudienceSource(?string $value): static
+    {
+        $value = $value !== null ? trim($value) : null;
+        $this->audienceSource = $value ?: null;
 
         return $this;
     }

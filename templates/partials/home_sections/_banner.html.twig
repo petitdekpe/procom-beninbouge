@@ -11,7 +11,9 @@
              data-controller="banner-slider" data-banner-slider-interval-value="5500">
         <div class="bb-banner-track" data-banner-slider-target="track" tabindex="0">
             {% for banner in banners %}
-                <div class="bb-banner-slide" data-banner-slider-target="slide" role="group" aria-roledescription="diapositive" aria-label="{{ loop.index }} sur {{ total }}">
+                <div class="bb-banner-slide" data-banner-slider-target="slide"
+                     data-controller="ad-tracker" data-ad-tracker-target-value="banner" data-ad-tracker-id-value="{{ banner.id }}" data-ad-tracker-placement-value="home_slider"
+                     role="group" aria-roledescription="diapositive" aria-label="{{ loop.index }} sur {{ total }}">
                     {% if banner.linkUrl %}
                         <a href="{{ banner.linkUrl }}" class="bb-banner-link"{% if banner.externalLink %} target="_blank" rel="noopener"{% endif %}>
                             <img src="{{ banner.imageUrl }}" alt="{{ banner.title }}"{% if loop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>

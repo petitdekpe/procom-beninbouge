@@ -6,6 +6,7 @@ use App\Entity\SiteSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -108,6 +109,28 @@ final class SiteSettingsAdminType extends AbstractType
                 'label' => 'Code de validation Google Search Console',
                 'required' => false,
                 'help' => 'Search Console → Ajouter une propriété → Préfixe d\'URL → Balise HTML. Vous pouvez coller la balise entière, seule la valeur est conservée.',
+            ])
+
+            // ----- Page Audience -----
+            ->add('audienceMonthlyReach', IntegerType::class, [
+                'label' => 'Portée mensuelle (tous canaux)',
+                'required' => false,
+                'attr' => ['min' => 0],
+                'help' => 'Personnes touchées par mois, à reprendre de vos outils de statistiques. Vide : le chiffre n\'est pas affiché.',
+            ])
+            ->add('audienceUnder35Percent', IntegerType::class, ['label' => 'Lecteurs de moins de 35 ans (%)', 'required' => false, 'attr' => ['min' => 0, 'max' => 100]])
+            ->add('audienceBeninPercent', IntegerType::class, ['label' => 'Lecteurs au Bénin (%)', 'required' => false, 'attr' => ['min' => 0, 'max' => 100]])
+            ->add('audienceDiasporaPercent', IntegerType::class, ['label' => 'Lecteurs dans la diaspora (%)', 'required' => false, 'attr' => ['min' => 0, 'max' => 100]])
+            ->add('facebookFollowers', IntegerType::class, ['label' => 'Abonnés Facebook', 'required' => false, 'attr' => ['min' => 0]])
+            ->add('instagramFollowers', IntegerType::class, ['label' => 'Abonnés Instagram', 'required' => false, 'attr' => ['min' => 0]])
+            ->add('youtubeSubscribers', IntegerType::class, ['label' => 'Abonnés YouTube', 'required' => false, 'attr' => ['min' => 0]])
+            ->add('twitterFollowers', IntegerType::class, ['label' => 'Abonnés X / Twitter', 'required' => false, 'attr' => ['min' => 0]])
+            ->add('whatsappMembers', IntegerType::class, ['label' => 'Membres de la chaîne WhatsApp', 'required' => false, 'attr' => ['min' => 0]])
+            ->add('audienceSource', TextType::class, [
+                'label' => 'Source et date des chiffres',
+                'required' => false,
+                'attr' => ['placeholder' => 'Ex. Meta Insights et YouTube Studio, octobre 2026'],
+                'help' => 'Affichée sous les chiffres : elle les rend vérifiables par les annonceurs.',
             ])
 
             // ----- Maintenance -----

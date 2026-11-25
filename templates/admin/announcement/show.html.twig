@@ -57,6 +57,20 @@
                 {% endif %}
             </div>
 
+            {% if announcement.online or stats %}
+                <div class="bo-card" style="padding:20px">
+                    <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 12px">Performance</h2>
+                    {% if stats %}
+                        <p style="margin:0 0 4px"><strong>{{ stats.views|format_number }}</strong> page{{ stats.views > 1 ? 's' }} vue{{ stats.views > 1 ? 's' }} · {{ stats.readers|format_number }} lecteur{{ stats.readers > 1 ? 's' }}</p>
+                        <p style="margin:0 0 4px"><strong>{{ stats.impressions|format_number }}</strong> affichage{{ stats.impressions > 1 ? 's' }} (cartes, pop-up) · {{ stats.clicks|format_number }} clic{{ stats.clicks > 1 ? 's' }}{% if stats.impressions > 0 %} ({{ (stats.clicks / stats.impressions * 100)|number_format(1, ',', ' ') }} %){% endif %}</p>
+                        <p style="margin:0"><strong>{{ stats.actions|format_number }}</strong> clic{{ stats.actions > 1 ? 's' }} sur un lien de contact ou de candidature</p>
+                    {% else %}
+                        <p class="bo-muted" style="margin:0">Aucune donnée pour l'instant.</p>
+                    {% endif %}
+                    {% if is_granted('stats.view') %}<p style="margin:10px 0 0"><a href="{{ path('admin_regie_stats') }}">Voir toute la régie →</a></p>{% endif %}
+                </div>
+            {% endif %}
+
             <div class="bo-card" style="padding:20px">
                 <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:0 0 12px">Formule et paiement</h2>
                 <p style="margin:0 0 4px">{{ announcement.durationDays }} jours · page Annonces{{ announcement.withHomeCard ? ' · carte accueil' }}{{ announcement.withPopup ? ' · pop-up accueil' }}</p>

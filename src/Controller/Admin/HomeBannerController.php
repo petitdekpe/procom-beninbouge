@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Enum\ActivityAction;
 use App\Entity\HomeBanner;
 use App\Form\HomeBannerAdminType;
+use App\Repository\AdEventRepository;
 use App\Repository\HomeBannerRepository;
 use App\Service\ActivityLogger;
 use App\Service\ImageUploader;
@@ -39,6 +40,7 @@ final class HomeBannerController extends AbstractController
 
     public function __construct(
         private HomeBannerRepository $bannerRepository,
+        private AdEventRepository $adEventRepository,
         private EntityManagerInterface $entityManager,
         private ImageUploader $imageUploader,
         private ActivityLogger $activityLogger,
@@ -55,6 +57,8 @@ final class HomeBannerController extends AbstractController
             'tabs' => self::TABS,
             'currentTab' => $tab,
             'counts' => $this->bannerRepository->countByTab(),
+            // Depuis le début de chaque campagne : c'est ce qui est facturé à l'annonceur.
+            'stats' => $this->adEventRepository->statsByBanner(),
         ]);
     }
 

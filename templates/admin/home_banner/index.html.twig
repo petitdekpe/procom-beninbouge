@@ -9,6 +9,7 @@
             {% if is_granted('home.manage') %}
                 <a href="{{ path('admin_home_section_index') }}" class="bo-btn bo-btn-muted">Emplacement sur l'accueil</a>
             {% endif %}
+            {% if is_granted('stats.view') %}<a href="{{ path('admin_regie_stats') }}" class="bo-btn bo-btn-muted">Performance</a>{% endif %}
             <a href="{{ path('app_home') }}" target="_blank" rel="noopener" class="bo-btn bo-btn-muted">Voir le site</a>
             <a href="{{ path('admin_home_banner_new') }}" class="bo-btn bo-btn-accent">+ Nouvelle publicité</a>
         </div>
@@ -34,6 +35,8 @@
                         <th>Annonceur</th>
                         <th>Période</th>
                         <th>Montant</th>
+                        <th style="text-align:right">Affichages</th>
+                        <th style="text-align:right">Clics</th>
                         <th style="text-align:right">Actions</th>
                     </tr>
                 </thead>
@@ -61,6 +64,9 @@
                                 <div style="font-size:11.5px">{{ banner.durationDays }} j{% if banner.status == 'scheduled' %} · débute le {{ banner.startsAt|date('d/m H:i') }}{% elseif banner.status == 'live' %} · fin {{ banner.endsAt|date('d/m H:i') }}{% endif %}</div>
                             </td>
                             <td class="bo-muted" style="white-space:nowrap">{{ banner.amount > 0 ? banner.amount|format_number ~ ' FCFA' : '—' }}</td>
+                            {% set s = stats[banner.id]|default({ impressions: 0, clicks: 0 }) %}
+                            <td style="text-align:right;white-space:nowrap">{{ s.impressions|format_number }}</td>
+                            <td style="text-align:right;white-space:nowrap">{{ s.clicks|format_number }}{% if s.impressions > 0 %}<div class="bo-muted" style="font-size:11.5px">{{ (s.clicks / s.impressions * 100)|number_format(1, ',', ' ') }} %</div>{% endif %}</td>
                             <td style="text-align:right;white-space:nowrap">
                                 {% if currentTab == 'live' %}
                                     <form method="post" action="{{ path('admin_home_banner_move_up', { id: banner.id }) }}" style="display:inline">

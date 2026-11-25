@@ -8,6 +8,7 @@ use App\Entity\Enum\AnnouncementStatus;
 use App\Entity\User;
 use App\Form\AnnouncementPricingType;
 use App\Form\AnnouncementSubmissionType;
+use App\Repository\AdEventRepository;
 use App\Repository\AnnouncementRepository;
 use App\Repository\SiteSettingsRepository;
 use App\Service\ActivityLogger;
@@ -48,6 +49,7 @@ final class AnnouncementController extends AbstractController
 
     public function __construct(
         private AnnouncementRepository $announcementRepository,
+        private AdEventRepository $adEventRepository,
         private EntityManagerInterface $entityManager,
         private ActivityLogger $activityLogger,
         private ImageUploader $imageUploader,
@@ -185,6 +187,7 @@ final class AnnouncementController extends AbstractController
     {
         return $this->render('admin/announcement/show.html.twig', [
             'announcement' => $announcement,
+            'stats' => $this->adEventRepository->statsByAnnouncement()[$announcement->getId()] ?? null,
         ]);
     }
 

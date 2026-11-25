@@ -1,0 +1,217 @@
+{% extends 'base.html.twig' %}
+
+{# Page « Audience » : kit média pour annonceurs et partenaires, sur le
+   modèle de brands.brut.media/audience (déclaration, grands chiffres,
+   profil des lecteurs, canaux, confiance, appel à nous contacter).
+   Données : App\Controller\AudienceController. Styles : .bb-aud* dans
+   assets/styles/pages.css. Un chiffre vide n'est jamais affiché. #}
+
+{% set audienceUrl = url('app_audience') %}
+{% set audienceDescription = 'Chiffres d\'audience de ' ~ settings.siteName ~ ' : lecteurs, vues, réseaux sociaux et profil du public. Le kit média des annonceurs et partenaires.' %}
+{% set hasProfile = settings.audienceUnder35Percent is not null or settings.audienceBeninPercent is not null or settings.audienceDiasporaPercent is not null %}
+
+{% block title %}Audience | {{ settings.siteName }}{% endblock %}
+
+{% block stylesheets %}
+    {{ include('partials/_seo_meta.html.twig', {
+        ogTitle: 'Audience | ' ~ settings.siteName,
+        metaDescription: audienceDescription,
+        canonicalUrl: audienceUrl,
+        structuredData: {
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            'name': 'Audience de ' ~ settings.siteName,
+            'url': audienceUrl,
+            'description': audienceDescription,
+            'isPartOf': { '@type': 'WebSite', 'name': settings.siteName, 'url': url('app_home') },
+        },
+    }) }}
+{% endblock %}
+
+{% block body %}
+<div class="bb-aud">
+
+    {{ include('partials/_header.html.twig') }}
+
+    {# ===== DÉCLARATION ===== #}
+    <section class="bb-about-hero">
+        <div class="bb-about-inner">
+            <nav class="bb-breadcrumb" aria-label="Fil d'Ariane">
+                <a href="{{ path('app_home') }}">Accueil</a>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page">Audience</span>
+            </nav>
+            <span class="bb-section-badge">Audience</span>
+            <h1 class="bb-aud-statement">{{ settings.siteName }}, le média qui fait <span class="bb-accent-forest">bouger le Bénin</span>.</h1>
+            <p class="bb-section-lead">Ils nous lisent, nous regardent et nous suivent pour comprendre le pays qui se transforme. Voici ce que notre audience représente, chiffres à l'appui.</p>
+        </div>
+    </section>
+
+    {# ===== GRANDS CHIFFRES ===== #}
+    <section class="bb-about-section bb-about-section--flush">
+        <div class="bb-about-inner">
+            <div class="bb-aud-kpis">
+                {% if settings.audienceMonthlyReach %}
+                    <div class="bb-aud-kpi bb-aud-kpi--lead">
+                        <p class="bb-aud-kpi-value">{{ settings.audienceMonthlyReach|format_number }}</p>
+                        <p class="bb-aud-kpi-label">personnes touchées chaque mois, tous canaux confondus</p>
+                    </div>
+                {% endif %}
+                {% if measured.views > 0 %}
+                    <div class="bb-aud-kpi">
+                        <p class="bb-aud-kpi-value">{{ measured.views|format_number }}</p>
+                        <p class="bb-aud-kpi-label">articles lus ces 30 derniers jours</p>
+                    </div>
+                {% endif %}
+                {% if measured.readers > 0 %}
+                    <div class="bb-aud-kpi">
+                        <p class="bb-aud-kpi-value">{{ measured.readers|format_number }}</p>
+                        <p class="bb-aud-kpi-label">lecteurs différents ces 30 derniers jours</p>
+                    </div>
+                {% endif %}
+                {% if settings.audienceUnder35Percent is not null %}
+                    <div class="bb-aud-kpi">
+                        <p class="bb-aud-kpi-value">{{ settings.audienceUnder35Percent }}%</p>
+                        <p class="bb-aud-kpi-label">de notre audience a moins de 35 ans</p>
+                    </div>
+                {% endif %}
+            </div>
+            <p class="bb-aud-source">
+                Lecteurs et vues : mesures de {{ app.request.host }}, 30 derniers jours (lecteurs distincts comptés par cookie, hors visiteurs qui les refusent).
+                {% if settings.audienceSource %}Autres chiffres : {{ settings.audienceSource }}.{% endif %}
+            </p>
+        </div>
+    </section>
+
+    {# ===== PROFIL DES LECTEURS ===== #}
+    {% if hasProfile %}
+        <section class="bb-about-section">
+            <div class="bb-about-inner">
+                <div class="bb-section-head">
+                    <span class="bb-section-badge">Le public</span>
+                    <h2 class="bb-section-title">Qui nous lit</h2>
+                </div>
+                <div class="bb-about-grid-2">
+                    {% if settings.audienceBeninPercent is not null or settings.audienceDiasporaPercent is not null %}
+                        <article class="bb-about-card bb-about-card--navy">
+                            <h3 class="bb-about-card-title">Où ils sont</h3>
+                            {% for row in [
+                                { label: 'Au Bénin', value: settings.audienceBeninPercent },
+                                { label: 'Dans la diaspora', value: settings.audienceDiasporaPercent },
+                            ]|filter(r => r.value is not null) %}
+                                <div class="bb-aud-bar">
+                                    <div class="bb-aud-bar-head"><span>{{ row.label }}</span><strong>{{ row.value }}%</strong></div>
+                                    <div class="bb-aud-bar-track" role="img" aria-label="{{ row.label }} : {{ row.value }} %"><span style="width:{{ row.value }}%"></span></div>
+                                </div>
+                            {% endfor %}
+                        </article>
+                    {% endif %}
+                    {% if settings.audienceUnder35Percent is not null %}
+                        <article class="bb-about-card bb-about-card--gold">
+                            <h3 class="bb-about-card-title">Une audience jeune</h3>
+                            <p class="bb-aud-big">{{ settings.audienceUnder35Percent }}%</p>
+                            <p>de nos lecteurs ont moins de 35 ans : la génération qui consomme, crée et entreprend au Bénin.</p>
+                        </article>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    {# ===== CANAUX ===== #}
+    {% if channels|length > 0 %}
+        <section class="bb-about-section bb-about-section--tinted">
+            <div class="bb-about-inner">
+                <div class="bb-section-head">
+                    <span class="bb-section-badge">Nos canaux</span>
+                    <h2 class="bb-section-title">Là où ils nous suivent</h2>
+                    <p class="bb-section-lead">Un même contenu, présent là où votre public passe sa journée.</p>
+                </div>
+                <div class="bb-aud-channels">
+                    {% for channel in channels %}
+                        {% set tag = channel.url ? 'a' : 'div' %}
+                        <{{ tag }} class="bb-aud-channel"{% if channel.url %} href="{{ channel.url }}" target="_blank" rel="noopener"{% endif %}>
+                            <p class="bb-aud-channel-name">{{ channel.label }}</p>
+                            <p class="bb-aud-channel-value">{{ channel.value|format_number }}</p>
+                            <p class="bb-aud-channel-unit">{{ channel.unit }}</p>
+                        </{{ tag }}>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    {# ===== CONFIANCE ===== #}
+    <section class="bb-about-section">
+        <div class="bb-about-inner">
+            <div class="bb-section-head">
+                <span class="bb-section-badge">Fiabilité</span>
+                <h2 class="bb-section-title">Un média sur lequel on revient</h2>
+                <p class="bb-section-lead">Chaque information est vérifiée avant publication. Un public fidèle, c'est un environnement dans lequel votre message est lu.</p>
+            </div>
+            <div class="bb-about-figures">
+                <div class="bb-about-figure">
+                    <p class="bb-about-figure-value">{{ measured.articles|format_number }}</p>
+                    <p class="bb-about-figure-label">articles publiés</p>
+                </div>
+                {% if measured.videos > 0 %}
+                    <div class="bb-about-figure">
+                        <p class="bb-about-figure-value">{{ measured.videos|format_number }}</p>
+                        <p class="bb-about-figure-label">vidéos</p>
+                    </div>
+                {% endif %}
+                {% if measured.subscribers > 0 %}
+                    <div class="bb-about-figure">
+                        <p class="bb-about-figure-value">{{ measured.subscribers|format_number }}</p>
+                        <p class="bb-about-figure-label">abonnés à la newsletter</p>
+                    </div>
+                {% endif %}
+                {% if measured.minutes is not null %}
+                    <div class="bb-about-figure">
+                        <p class="bb-about-figure-value">{{ measured.minutes }} min</p>
+                        <p class="bb-about-figure-label">de lecture en moyenne par article</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    {# ===== ILS NOUS FONT CONFIANCE ===== #}
+    {% if partners|length > 0 %}
+        <section class="bb-about-section bb-about-section--tinted">
+            <div class="bb-about-inner">
+                <div class="bb-section-head">
+                    <span class="bb-section-badge">Partenaires</span>
+                    <h2 class="bb-section-title">Ils nous font confiance</h2>
+                </div>
+                <ul class="bb-aud-partners">
+                    {% for partner in partners %}
+                        <li>
+                            {% if partner.website %}<a href="{{ partner.website }}" target="_blank" rel="noopener sponsored">{% endif %}
+                            <img src="{{ partner.logoUrl }}" alt="{{ partner.name }}" loading="lazy">
+                            {% if partner.website %}</a>{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </section>
+    {% endif %}
+
+    {# ===== APPEL ===== #}
+    <section class="bb-about-section">
+        <div class="bb-about-inner">
+            <div class="bb-about-cta">
+                <h2>Parlez à notre audience</h2>
+                <p>Annonce, partenariat éditorial, sponsoring de contenu : dites-nous ce que vous cherchez et nous revenons vers vous.</p>
+                <div class="bb-about-cta-actions">
+                    <a href="{{ path('app_contact') }}" class="bb-about-cta-primary">Nous contacter</a>
+                    <a href="{{ path('app_announcement_submit') }}" class="bb-about-cta-secondary">Publier une annonce</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{ include('partials/_footer.html.twig') }}
+
+</div>
+{% endblock %}

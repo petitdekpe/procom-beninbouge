@@ -77,6 +77,19 @@
                 <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:20px 0 4px">Référencement &amp; audience</h2>
                 <div class="bo-form-row">{{ form_row(form.googleAnalyticsId) }}</div>
                 <div class="bo-form-row">{{ form_row(form.googleSiteVerification) }}</div>
+
+                <h2 style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sp-muted);margin:20px 0 4px">Page Audience (kit média)</h2>
+                <p class="bo-muted" style="font-size:12.5px;margin:0 0 12px">Chiffres que le site ne mesure pas lui-même, affichés sur <a href="{{ path('app_audience') }}" target="_blank" rel="noopener">la page Audience</a>. Les vues, lecteurs, articles et abonnés newsletter y sont lus automatiquement. Un champ vide masque le chiffre correspondant.</p>
+                <div class="bo-form-row">{{ form_row(form.audienceMonthlyReach) }}</div>
+                <div class="bo-form-row">{{ form_row(form.audienceUnder35Percent) }}</div>
+                <div class="bo-form-row">{{ form_row(form.audienceBeninPercent) }}</div>
+                <div class="bo-form-row">{{ form_row(form.audienceDiasporaPercent) }}</div>
+                <div class="bo-form-row">{{ form_row(form.facebookFollowers) }}</div>
+                <div class="bo-form-row">{{ form_row(form.instagramFollowers) }}</div>
+                <div class="bo-form-row">{{ form_row(form.youtubeSubscribers) }}</div>
+                <div class="bo-form-row">{{ form_row(form.twitterFollowers) }}</div>
+                <div class="bo-form-row">{{ form_row(form.whatsappMembers) }}</div>
+                <div class="bo-form-row">{{ form_row(form.audienceSource) }}</div>
             </div>
 
             <div class="bo-step">

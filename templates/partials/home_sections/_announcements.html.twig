@@ -30,7 +30,8 @@
             <ul class="bb-jobs-grid">
                 {% for announcement in announcements %}
                     <li>
-                        <a href="{{ path('app_announcement_show', { key: announcement.publicKey }) }}" class="bb-job-card">
+                        <a href="{{ path('app_announcement_show', { key: announcement.publicKey }) }}" class="bb-job-card"
+                           data-controller="ad-tracker" data-ad-tracker-target-value="announcement" data-ad-tracker-id-value="{{ announcement.id }}" data-ad-tracker-placement-value="home_card">
                             <span class="bb-chip {{ chipByCategory[announcement.category.value] ?? 'bb-chip--white' }}">{{ announcement.category.label }}</span>
                             <strong class="bb-job-card-title">{{ announcement.title }}</strong>
                             <span class="bb-job-card-org">{{ announcement.organization }}{% if announcement.location %} · {{ announcement.location }}{% endif %}</span>

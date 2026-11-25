@@ -44,12 +44,14 @@ final class AudienceController extends AbstractController
 
         // Canaux : uniquement ceux dont un nombre a été saisi.
         $channels = array_values(array_filter([
+            ['label' => 'TikTok', 'value' => $settings->getTiktokFollowers(), 'unit' => 'abonnés', 'url' => $settings->getTiktokUrl()],
             ['label' => 'Facebook', 'value' => $settings->getFacebookFollowers(), 'unit' => 'abonnés', 'url' => $settings->getFacebookUrl()],
-            ['label' => 'Instagram', 'value' => $settings->getInstagramFollowers(), 'unit' => 'abonnés', 'url' => $settings->getInstagramUrl()],
-            ['label' => 'YouTube', 'value' => $settings->getYoutubeSubscribers(), 'unit' => 'abonnés', 'url' => $settings->getYoutubeUrl()],
-            ['label' => 'X', 'value' => $settings->getTwitterFollowers(), 'unit' => 'abonnés', 'url' => $settings->getTwitterUrl()],
             ['label' => 'WhatsApp', 'value' => $settings->getWhatsappMembers(), 'unit' => 'membres', 'url' => $settings->getWhatsappUrl()],
-        ], static fn (array $channel): bool => null !== $channel['value'] && $channel['value'] > 0));
+            ['label' => 'Instagram', 'value' => $settings->getInstagramFollowers(), 'unit' => 'abonnés', 'url' => $settings->getInstagramUrl()],
+            ['label' => 'LinkedIn', 'value' => $settings->getLinkedinFollowers(), 'unit' => 'abonnés', 'url' => $settings->getLinkedinUrl()],
+            ['label' => 'X', 'value' => $settings->getTwitterFollowers(), 'unit' => 'abonnés', 'url' => $settings->getTwitterUrl()],
+            ['label' => 'YouTube', 'value' => $settings->getYoutubeSubscribers(), 'unit' => 'abonnés', 'url' => $settings->getYoutubeUrl()],
+        ],static fn (array $channel): bool => null !== $channel['value'] && $channel['value'] > 0));
 
         $partners = array_values(array_filter(
             $this->partnerRepository->findBy(['active' => true], ['name' => 'ASC']),

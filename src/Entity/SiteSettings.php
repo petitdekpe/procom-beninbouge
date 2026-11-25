@@ -110,6 +110,14 @@ class SiteSettings
     #[Assert\Url]
     private ?string $whatsappUrl = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url]
+    private ?string $tiktokUrl = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url]
+    private ?string $linkedinUrl = null;
+
     // ----- Référencement & mesure d'audience -----
     // Rendus dans templates/base.html.twig (pages publiques uniquement).
 
@@ -167,6 +175,14 @@ class SiteSettings
     #[ORM\Column(nullable: true)]
     #[Assert\PositiveOrZero]
     private ?int $whatsappMembers = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
+    private ?int $tiktokFollowers = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
+    private ?int $linkedinFollowers = null;
 
     /** Origine et date des chiffres ci-dessus, ex. « Meta Insights et YouTube Studio, octobre 2026 ». */
     #[ORM\Column(length: 255, nullable: true)]
@@ -420,6 +436,30 @@ class SiteSettings
         return $this;
     }
 
+    public function getTiktokUrl(): ?string
+    {
+        return $this->tiktokUrl;
+    }
+
+    public function setTiktokUrl(?string $tiktokUrl): static
+    {
+        $this->tiktokUrl = $tiktokUrl;
+
+        return $this;
+    }
+
+    public function getLinkedinUrl(): ?string
+    {
+        return $this->linkedinUrl;
+    }
+
+    public function setLinkedinUrl(?string $linkedinUrl): static
+    {
+        $this->linkedinUrl = $linkedinUrl;
+
+        return $this;
+    }
+
     public function getGoogleAnalyticsId(): ?string
     {
         return $this->googleAnalyticsId;
@@ -557,6 +597,30 @@ class SiteSettings
     public function setWhatsappMembers(?int $value): static
     {
         $this->whatsappMembers = $value;
+
+        return $this;
+    }
+
+    public function getTiktokFollowers(): ?int
+    {
+        return $this->tiktokFollowers;
+    }
+
+    public function setTiktokFollowers(?int $value): static
+    {
+        $this->tiktokFollowers = $value;
+
+        return $this;
+    }
+
+    public function getLinkedinFollowers(): ?int
+    {
+        return $this->linkedinFollowers;
+    }
+
+    public function setLinkedinFollowers(?int $value): static
+    {
+        $this->linkedinFollowers = $value;
 
         return $this;
     }

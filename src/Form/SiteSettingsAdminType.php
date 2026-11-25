@@ -97,6 +97,8 @@ final class SiteSettingsAdminType extends AbstractType
                 'required' => false,
                 'help' => 'Lien complet, ex. https://wa.me/22900000000',
             ])
+            ->add('tiktokUrl', TextType::class, ['label' => 'TikTok', 'required' => false])
+            ->add('linkedinUrl', TextType::class, ['label' => 'LinkedIn', 'required' => false])
 
             // ----- Référencement & mesure d'audience -----
             ->add('googleAnalyticsId', TextType::class, [
@@ -126,6 +128,8 @@ final class SiteSettingsAdminType extends AbstractType
             ->add('youtubeSubscribers', IntegerType::class, ['label' => 'Abonnés YouTube', 'required' => false, 'attr' => ['min' => 0]])
             ->add('twitterFollowers', IntegerType::class, ['label' => 'Abonnés X / Twitter', 'required' => false, 'attr' => ['min' => 0]])
             ->add('whatsappMembers', IntegerType::class, ['label' => 'Membres de la chaîne WhatsApp', 'required' => false, 'attr' => ['min' => 0]])
+            ->add('tiktokFollowers', IntegerType::class, ['label' => 'Abonnés TikTok', 'required' => false, 'attr' => ['min' => 0]])
+            ->add('linkedinFollowers', IntegerType::class, ['label' => 'Abonnés LinkedIn', 'required' => false, 'attr' => ['min' => 0]])
             ->add('audienceSource', TextType::class, [
                 'label' => 'Source et date des chiffres',
                 'required' => false,

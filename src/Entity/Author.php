@@ -21,10 +21,10 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [
         new GetCollection(),
         new Get(),
-        new Post(security: "is_granted('ROLE_EDITOR')"),
-        new Put(security: "is_granted('ROLE_EDITOR')", processor: AuthorWriteProcessor::class),
-        new Patch(security: "is_granted('ROLE_EDITOR')", processor: AuthorWriteProcessor::class),
-        new Delete(security: "is_granted('ROLE_EDITOR')"),
+        new Post(security: "is_granted('authors.manage')"),
+        new Put(security: "is_granted('authors.manage')", processor: AuthorWriteProcessor::class),
+        new Patch(security: "is_granted('authors.manage')", processor: AuthorWriteProcessor::class),
+        new Delete(security: "is_granted('authors.manage')"),
     ],
 )]
 class Author
@@ -53,6 +53,8 @@ class Author
     private ?string $bio = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    #[Assert\Regex(pattern: '#^(https?://|/)\S+$#', message: 'La photo doit être une adresse web (https://…) ou un fichier du site (/uploads/…).')]
     private ?string $avatar = null;
 
     /**
@@ -79,6 +81,10 @@ class Author
     #[ApiProperty(readable: false, writable: false)]
     #[ORM\Column(length: 180, nullable: true)]
     private ?string $pendingEmail = null;
+
+    #[ApiProperty(readable: false, writable: false)]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $pendingAvatar = null;
 
     public function getId(): ?int
     {
@@ -193,10 +199,22 @@ class Author
         return $this;
     }
 
+    public function getPendingAvatar(): ?string
+    {
+        return $this->pendingAvatar;
+    }
+
+    public function setPendingAvatar(?string $pendingAvatar): static
+    {
+        $this->pendingAvatar = $pendingAvatar;
+
+        return $this;
+    }
+
     #[ApiProperty(readable: false, writable: false)]
     public function hasPendingChanges(): bool
     {
-        return null !== $this->pendingFirstName || null !== $this->pendingLastName || null !== $this->pendingEmail;
+        return null !== $this->pendingFirstName || null !== $this->pendingLastName || null !== $this->pendingEmail || null !== $this->pendingAvatar;
     }
 
     /**
@@ -214,6 +232,9 @@ class Author
         if (null !== $this->pendingEmail) {
             $this->email = $this->pendingEmail;
         }
+        if (null !== $this->pendingAvatar) {
+            $this->avatar = $this->pendingAvatar;
+        }
 
         return $this->clearPendingChanges();
     }
@@ -223,6 +244,7 @@ class Author
         $this->pendingFirstName = null;
         $this->pendingLastName = null;
         $this->pendingEmail = null;
+        $this->pendingAvatar = null;
 
         return $this;
     }

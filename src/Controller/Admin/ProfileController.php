@@ -5,8 +5,10 @@ namespace App\Controller\Admin;
 use App\Entity\User;
 use App\Form\EditorProfileRequestType;
 use App\Service\EditorProfileProvisioner;
+use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -25,6 +27,7 @@ final class ProfileController extends AbstractController
     public function __construct(
         private EditorProfileProvisioner $editorProfileProvisioner,
         private EntityManagerInterface $entityManager,
+        private ImageUploader $imageUploader,
     ) {
     }
 
@@ -47,18 +50,22 @@ final class ProfileController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
-            $unchanged = $data['firstName'] === $author->getFirstName()
-                && $data['lastName'] === $author->getLastName()
-                && $data['email'] === $author->getEmail();
+            // Seules les valeurs qui diffèrent du profil publié sont mises en attente.
+            $changed = static fn (?string $new, ?string $current): ?string => $new !== $current ? $new : null;
+            $author->setPendingFirstName($changed($data['firstName'], $author->getFirstName()));
+            $author->setPendingLastName($changed($data['lastName'], $author->getLastName()));
+            $author->setPendingEmail($changed($data['email'], $author->getEmail()));
 
-            if ($unchanged) {
-                $author->clearPendingChanges();
-                $this->addFlash('success', 'Profil inchangé.');
-            } else {
-                $author->setPendingFirstName($data['firstName']);
-                $author->setPendingLastName($data['lastName']);
-                $author->setPendingEmail($data['email']);
+            // Sans nouveau fichier, une photo déjà en attente est conservée.
+            $file = $form->get('avatarFile')->getData();
+            if ($file instanceof UploadedFile) {
+                $author->setPendingAvatar($this->imageUploader->uploadAvatar($file));
+            }
+
+            if ($author->hasPendingChanges()) {
                 $this->addFlash('success', 'Votre demande de modification a été envoyée et sera examinée par un administrateur.');
+            } else {
+                $this->addFlash('success', 'Profil inchangé.');
             }
 
             $this->entityManager->flush();

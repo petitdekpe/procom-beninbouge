@@ -1,0 +1,11 @@
+{# Pastille ronde d'un journaliste : sa photo, sinon ses initiales. Décorative
+   (le nom est toujours écrit à côté).
+   Attend : author (App\Entity\Author). Optionnel : class (taille, voir
+   .bb-author-avatar dans assets/styles/content.css). #}
+<span class="{{ class|default('bb-author-avatar') }}" aria-hidden="true">
+    {%- if author.avatar -%}
+        <img src="{{ author.avatar }}" alt="" loading="lazy">
+    {%- else -%}
+        {{- (author.firstName|first ~ author.lastName|first)|upper -}}
+    {%- endif -%}
+</span>

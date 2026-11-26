@@ -64,13 +64,19 @@ final class ArticleSaver
      * whether the article was already published *before* this change,
      * so the caller can detect a draft/scheduled → published transition
      * once the write actually lands (see afterSave()).
+     *
+     * $enforceAuthorship à false : la signature ne peut pas changer dans ce
+     * parcours (application mobile), le contrôle applyAuthorshipGate() ne
+     * s'applique donc pas.
      */
-    public function applyDefaults(Article $article): bool
+    public function applyDefaults(Article $article, bool $enforceAuthorship = true): bool
     {
         $originalStatus = $this->entityManager->getUnitOfWork()->getOriginalEntityData($article)['status'] ?? null;
         $wasPublished = ArticleStatus::Published === $originalStatus;
 
-        $this->applyAuthorshipGate($article);
+        if ($enforceAuthorship) {
+            $this->applyAuthorshipGate($article);
+        }
         $this->normalizeUnicodeStyles($article);
 
         if (!$article->getSlug() && $article->getTitle()) {

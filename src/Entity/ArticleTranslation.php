@@ -29,10 +29,10 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [
         new GetCollection(),
         new Get(),
-        new Post(security: "is_granted('ROLE_EDITOR')"),
-        new Put(security: "is_granted('ROLE_EDITOR')"),
-        new Patch(security: "is_granted('ROLE_EDITOR')"),
-        new Delete(security: "is_granted('ROLE_EDITOR')"),
+        new Post(security: "is_granted('ROLE_ADMIN')"),
+        new Put(security: "is_granted('ROLE_ADMIN')"),
+        new Patch(security: "is_granted('ROLE_ADMIN')"),
+        new Delete(security: "is_granted('ROLE_ADMIN')"),
     ],
 )]
 #[ApiFilter(SearchFilter::class, properties: ['article' => 'exact', 'locale' => 'exact'])]

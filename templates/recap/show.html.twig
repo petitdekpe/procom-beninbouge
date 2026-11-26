@@ -79,7 +79,7 @@
 
                         <div class="bb-article-meta">
                             <p class="bb-article-byline">
-                                {% if recap.author %}<strong>{{ recap.author.firstName }} {{ recap.author.lastName }}</strong><span aria-hidden="true">·</span>{% endif %}
+                                {% if recap.author %}{{ include('partials/_author_avatar.html.twig', { author: recap.author, class: 'bb-author-avatar bb-author-avatar--sm' }) }}<strong>{{ recap.author.firstName }} {{ recap.author.lastName }}</strong><span aria-hidden="true">·</span>{% endif %}
                                 {% if recap.publishedAt %}<time datetime="{{ recap.publishedAt|date('c') }}">{{ recap.publishedAt|french_date }}</time>{% endif %}
                             </p>
                             <ul class="bb-share" aria-label="Partager le récap">

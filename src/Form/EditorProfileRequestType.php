@@ -22,6 +22,10 @@ final class EditorProfileRequestType extends AbstractType
             ->add('firstName', TextType::class, ['label' => 'Prénom'])
             ->add('lastName', TextType::class, ['label' => 'Nom'])
             ->add('email', EmailType::class, ['label' => 'E-mail'])
+            ->add('avatarFile', AvatarFileType::class, [
+                'label' => 'Nouvelle photo de profil',
+                'help' => 'JPEG, PNG, WebP ou GIF, 5 Mo maximum. Visage centré conseillé : la photo est recadrée en carré.',
+            ])
         ;
     }
 

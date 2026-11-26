@@ -6,9 +6,12 @@ use App\Entity\Author;
 use App\Entity\User;
 use App\Form\AuthorAdminType;
 use App\Repository\AuthorRepository;
+use App\Service\ImageUploader;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -21,6 +24,7 @@ final class AuthorController extends AbstractController
     public function __construct(
         private AuthorRepository $authorRepository,
         private EntityManagerInterface $entityManager,
+        private ImageUploader $imageUploader,
     ) {
     }
 
@@ -40,6 +44,7 @@ final class AuthorController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->handleAvatarUpload($author, $form);
             $this->entityManager->persist($author);
             $this->entityManager->flush();
 
@@ -69,6 +74,7 @@ final class AuthorController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->handleAvatarUpload($author, $form);
             $this->entityManager->flush();
 
             $this->addFlash('success', 'Auteur mis à jour.');
@@ -97,5 +103,13 @@ final class AuthorController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_author_index');
+    }
+
+    private function handleAvatarUpload(Author $author, FormInterface $form): void
+    {
+        $file = $form->get('avatarFile')->getData();
+        if ($file instanceof UploadedFile) {
+            $author->setAvatar($this->imageUploader->uploadAvatar($file));
+        }
     }
 }

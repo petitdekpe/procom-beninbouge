@@ -28,6 +28,18 @@
                                 {% if author.pendingEmail and author.pendingEmail != author.email %}
                                     <div>E-mail : <span class="bo-muted">{{ author.email }}</span> → <strong>{{ author.pendingEmail }}</strong></div>
                                 {% endif %}
+                                {% if author.pendingAvatar %}
+                                    <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+                                        Photo :
+                                        {% if author.avatar %}
+                                            <img class="bo-thumb" style="width:56px;height:56px;border-radius:50%" src="{{ author.avatar }}" alt="Photo actuelle">
+                                        {% else %}
+                                            <span class="bo-muted">aucune</span>
+                                        {% endif %}
+                                        →
+                                        <img class="bo-thumb" style="width:56px;height:56px;border-radius:50%" src="{{ author.pendingAvatar }}" alt="Photo proposée">
+                                    </div>
+                                {% endif %}
                             </td>
                             <td style="text-align:right;white-space:nowrap">
                                 <form method="post" action="{{ path('admin_validation_profile_approve', { id: author.id }) }}" style="display:inline">

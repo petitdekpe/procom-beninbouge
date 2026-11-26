@@ -25,6 +25,7 @@ class AuthorRepository extends ServiceEntityRepository
             ->where('a.pendingFirstName IS NOT NULL')
             ->orWhere('a.pendingLastName IS NOT NULL')
             ->orWhere('a.pendingEmail IS NOT NULL')
+            ->orWhere('a.pendingAvatar IS NOT NULL')
             ->orderBy('a.id', 'DESC')
             ->getQuery()
             ->getResult();

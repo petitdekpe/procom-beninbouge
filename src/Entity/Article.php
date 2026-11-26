@@ -46,10 +46,13 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
             provider: RelatedArticlesProvider::class,
             cacheHeaders: ['max_age' => 60, 'shared_max_age' => 3600, 'vary' => ['Authorization']],
         ),
-        new Post(security: "is_granted('ROLE_EDITOR')", processor: ArticleWriteProcessor::class),
-        new Put(security: "is_granted('ROLE_EDITOR')", processor: ArticleWriteProcessor::class),
-        new Patch(security: "is_granted('ROLE_EDITOR')", processor: ArticleWriteProcessor::class),
-        new Delete(security: "is_granted('ROLE_EDITOR')", processor: ArticleDeleteProcessor::class),
+        // Écriture réservée aux administrateurs : ces opérations ignorent le
+        // circuit de relecture et la corbeille. La rédaction passe par le
+        // back-office ou par l'API mobile, qui les appliquent.
+        new Post(security: "is_granted('ROLE_ADMIN')", processor: ArticleWriteProcessor::class),
+        new Put(security: "is_granted('ROLE_ADMIN')", processor: ArticleWriteProcessor::class),
+        new Patch(security: "is_granted('ROLE_ADMIN')", processor: ArticleWriteProcessor::class),
+        new Delete(security: "is_granted('ROLE_ADMIN')", processor: ArticleDeleteProcessor::class),
     ],
     paginationItemsPerPage: 10,
     paginationMaximumItemsPerPage: 50,

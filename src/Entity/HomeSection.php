@@ -27,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [
         new GetCollection(),
         new Get(),
-        new Patch(security: "is_granted('ROLE_EDITOR')"),
+        new Patch(security: "is_granted('home.manage')"),
     ],
 )]
 class HomeSection

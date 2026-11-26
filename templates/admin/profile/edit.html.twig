@@ -6,7 +6,7 @@
     <div class="bo-page-head">
         <h1 class="bo-page-title">Mon profil</h1>
     </div>
-    <p class="bo-muted" style="margin:0 0 22px;font-size:14px">C'est le nom qui apparaît sur les articles que vous publiez sous votre propre identité. Toute modification doit être validée par un administrateur avant de prendre effet.</p>
+    <p class="bo-muted" style="margin:0 0 22px;font-size:14px">Ce sont le nom et la photo qui apparaissent sur les articles que vous publiez sous votre propre identité. Toute modification doit être validée par un administrateur avant de prendre effet.</p>
 
     {% if author.hasPendingChanges %}
         <div class="bo-flash" style="background:#fff7e0;color:#7a5b00">
@@ -14,6 +14,9 @@
             <div class="bo-review-row" style="border-bottom:none"><span>Prénom</span><strong>{{ author.pendingFirstName ?? author.firstName }}</strong></div>
             <div class="bo-review-row" style="border-bottom:none"><span>Nom</span><strong>{{ author.pendingLastName ?? author.lastName }}</strong></div>
             <div class="bo-review-row" style="border-bottom:none"><span>E-mail</span><strong>{{ author.pendingEmail ?? author.email }}</strong></div>
+            {% if author.pendingAvatar %}
+                <div class="bo-review-row" style="border-bottom:none;align-items:center"><span>Photo</span><img src="{{ author.pendingAvatar }}" alt="Photo proposée" style="width:56px;height:56px;border-radius:50%;object-fit:cover"></div>
+            {% endif %}
             <form method="post" action="{{ path('admin_profile_cancel_request') }}" style="margin-top:10px" onsubmit="return confirm('Annuler cette demande de modification ?');">
                 <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
                 <button type="submit" class="bo-btn bo-btn-muted">Annuler la demande</button>
@@ -22,10 +25,19 @@
     {% endif %}
 
     <div class="bo-card" style="padding:28px;max-width:560px">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+            {% if author.avatar %}
+                <img src="{{ author.avatar }}" alt="Votre photo actuelle" style="width:72px;height:72px;border-radius:50%;object-fit:cover;flex:none">
+            {% else %}
+                <span class="bo-thumb-fallback" style="width:72px;height:72px;border-radius:50%;font-size:22px" aria-hidden="true">{{ (author.firstName|first ~ author.lastName|first)|upper }}</span>
+                <span class="bo-muted" style="font-size:13px">Pas encore de photo : vos initiales s'affichent sur vos articles.</span>
+            {% endif %}
+        </div>
         {{ form_start(form) }}
             <div class="bo-form-row">{{ form_row(form.firstName) }}</div>
             <div class="bo-form-row">{{ form_row(form.lastName) }}</div>
             <div class="bo-form-row">{{ form_row(form.email) }}</div>
+            <div class="bo-form-row">{{ form_row(form.avatarFile) }}</div>
             <button type="submit" class="bo-btn bo-btn-accent">Envoyer la demande</button>
         {{ form_end(form) }}
     </div>

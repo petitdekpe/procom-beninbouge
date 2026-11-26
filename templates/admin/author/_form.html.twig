@@ -21,7 +21,11 @@
 
     <div class="bo-step">
         <div class="bo-form-row">{{ form_row(form.bio) }}</div>
+        {% if author.avatar %}
+            <img src="{{ author.avatar }}" alt="Photo actuelle" style="width:96px;height:96px;border-radius:50%;object-fit:cover;display:block;margin-bottom:18px">
+        {% endif %}
         <div class="bo-form-row">{{ form_row(form.avatar) }}</div>
+        <div class="bo-form-row">{{ form_row(form.avatarFile) }}</div>
     </div>
 
     <div class="bo-step">

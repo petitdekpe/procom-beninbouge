@@ -325,7 +325,13 @@
                     <svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5"/><path d="M4 16h16l-1.2 2.2a1 1 0 0 1-.9.5H6.1a1 1 0 0 1-.9-.5L4 16Z"/><path d="M10.5 20a1.5 1.5 0 0 0 3 0"/></svg>
                 </button>
                 <details class="bo-user">
-                    <summary aria-label="Menu du compte"><span class="bo-avatar">{{ app.user ? (app.user.displayName ?: app.user.userIdentifier)|first|upper : 'A' }}</span></summary>
+                    <summary aria-label="Menu du compte">
+                        {% if app.user and app.user.author and app.user.author.avatar %}
+                            <img class="bo-avatar" style="object-fit:cover" src="{{ app.user.author.avatar }}" alt="">
+                        {% else %}
+                            <span class="bo-avatar">{{ app.user ? (app.user.displayName ?: app.user.userIdentifier)|first|upper : 'A' }}</span>
+                        {% endif %}
+                    </summary>
                     <div class="bo-user-menu">
                         {% if app.user %}
                             <div class="who"><strong>{{ app.user.displayName }}</strong><span>{{ app.user.userIdentifier }}</span></div>

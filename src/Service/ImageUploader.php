@@ -30,6 +30,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 final class ImageUploader
 {
     private const QUALITY = 82;
+    private const AVATAR_SIZE = 480;
 
     public function __construct(
         #[Autowire('%kernel.project_dir%/public/uploads/images')]
@@ -42,6 +43,51 @@ final class ImageUploader
     {
         $filename = $this->reserveFilename($file);
         $this->store($file, $filename);
+
+        return $this->urlFor($filename);
+    }
+
+    /**
+     * Photo de profil : redressée selon l'orientation EXIF (photos prises au
+     * téléphone), recadrée en carré et réduite, car elle s'affiche en petit
+     * sur chaque carte d'article.
+     */
+    public function uploadAvatar(UploadedFile $file): string
+    {
+        $image = $this->decode($file);
+        imagepalettetotruecolor($image);
+
+        // Réduction avant rotation, pour limiter la mémoire consommée.
+        $shortSide = min(imagesx($image), imagesy($image));
+        if ($shortSide > self::AVATAR_SIZE) {
+            $ratio = self::AVATAR_SIZE / $shortSide;
+            $scaled = imagecreatetruecolor((int) round(imagesx($image) * $ratio), (int) round(imagesy($image) * $ratio));
+            imagealphablending($scaled, false);
+            imagesavealpha($scaled, true);
+            imagecopyresampled($scaled, $image, 0, 0, 0, 0, imagesx($scaled), imagesy($scaled), imagesx($image), imagesy($image));
+            $image = $scaled;
+        }
+
+        $image = $this->applyExifOrientation($image, $file);
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $side = min($width, $height);
+        // Centré en largeur ; en portrait, cadré vers le haut pour garder le visage.
+        $square = imagecrop($image, [
+            'x' => intdiv($width - $side, 2),
+            'y' => intdiv($height - $side, 4),
+            'width' => $side,
+            'height' => $side,
+        ]);
+
+        if (false === $square) {
+            throw new FileException('Impossible de recadrer la photo.');
+        }
+
+        $filename = $this->reserveFilename($file);
+        $this->ensureUploadDir();
+        $this->writeWebp($square, $this->uploadDir.\DIRECTORY_SEPARATOR.$filename);
 
         return $this->urlFor($filename);
     }
@@ -65,14 +111,23 @@ final class ImageUploader
      */
     public function store(UploadedFile $file, string $filename): void
     {
-        if (!$this->filesystem->exists($this->uploadDir)) {
-            $this->filesystem->mkdir($this->uploadDir);
-        }
-
+        $this->ensureUploadDir();
         $this->convertToWebp($file, $this->uploadDir.\DIRECTORY_SEPARATOR.$filename);
     }
 
+    private function ensureUploadDir(): void
+    {
+        if (!$this->filesystem->exists($this->uploadDir)) {
+            $this->filesystem->mkdir($this->uploadDir);
+        }
+    }
+
     private function convertToWebp(UploadedFile $file, string $targetPath): void
+    {
+        $this->writeWebp($this->decode($file), $targetPath);
+    }
+
+    private function decode(UploadedFile $file): \GdImage
     {
         $sourcePath = $file->getPathname();
 
@@ -88,6 +143,28 @@ final class ImageUploader
             throw new FileException('Impossible de lire le fichier image.');
         }
 
+        return $image;
+    }
+
+    private function applyExifOrientation(\GdImage $image, UploadedFile $file): \GdImage
+    {
+        if ('image/jpeg' !== $file->getMimeType() || !\function_exists('exif_read_data')) {
+            return $image;
+        }
+
+        $exif = @exif_read_data($file->getPathname());
+        $angle = match ($exif['Orientation'] ?? 1) {
+            3 => 180,
+            6 => -90,
+            8 => 90,
+            default => 0,
+        };
+
+        return 0 === $angle ? $image : (imagerotate($image, $angle, 0) ?: $image);
+    }
+
+    private function writeWebp(\GdImage $image, string $targetPath): void
+    {
         // Preserves transparency (PNG/GIF) through the re-encode instead of
         // flattening it to a solid background.
         imagepalettetotruecolor($image);

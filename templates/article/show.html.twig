@@ -68,7 +68,7 @@
 
                 <div class="bb-article-meta">
                     <p class="bb-article-byline">
-                        {% if article.author %}<strong>{{ article.author.firstName }} {{ article.author.lastName }}</strong><span aria-hidden="true">·</span>{% endif %}
+                        {% if article.author %}{{ include('partials/_author_avatar.html.twig', { author: article.author, class: 'bb-author-avatar bb-author-avatar--sm' }) }}<strong>{{ article.author.firstName }} {{ article.author.lastName }}</strong><span aria-hidden="true">·</span>{% endif %}
                         {% if article.publishedAt %}<time datetime="{{ article.publishedAt|date('c') }}">{{ article.publishedAt|french_date }}</time><span aria-hidden="true">·</span>{% endif %}
                         <span>{{ article.content|reading_time }} min de lecture</span>
                     </p>
@@ -127,13 +127,7 @@
 
                     {% if article.author %}
                         <aside class="bb-author" aria-label="L'auteur">
-                            <span class="bb-author-avatar">
-                                {% if article.author.avatar %}
-                                    <img src="{{ article.author.avatar }}" alt="">
-                                {% else %}
-                                    {{ article.author.firstName|first }}{{ article.author.lastName|first }}
-                                {% endif %}
-                            </span>
+                            {{ include('partials/_author_avatar.html.twig', { author: article.author, class: 'bb-author-avatar' }) }}
                             <div>
                                 <p class="bb-author-name">{{ article.author.firstName }} {{ article.author.lastName }}</p>
                                 {% if article.author.bio %}<p class="bb-author-bio">{{ article.author.bio }}</p>{% endif %}

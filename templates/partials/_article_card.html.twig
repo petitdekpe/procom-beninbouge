@@ -23,7 +23,10 @@
     <div class="bb-card-a-body">
         <{{ tag }} class="bb-card-a-title">{{ article.title }}</{{ tag }}>
         <p class="bb-card-a-meta">
-            <span>{{ authorName }}</span>
+            <span class="bb-card-a-author">
+                {%- if author %}{{ include('partials/_author_avatar.html.twig', { author: author, class: 'bb-author-avatar bb-author-avatar--xs' }, with_context = false) }}{% endif -%}
+                {{ authorName }}
+            </span>
             {% if article.publishedAt %}<span aria-hidden="true">·</span><time datetime="{{ article.publishedAt|date('c') }}">{{ article.publishedAt|french_date_short }}</time>{% endif %}
             <span aria-hidden="true">·</span><span>{{ article.content|reading_time }} min</span>
         </p>

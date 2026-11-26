@@ -31,10 +31,10 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
     operations: [
         new GetCollection(),
         new Get(),
-        new Post(security: "is_granted('ROLE_EDITOR')"),
-        new Put(security: "is_granted('ROLE_EDITOR')"),
-        new Patch(security: "is_granted('ROLE_EDITOR')"),
-        new Delete(security: "is_granted('ROLE_EDITOR')"),
+        new Post(security: "is_granted('ads.manage')"),
+        new Put(security: "is_granted('ads.manage')"),
+        new Patch(security: "is_granted('ads.manage')"),
+        new Delete(security: "is_granted('ads.manage')"),
     ],
 )]
 #[ApiFilter(SearchFilter::class, properties: ['type' => 'exact', 'placement' => 'exact', 'partner' => 'exact', 'active' => 'exact'])]

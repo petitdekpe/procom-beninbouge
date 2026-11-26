@@ -19,10 +19,10 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [
         new GetCollection(),
         new Get(),
-        new Post(security: "is_granted('ROLE_EDITOR')"),
-        new Put(security: "is_granted('ROLE_EDITOR')"),
-        new Patch(security: "is_granted('ROLE_EDITOR')"),
-        new Delete(security: "is_granted('ROLE_EDITOR')"),
+        new Post(security: "is_granted('media.manage')"),
+        new Put(security: "is_granted('media.manage')"),
+        new Patch(security: "is_granted('media.manage')"),
+        new Delete(security: "is_granted('media.manage')"),
     ],
 )]
 class Gallery
